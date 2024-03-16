@@ -1,0 +1,191 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+///**1er Ejercicio///
+//int NumeroRandom();
+///**2do Ejercicio///
+/*int BuscarMenor (int num1, int num2, int num3);
+int BuscarMayor (int num1, int num2, int num3);
+void ResultadoMenoryMayor (int mayor, int menor);*/
+///**3er Ejercicio///
+/*int SumaNum (int Num);*/
+///**4to Ejercicio///
+/*void TablaMulti (int Num);*/
+///**5to Ejercicio///
+float sumar (float num1, float num2);
+float restar (float num1, float num2);
+float multiplicacion (float num1, float num2);
+float division (float num1, float num2);
+
+
+
+///**///////////////////////////////////////////////////////////////////////////////
+int main()
+{
+   ///**1er Ejercicio///
+   /*int random = NumeroRandom();
+   printf("El numero random generado es:%d\n", random);*/
+
+   ///**2do Ejercicio///
+   /*int num1, num2, num3;
+
+   printf("Ingrese tres numeros enteros: \n");
+   scanf("%d %d %d", &num1, &num2, &num3);
+
+   ResultadoMenoryMayor(BuscarMenor(num1,num2,num3), BuscarMayor (num1,num2,num3));*/
+
+   ///**3er Ejercicio///
+    /*int result, Num;
+
+    printf("Ingrese un numero positivo: ");
+    scanf("%d", &Num);
+
+    result=SumaNum(Num);
+
+    printf("La suma de los numeros positivos hasta %d es: %d\n", Num, result);*/
+
+    ///**4to Ejercicio///
+    /*
+    int result, Num;
+
+    printf ("Ingrese un numero que desa multiplicar: \n");
+    scanf("%d", &Num);
+
+    TablaMulti(Num);*/
+
+    ///**5to Ejercicio///
+
+    float num1, num2;
+    char operador;
+
+    printf("Porfavor ingrese un 1er numero\n");
+    scanf("%d", &num1);
+
+    printf("Porfavor ingrese un 2do numero\n");
+    scanf("%d", &num2);
+
+    printf("Ingrese la operacion que desea realizar (+,-,*,/): ");
+    scanf("%c", &operador);
+
+    switch(operador){
+
+    case '+':
+        printf("El resultado de la suma es: %.2f\n", sumar(num1, num2));
+        break;
+    case '-':
+        printf("El resultado de la resta es: %.2f\n", restar(num1, num2));
+        break;
+    case '*':
+        printf("El resultado de la multiplicacion es: %.2f\n", multiplicacion(num1, num2));
+        break;
+    case '/':
+        printf("El resultado de la division es: %.2f\n", division(num1, num2));
+        break;
+    default:
+        printf("Operador no identificado\n");
+    }
+
+    return 0;
+}
+
+///**//////////////////////////////////////////////////////////////////////////////////////////
+
+    ///**1er Ejercicio///
+
+    /*int NumeroRandom()
+    {
+        srand(time(NULL));
+        int valor = rand()%101;
+
+        return valor;
+    }*/
+
+    ///**2do Ejercicio///
+
+    /*int BuscarMenor (int num1, int num2, int num3)
+    {
+        if(num1 < num2 && num1 < num2){
+        return num1;
+        fflush(stdin);
+    } else if (num2 < num1 && num2 < num3){
+        return num2;
+        fflush(stdin);
+    }else{
+        return num3;
+        fflush(stdin);
+         }
+    }
+
+    int BuscarMayor (int num1, int num2, int num3)
+    {
+        if(num1 > num2 && num1 > num3){
+            return num1;
+            fflush(stdin);
+        }else if (num2 > num1 && num2 > num3){
+            return num2;
+            fflush(stdin);
+        }else {
+            return num3;
+            fflush(stdin);
+        }
+    }
+
+    void ResultadoMenoryMayor (int mayor, int menor)
+    {
+        printf("El mayor numero es: %d\n", menor);
+        printf("El menor numero es: %d\n", mayor);
+    }*/
+
+    ///**3er Ejercicio///
+    /*
+    int SumaNum (int Num)
+    {
+        int Suma = 0;
+
+        for (int i=1;i<=Num;i++){
+            Suma += i;
+        }
+
+        return Suma;
+    }*/
+
+    ///**4to Ejercicio///
+    /*
+    void TablaMulti (int Num)
+    {
+        printf ("Tabla de multiplicar del %d:\n", Num);
+        for (int i=1;i<=10;i++){
+            int resultado = Num * i;
+            printf("%d x %d = %d\n", Num, i , resultado);
+        }
+    }*/
+
+    ///**5to Ejercicio///
+
+    float sumar (float num1, float num2)
+    {
+        float suma=num1+num2;
+        return suma;
+    }
+
+    float restar (float num1, float num2)
+    {
+        float resta = num1-num2;
+        return resta;
+    }
+
+    float multiplicacion (float num1, float num2)
+    {
+        return num1*num2;
+    }
+
+    float division (float num1, float num2)
+    {
+        if (num2!=0)
+        {
+            return num1/num2;
+        }else{
+            printf("Error: division por cero\n");
+            return 0;
+        }
+    }
