@@ -12,10 +12,11 @@ void ResultadoMenoryMayor (int mayor, int menor);*/
 ///**4to Ejercicio///
 /*void TablaMulti (int Num);*/
 ///**5to Ejercicio///
-float sumar (float num1, float num2);
+/*float sumar (float num1, float num2);
 float restar (float num1, float num2);
 float multiplicacion (float num1, float num2);
-float division (float num1, float num2);
+float division (float num1, float num2);*/
+///**6to Ejercicio///
 
 
 
@@ -54,17 +55,18 @@ int main()
     TablaMulti(Num);*/
 
     ///**5to Ejercicio///
-
+    /*
     float num1, num2;
     char operador;
 
     printf("Porfavor ingrese un 1er numero\n");
-    scanf("%d", &num1);
+    scanf("%f", &num1);
 
     printf("Porfavor ingrese un 2do numero\n");
-    scanf("%d", &num2);
+    scanf("%f", &num2);
 
     printf("Ingrese la operacion que desea realizar (+,-,*,/): ");
+    fflush(stdin);
     scanf("%c", &operador);
 
     switch(operador){
@@ -83,14 +85,21 @@ int main()
         break;
     default:
         printf("Operador no identificado\n");
-    }
+    }*/
+    
+    ///**6to Ejercicio/////
+    
+    
+    
+    
+    
 
     return 0;
 }
 
 ///**//////////////////////////////////////////////////////////////////////////////////////////
 
-    ///**1er Ejercicio///
+    ///**1er Ejercicio///////////////////////////////
 
     /*int NumeroRandom()
     {
@@ -100,7 +109,7 @@ int main()
         return valor;
     }*/
 
-    ///**2do Ejercicio///
+    ///**2do Ejercicio/////////////////////////////////
 
     /*int BuscarMenor (int num1, int num2, int num3)
     {
@@ -136,7 +145,7 @@ int main()
         printf("El menor numero es: %d\n", mayor);
     }*/
 
-    ///**3er Ejercicio///
+    ///**3er Ejercicio////////////////////////////////////
     /*
     int SumaNum (int Num)
     {
@@ -149,7 +158,7 @@ int main()
         return Suma;
     }*/
 
-    ///**4to Ejercicio///
+    ///**4to Ejercicio//////////////////////////////////////////
     /*
     void TablaMulti (int Num)
     {
@@ -160,8 +169,9 @@ int main()
         }
     }*/
 
-    ///**5to Ejercicio///
-
+    ///**5to Ejercicio/////////////////////////////////////////////
+    
+    /*
     float sumar (float num1, float num2)
     {
         float suma=num1+num2;
@@ -176,7 +186,8 @@ int main()
 
     float multiplicacion (float num1, float num2)
     {
-        return num1*num2;
+        float multi = num1*num2;
+        return multi;
     }
 
     float division (float num1, float num2)
@@ -188,4 +199,13 @@ int main()
             printf("Error: division por cero\n");
             return 0;
         }
-    }
+    }*/
+    
+    ///**6to Ejercicio///////////////////////////
+    
+    
+    
+    
+    
+    
+    
