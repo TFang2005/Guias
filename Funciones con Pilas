@@ -1,1 +1,83 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "pila.h"
+
+///**Prototipado/////////////////////////////////////////////////////////
+void GuardarNum (Pila * p);///**1ER EJERCICIO/////
+void PasarNum (Pila * p, Pila * r);///**2DO EJERCICIO/////
+void PasarOrdenNum (Pila * r, Pila * s, Pila * aux); ///**3ER EJERCICIO////
+
+
+///**///////////////////////////////////////////////////////////////////////
+int main()
+{
+    Pila p, r, s, aux;
+    inicpila (&p);
+    inicpila (&r);
+    inicpila (&s);
+    inicpila (&aux);
+
+    ///**1ER Ejercicio/////////
+    GuardarNum (&p);
+    printf("Pila P: \n");
+    mostrar(&p);
+    printf("-----------------------------------------------------------------------\n");
+
+    ///**2DO Ejercicio////////
+    PasarNum (&p, &r);
+    printf("Pila R: \n");
+    mostrar(&r);
+    printf("-----------------------------------------------------------------------\n");
+
+    ///**3ER Ejercicio////////
+    PasarOrdenNum (&r, &s, &aux);
+    printf("Pila S: \n");
+    mostrar(&s);
+
+    ///**4TO Ejercicio///////
+
+
+    return 0;
+}
+///**////////////////////////////////////////////////////////////////////////////
+
+///**1ER ejercicio/////////////
+void GuardarNum (Pila * p)
+{
+
+    char continuar = 's';
+
+    do
+    {
+        leer(p);
+        printf("Si desea cargar mas numeros, ingrese s, sino n\n");
+        fflush(stdin);
+        scanf ("%c", &continuar);
+    }
+    while(continuar=='s');
+}
+///**2DO Ejercicio////////////////////////////////////////////////////
+
+void PasarNum (Pila * p, Pila * r)
+{
+    while(!pilavacia(p))
+    {
+        apilar(r, desapilar(p));
+    }
+}
+
+///**3ER Ejercicio/////////////////////////////////////////////////
+
+void PasarOrdenNum (Pila * r, Pila * s, Pila * aux)
+{
+    while (!pilavacia(r))
+    {
+        apilar(aux, desapilar(r));
+        apilar(s, desapilar(aux));
+    }
+}
+
+///**4TO Ejercicio///////////////////////////////////////////
+
+void ElimNumMenor (Pila * p, Pila * )
 
