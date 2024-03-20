@@ -1,83 +1,132 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "pila.h"
+///Prototipado//////////////////////////////////////////////
+void IngresarNum(Pila *p);///1Er Ejercicio//////////////
+void opcion1(Pila * p, Pila * r);///2DO Ejercicio//////////////
+void opcion2(Pila * p, Pila * s, Pila * aux);///**3ER Ejercicio/////////////////////////////////////////
+void opcion3(Pila * p, Pila * y, Pila * basura, Pila *z);
 
-///**Prototipado/////////////////////////////////////////////////////////
-void GuardarNum (Pila * p);///**1ER EJERCICIO/////
-void PasarNum (Pila * p, Pila * r);///**2DO EJERCICIO/////
-void PasarOrdenNum (Pila * r, Pila * s, Pila * aux); ///**3ER EJERCICIO////
 
+///**////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-///**///////////////////////////////////////////////////////////////////////
-int main()
-{
-    Pila p, r, s, aux;
+int main() {
+    int opcion;
+
+    Pila p, r, s, aux, basura, z, y;
     inicpila (&p);
     inicpila (&r);
     inicpila (&s);
+    inicpila(&z);
+    inicpila(&y);
+    inicpila(&basura);
     inicpila (&aux);
 
-    ///**1ER Ejercicio/////////
-    GuardarNum (&p);
-    printf("Pila P: \n");
+    ///**1ER Ejercicio/////////////////////////////////////////////////////////////////
+    IngresarNum (&p);
+    printf("\nPila P: \n");
     mostrar(&p);
     printf("-----------------------------------------------------------------------\n");
 
-    ///**2DO Ejercicio////////
-    PasarNum (&p, &r);
-    printf("Pila R: \n");
-    mostrar(&r);
-    printf("-----------------------------------------------------------------------\n");
+    do {
 
-    ///**3ER Ejercicio////////
-    PasarOrdenNum (&r, &s, &aux);
-    printf("Pila S: \n");
-    mostrar(&s);
+        printf("\n*** Menu ***\n");
+        printf("1. Pasar a otra pila\n");
+        printf("2. Pasar elementos sin alterar el orden\n");
+        printf("3. Opcion 3\n");
+        printf("4. Salir\n");
+        printf("Ingrese su opcion: ");
+        scanf("%d", &opcion);
 
-    ///**4TO Ejercicio///////
 
+        switch(opcion) {
+            ///**2DO EJERCICIO///////////////////////////////////////////////////
+            case 1:
+                 printf("\n\nPasando a PILA R...\n");
+                 opcion1(&p, &r);
+                 mostrar(&r);
+                 printf("-----------------------------------------------------------------------\n");
+                break;
+            ///**3ER EJERCICIO//////////////////////////////////////////////////////////
+            case 2:
+                printf("\n\nPasando elementos sin alteracion...\n");
+                opcion2(&p, &s, &aux);
+                mostrar(&s);
+                printf("-----------------------------------------------------------------------\n");
+                break;
+            case 3:
+                printf("\n\nEliminando el menor...\n");
+                opcion3(&p, &y, &basura, &z);
+                mostrar(&y);
+                printf("-----------------------------------------------------------------------\n");
+                break;
+            case 4:
+                printf("Saliendo del programa...\n");
+                break;
+            default:
+                printf("Opcion no valida. Por favor, ingrese una opcion valida.\n");
+        }
+    } while(opcion != 4);
 
     return 0;
 }
-///**////////////////////////////////////////////////////////////////////////////
+///**////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-///**1ER ejercicio/////////////
-void GuardarNum (Pila * p)
-{
+///**1ER Ejercicio/////////////////////////////////////////////////////
+
+void IngresarNum (Pila * p){
 
     char continuar = 's';
 
     do
     {
         leer(p);
-        printf("Si desea cargar mas numeros, ingrese s, sino n\n");
+        printf("Si desea seguir agreando numero, presione S, de lo contrario N\n");
         fflush(stdin);
-        scanf ("%c", &continuar);
-    }
-    while(continuar=='s');
+        scanf("%c", &continuar);
+    } while (continuar == 's');
 }
-///**2DO Ejercicio////////////////////////////////////////////////////
 
-void PasarNum (Pila * p, Pila * r)
-{
+///**2DO Ejercicio///////////////////////////////////////////////////////////////
+
+void opcion1(Pila * p, Pila * r) {
+
     while(!pilavacia(p))
     {
         apilar(r, desapilar(p));
     }
 }
 
-///**3ER Ejercicio/////////////////////////////////////////////////
+///**3ER Ejercicio///////////////////////////////////////////////////////////
 
-void PasarOrdenNum (Pila * r, Pila * s, Pila * aux)
-{
-    while (!pilavacia(r))
+void opcion2(Pila * p, Pila * s, Pila * aux) {
+
+    while(!pilavacia(p))
     {
-        apilar(aux, desapilar(r));
+        apilar(aux, desapilar(p));
+    }
+
+    while(!pilavacia(aux))
+    {
         apilar(s, desapilar(aux));
     }
 }
 
-///**4TO Ejercicio///////////////////////////////////////////
+///**4TO Ejercicio////////////////////////////////////////////////////////////
 
-void ElimNumMenor (Pila * p, Pila * )
+void opcion3(Pila * p, Pila * y, Pila * basura, Pila *z) {
 
+ while(!pilavacia(p))
+ {
+     if(tope(p)<tope(y)){
+        apilar(basura, desapilar(p));
+     }else{
+        apilar(y, desapilar(p));
+     }
+
+
+
+ }
+
+
+}
