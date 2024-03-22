@@ -5,8 +5,8 @@
 void IngresarNum(Pila *p);///1Er Ejercicio//////////////
 void opcion1(Pila * p, Pila * r);///2DO Ejercicio//////////////
 void opcion2(Pila * p, Pila * s, Pila * aux);///**3ER Ejercicio/////////////////////////////////////////
-void opcion3(Pila * p, Pila * y, Pila * basura, Pila *z);
-
+void opcion3(Pila * p, Pila * y, Pila * basura, Pila * z);///**4TO Ejercicio//////////////////////////////////
+int opcion8 (Pila p);
 
 ///**////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -14,6 +14,7 @@ int main() {
     int opcion;
 
     Pila p, r, s, aux, basura, z, y;
+    int suma, resul;
     inicpila (&p);
     inicpila (&r);
     inicpila (&s);
@@ -21,6 +22,7 @@ int main() {
     inicpila(&y);
     inicpila(&basura);
     inicpila (&aux);
+
 
     ///**1ER Ejercicio/////////////////////////////////////////////////////////////////
     IngresarNum (&p);
@@ -33,7 +35,8 @@ int main() {
         printf("\n*** Menu ***\n");
         printf("1. Pasar a otra pila\n");
         printf("2. Pasar elementos sin alterar el orden\n");
-        printf("3. Opcion 3\n");
+        printf("3. Eliminar menor\n");
+        printf("8. Sumar tope y anterior\n");
         printf("4. Salir\n");
         printf("Ingrese su opcion: ");
         scanf("%d", &opcion);
@@ -54,19 +57,26 @@ int main() {
                 mostrar(&s);
                 printf("-----------------------------------------------------------------------\n");
                 break;
+            ///**4TO EJERCICIO////////////////////////////////////////////////////////////
             case 3:
                 printf("\n\nEliminando el menor...\n");
                 opcion3(&p, &y, &basura, &z);
-                mostrar(&y);
+                mostrar(&z);
                 printf("-----------------------------------------------------------------------\n");
                 break;
-            case 4:
+            case 8:
+                printf("\n\nSumando Tope y Anterior...\n");
+                resul = opcion8(p);
+                printf("\n\nLa suma es: %d\n", resul);
+                printf("\n\nLa pila queda...\n");
+                mostrar(&p);
+            case 11:
                 printf("Saliendo del programa...\n");
                 break;
             default:
                 printf("Opcion no valida. Por favor, ingrese una opcion valida.\n");
         }
-    } while(opcion != 4);
+    } while(opcion != 11);
 
     return 0;
 }
@@ -113,20 +123,34 @@ void opcion2(Pila * p, Pila * s, Pila * aux) {
 }
 
 ///**4TO Ejercicio////////////////////////////////////////////////////////////
+///**TERMINAR///////////////////////////////////////////////////////////////
+void opcion3(Pila * p, Pila * y, Pila * basura, Pila * z) {
 
-void opcion3(Pila * p, Pila * y, Pila * basura, Pila *z) {
 
  while(!pilavacia(p))
  {
-     if(tope(p)<tope(y)){
-        apilar(basura, desapilar(p));
-     }else{
-        apilar(y, desapilar(p));
-     }
+     apilar(y, desapilar(p));
 
-
-
+     if (tope(p)<tope(y)){
+     apilar(basura, desapilar(p));
+ }else apilar(z, desapilar(p));
  }
 
-
 }
+
+///**8VO Ejercicio////////////////////////////////////////////////////////////////////////
+
+int opcion8 (Pila p)
+{
+     int suma = 0;
+     int tope = desapilar(&p); //guardamos el top
+     int anterior = desapilar(&p); //guardamos el anterior al tope
+     suma = tope + anterior;
+
+     return suma;
+}
+
+void 
+
+
+
