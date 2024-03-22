@@ -5,8 +5,14 @@
 void IngresarNum(Pila *p);///1Er Ejercicio//////////////
 void opcion1(Pila * p, Pila * r);///2DO Ejercicio//////////////
 void opcion2(Pila * p, Pila * s, Pila * aux);///**3ER Ejercicio/////////////////////////////////////////
-void opcion3(Pila * p, Pila * y, Pila * basura, Pila * z);///**4TO Ejercicio//////////////////////////////////
-int opcion8 (Pila p);
+int opcion3(Pila p);///**4TO Ejercicio//////////////////////////////////
+int opcion8 (Pila p);///**8VO Ejercicio/////////////////////////////////
+int SumaPila (Pila p);
+int Contador (Pila P);
+float Division (Pila p);
+void Promedio (Pila p);
+
+
 
 ///**////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -14,7 +20,8 @@ int main() {
     int opcion;
 
     Pila p, r, s, aux, basura, z, y;
-    int suma, resul;
+    int suma, resul, nums;
+    float div;
     inicpila (&p);
     inicpila (&r);
     inicpila (&s);
@@ -37,6 +44,7 @@ int main() {
         printf("2. Pasar elementos sin alterar el orden\n");
         printf("3. Eliminar menor\n");
         printf("8. Sumar tope y anterior\n");
+        printf("9. Calcular promedio de la pila\n");
         printf("4. Salir\n");
         printf("Ingrese su opcion: ");
         scanf("%d", &opcion);
@@ -60,16 +68,27 @@ int main() {
             ///**4TO EJERCICIO////////////////////////////////////////////////////////////
             case 3:
                 printf("\n\nEliminando el menor...\n");
-                opcion3(&p, &y, &basura, &z);
-                mostrar(&z);
+                opcion3(p);
+                mostrar(&p);
                 printf("-----------------------------------------------------------------------\n");
                 break;
+            ///**8VO EJERCICIO////////////////////////////////////////////////////////////
             case 8:
                 printf("\n\nSumando Tope y Anterior...\n");
                 resul = opcion8(p);
                 printf("\n\nLa suma es: %d\n", resul);
                 printf("\n\nLa pila queda...\n");
                 mostrar(&p);
+                break;
+            ///**9NO EJERCICIO////////////////////////////////////////////////////////////
+            case 9:
+                resul = SumaPila(p);
+                nums = Contador (p);
+                div = Division (p);
+                printf("\n\nEl resultado es %d\n", resul);
+                printf("\nLos numeros de la pila son %d\n", nums);
+                printf("\nLa division es %f\n", div);
+                break;
             case 11:
                 printf("Saliendo del programa...\n");
                 break;
@@ -124,17 +143,13 @@ void opcion2(Pila * p, Pila * s, Pila * aux) {
 
 ///**4TO Ejercicio////////////////////////////////////////////////////////////
 ///**TERMINAR///////////////////////////////////////////////////////////////
-void opcion3(Pila * p, Pila * y, Pila * basura, Pila * z) {
+int opcion3(Pila p)
+{
+
+    int menor = 0;
+    int tope = desapilar(&p);
 
 
- while(!pilavacia(p))
- {
-     apilar(y, desapilar(p));
-
-     if (tope(p)<tope(y)){
-     apilar(basura, desapilar(p));
- }else apilar(z, desapilar(p));
- }
 
 }
 
@@ -150,7 +165,59 @@ int opcion8 (Pila p)
      return suma;
 }
 
-void 
+///**9NO Ejercicio/////////////////////////////////////////////////////////////////////
+
+int SumaPila (Pila p)
+{
+    int suma1 = 0;
+    Pila aux;
+    inicpila(&aux);
+
+    while(!pilavacia(&p))
+    {
+        suma1 = suma1 + tope(&p);
+        apilar(&aux, desapilar(&p));
+    }
+
+
+    int result = suma1;
+
+    return result;
+}
+
+int  Contador (Pila p)
+{
+    Pila aux;
+    inicpila(&aux);
+
+    int contador = 0;
+
+    while(!pilavacia(&p))
+    {
+        contador++;
+        apilar(&aux, desapilar(&p));
+    }
+        int result = contador;
+
+    return result;
+}
+
+ float Division (Pila  p)
+ {
+     
+
+     float division = (float)suma/cont;
+
+     return division;
+ }
+
+ void Promedio (Pila p)
+ {
+    int suma = SumaPila(p), cont= Contador(p);
+     
+ }
+
+
 
 
 
