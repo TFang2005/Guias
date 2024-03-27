@@ -5,13 +5,11 @@
 void IngresarNum(Pila *p);///1Er Ejercicio//////////////
 void opcion1(Pila * p, Pila * r);///2DO Ejercicio//////////////
 void opcion2(Pila * p, Pila * s, Pila * aux);///**3ER Ejercicio/////////////////////////////////////////
-int opcion3(Pila p);///**4TO Ejercicio//////////////////////////////////
+int opcion3(Pila * p);///**4TO Ejercicio//////////////////////////////////
+Pila OrdenarPila (Pila p);///**5TO Ejercicio/////////////////////////////////
+Pila InsertNum (Pila  p, int  insert);///**6TO Ejercicio//////////////////////////////////////
 int opcion8 (Pila p);///**8VO Ejercicio/////////////////////////////////
-int SumaPila (Pila p);
-int Contador (Pila P);
-float Division (Pila p);
-void Promedio (Pila p);
-
+float Promedio (Pila p);///**9NO Ejercicio//////////////////////////////
 
 
 ///**////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -19,14 +17,15 @@ void Promedio (Pila p);
 int main() {
     int opcion;
 
-    Pila p, r, s, aux, basura, z, y;
-    int suma, resul, nums;
-    float div;
+    Pila p, r, s, aux, basura, z, y, InserOrdenada;
+    int suma, resul, nums, insert;
+    float div, result;
     inicpila (&p);
     inicpila (&r);
     inicpila (&s);
     inicpila(&z);
     inicpila(&y);
+    inicpila(&InserOrdenada);
     inicpila(&basura);
     inicpila (&aux);
 
@@ -43,10 +42,12 @@ int main() {
         printf("1. Pasar a otra pila\n");
         printf("2. Pasar elementos sin alterar el orden\n");
         printf("3. Eliminar menor\n");
+        printf("4. Ordenada Pila\n");
+        printf("5. Insertar Numero\n");
         printf("8. Sumar tope y anterior\n");
         printf("9. Calcular promedio de la pila\n");
-        printf("4. Salir\n");
-        printf("Ingrese su opcion: ");
+        printf("11. Salir\n");
+        printf("Ingrese su opcion: \n");
         scanf("%d", &opcion);
 
 
@@ -68,9 +69,22 @@ int main() {
             ///**4TO EJERCICIO////////////////////////////////////////////////////////////
             case 3:
                 printf("\n\nEliminando el menor...\n");
-                opcion3(p);
-                mostrar(&p);
+                resul=opcion3(&p);
+                printf("\n\nEl dato menor eliminado es: %d\n",resul);
                 printf("-----------------------------------------------------------------------\n");
+                break;
+            ///**5TO EJERCICIO//////////////////////////////////////////////////
+            case 4:
+                printf("\n\nOrdenando Pila...\n");
+                OrdenarPila(p);
+                mostrar(&p);
+                break;
+            case 5:
+                printf("\n\nPorfavor ingrese un numero entero que desea agregar a la pila\n");
+                scanf("%d", &insert);
+                printf("\n\nAgregando numero...\n");
+                InserOrdenada = InsertNum (p, insert);
+                mostrar(&InserOrdenada);
                 break;
             ///**8VO EJERCICIO////////////////////////////////////////////////////////////
             case 8:
@@ -82,12 +96,9 @@ int main() {
                 break;
             ///**9NO EJERCICIO////////////////////////////////////////////////////////////
             case 9:
-                resul = SumaPila(p);
-                nums = Contador (p);
-                div = Division (p);
-                printf("\n\nEl resultado es %d\n", resul);
-                printf("\nLos numeros de la pila son %d\n", nums);
-                printf("\nLa division es %f\n", div);
+                printf("\n\nCalculando promedio...\n");
+                resul = Promedio(p);
+                printf("\n\nEl promedio de los elementos de la pila es: %d\n", resul);
                 break;
             case 11:
                 printf("Saliendo del programa...\n");
@@ -142,16 +153,63 @@ void opcion2(Pila * p, Pila * s, Pila * aux) {
 }
 
 ///**4TO Ejercicio////////////////////////////////////////////////////////////
-///**TERMINAR///////////////////////////////////////////////////////////////
-int opcion3(Pila p)
+
+int opcion3(Pila * p)
 {
+    Pila menor; inicpila(&menor); Pila aux; inicpila(&aux);
 
-    int menor = 0;
-    int tope = desapilar(&p);
+    if (!pilavacia(p))
+        apilar(&menor, desapilar(p));
 
+    while(!pilavacia(p)){
+        if(tope(p)<tope(&menor)){
+            apilar(&aux, desapilar(&menor));
+            apilar(&menor, desapilar(p));
+        }else{
+            apilar(&aux, desapilar(p));
+        }
+    }
 
-
+    while(!pilavacia(&aux)){
+        apilar(p, desapilar(&aux));
+    }
+    return tope(&menor);
 }
+
+///**5TO Ejercicio///////////////////////////////////////////////////////////
+
+Pila OrdenarPila (Pila p)
+{
+    Pila ordenada; inicpila(&ordenada);
+    int menor;
+
+    while(!pilavacia(&p)){
+        menor = opcion3(&p);
+        apilar(&ordenada, menor);
+    }
+
+    return ordenada;
+}
+
+///**6TO Ejericicio///////////////////////////////////////////////////
+
+Pila InsertNum (Pila  p, int  insert)
+{
+    Pila aux; inicpila(&aux);
+
+    while((!pilavacia(&p)) && (tope(&p)<insert)){
+          apilar(&aux, desapilar(&p));
+   }
+
+   apilar(&p, insert);
+
+    while(!pilavacia(&aux)){
+        apilar(&p, desapilar(&aux));
+    }
+
+    return p;
+}
+
 
 ///**8VO Ejercicio////////////////////////////////////////////////////////////////////////
 
@@ -202,22 +260,17 @@ int  Contador (Pila p)
     return result;
 }
 
- float Division (Pila  p)
+ float Division (float sum, float cont)
  {
-     
-
-     float division = (float)suma/cont;
+     float division = (float) sum/cont;
 
      return division;
  }
 
- void Promedio (Pila p)
+ float Promedio (Pila p)
  {
-    int suma = SumaPila(p), cont= Contador(p);
-     
+     int sum=SumaPila(p), cont= Contador(p);
+     float prome = Division(sum, cont);
+
+     return prome;
  }
-
-
-
-
-
