@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+///**PROTOTIPADO///////////////////////////////////////////////////////////////////////////////////
+
 ///**1er Ejercicio///
 //int NumeroRandom();
 ///**2do Ejercicio///
@@ -12,22 +15,27 @@ void ResultadoMenoryMayor (int mayor, int menor);*/
 ///**4to Ejercicio///
 /*void TablaMulti (int Num);*/
 ///**5to Ejercicio///
-/*float sumar (float num1, float num2);
-float restar (float num1, float num2);
+/*
+float sumar (float num1, float num2);
+float resta (float num1, float num2);
 float multiplicacion (float num1, float num2);
-float division (float num1, float num2);*/
+float division (float num1, float num2);
+*/
 ///**6to Ejercicio///
-
+/*void CambiarSigno (int * num1);*/
+///**7mo Ejercicio///
+void CargarNums (int * num1, int * num2);
 
 
 ///**///////////////////////////////////////////////////////////////////////////////
+///**MAIN//////////////////////////////////////////////////////////////////////////////////
 int main()
 {
-   ///**1er Ejercicio///
+   ///**1er Ejercicio///////////////////////////////////////////////////////
    /*int random = NumeroRandom();
    printf("El numero random generado es:%d\n", random);*/
 
-   ///**2do Ejercicio///
+   ///**2do Ejercicio////////////////////////////////////////////////////////
    /*int num1, num2, num3;
 
    printf("Ingrese tres numeros enteros: \n");
@@ -35,7 +43,7 @@ int main()
 
    ResultadoMenoryMayor(BuscarMenor(num1,num2,num3), BuscarMayor (num1,num2,num3));*/
 
-   ///**3er Ejercicio///
+   ///**3er Ejercicio//////////////////////////////////////////////////////
     /*int result, Num;
 
     printf("Ingrese un numero positivo: ");
@@ -45,7 +53,7 @@ int main()
 
     printf("La suma de los numeros positivos hasta %d es: %d\n", Num, result);*/
 
-    ///**4to Ejercicio///
+    ///**4to Ejercicio///////////////////////////////////////////////////////
     /*
     int result, Num;
 
@@ -56,7 +64,7 @@ int main()
 
     ///**5to Ejercicio///
     /*
-    float num1, num2;
+    float num1, num2, resul;
     char operador;
 
     printf("Porfavor ingrese un 1er numero\n");
@@ -75,7 +83,7 @@ int main()
         printf("El resultado de la suma es: %.2f\n", sumar(num1, num2));
         break;
     case '-':
-        printf("El resultado de la resta es: %.2f\n", restar(num1, num2));
+        printf("El resultado de la resta es: %.2f\n", resta(num1, num2));
         break;
     case '*':
         printf("El resultado de la multiplicacion es: %.2f\n", multiplicacion(num1, num2));
@@ -85,25 +93,37 @@ int main()
         break;
     default:
         printf("Operador no identificado\n");
-    }*/
-    
-    ///**6to Ejercicio/////
-    int num1;
-    
-    printf("Ingrese un numero al que desea cambiarle de signo\n");
+    }
+    */
+
+    ///**6to Ejercicio//////////////////////////////////////////////////////
+    /*
+    int num1, resul;
+
+    printf("Porfavor, ingrese un numero al que desea cambiarle el signo...\n");
     scanf("%d", &num1);
-       
-       
-       
-       
-       
+
+    CambiarSigno (&num1);
+
+    printf("\nEl numero es: %d", num1);
+    */
+
+    ///**7mo Ejercicio////////////////////////////////////////////////////////
+    int num1, num2;
+
+    CargarNums (&num1, &num2);
+
+    printf("El primer numero es: %d\n", num1);
+    printf("\nEl segundo numero es: %d\n", num2);
+
+
+
     return 0;
 }
 
-    
-///**//////////////////////////////////////////////////////////////////////////////////////////
+///**FUNCIONES//////////////////////////////////////////////////////////////////////////////////////////
 
-    ///**1er Ejercicio///////////////////////////////
+    ///**1er Ejercicio////////////////////////////////////////
 
     /*int NumeroRandom()
     {
@@ -113,7 +133,7 @@ int main()
         return valor;
     }*/
 
-    ///**2do Ejercicio/////////////////////////////////
+    ///**2do Ejercicio//////////////////////////////////////////
 
     /*int BuscarMenor (int num1, int num2, int num3)
     {
@@ -149,7 +169,7 @@ int main()
         printf("El menor numero es: %d\n", mayor);
     }*/
 
-    ///**3er Ejercicio////////////////////////////////////
+    ///**3er Ejercicio////////////////////////////////////////////////
     /*
     int SumaNum (int Num)
     {
@@ -162,7 +182,7 @@ int main()
         return Suma;
     }*/
 
-    ///**4to Ejercicio//////////////////////////////////////////
+    ///**4to Ejercicio////////////////////////////////////////////
     /*
     void TablaMulti (int Num)
     {
@@ -173,8 +193,7 @@ int main()
         }
     }*/
 
-    ///**5to Ejercicio/////////////////////////////////////////////
-    
+    ///**5to Ejercicio///////////////////////////////////////////
     /*
     float sumar (float num1, float num2)
     {
@@ -182,16 +201,14 @@ int main()
         return suma;
     }
 
-    float restar (float num1, float num2)
+    float resta (float num1, float num2)
     {
-        float resta = num1-num2;
-        return resta;
+        return num1-num2;
     }
 
     float multiplicacion (float num1, float num2)
     {
-        float multi = num1*num2;
-        return multi;
+        return num1*num2;
     }
 
     float division (float num1, float num2)
@@ -203,21 +220,28 @@ int main()
             printf("Error: division por cero\n");
             return 0;
         }
-    }*/
-    
-    ///**6to Ejercicio///////////////////////////
-    
-    void CambioSig (int Num1)
-    {
-        
-        
     }
-    
-    
-    
 
-    
-    
-    
-    
-    
+    */
+    ///**6to Ejercicio/////////////////////////////////////////////////
+    /*
+    void CambiarSigno (int * num1)
+    {
+        *num1 = -(*num1);
+    }
+    */
+
+    ///**7mo Ejercicio////////////////////////////////////////////
+
+    void CargarNums (int * num1, int * num2)
+    {
+        printf("Ingrese el 1er numero: \n");
+        scanf("%d", num1);
+
+        printf("Ingrese el 2do numero: \n");
+        scanf("%d", num2);
+    }
+
+
+
+
