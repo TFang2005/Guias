@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdlib.h>
+///**PROTOTIPADO//////////////////////////////////////////////////////////////////////////////
+int CargarArreglo (int A[], int dimension);///**1ER EJERCICIO//////////////////
+void MostrarAreglo (int A[], int dimension);///**2DO EJERCICIO/////////////////
+
+
+
+
+///**MAIN/////////////////////////////////////////////////////////////////////////////////////
+
+int main()
+{
+    int A[5] = {};//Arreglo creado
+
+    ///**1ER EJERCICIO/////////////////////////////////////////////////////////////////
+    int CantidadElementos = CargarArreglo (A, 5);
+    printf ("\nSe han ingresado %d elementos en el arreglo\n", CantidadElementos);
+
+    ///**2DO EJERCICIO/////////////////////////////////////////////////////////////////
+    printf("\nElementos del arreglo:\n");
+    MostrarAreglo (A, 5);
+
+    return 0;
+}
+
+
+
+
+///**FUNCIONES////////////////////////////////////////////////////////////////////////////////
+
+///**1ER EJERCICIO//////////////////////////////////////////////////////////////////////////
+int CargarArreglo (int A[], int dimension)
+{
+    int validos = 0;
+    char continuar = 's';
+
+    while (continuar == 's' && validos < dimension)
+    {
+        printf("Ingrese un numero entero: ");
+        fflush(stdin);
+        scanf("%d", &A[validos]);
+
+        validos++;
+
+        if (validos < 5){
+            printf("Desea continuar cargando datos? (s/n): ");
+            fflush(stdin);
+            scanf("%c", &continuar);
+        }
+    }
+    return validos;
+}
+
+///**2DO EJERCICIO/////////////////////////////////////////////////////////////////////////////////
+void MostrarAreglo (int A[], int dimension)
+{
+    int validos;
+
+    for (validos=0; validos<dimension; validos++){
+        printf("\Indice %d: Valor %d\n", validos, A[validos]);
+    }
+}
