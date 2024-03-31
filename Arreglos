@@ -3,7 +3,7 @@
 ///**PROTOTIPADO//////////////////////////////////////////////////////////////////////////////
 int CargarArreglo (int A[], int dimension);///**1ER EJERCICIO//////////////////
 void MostrarAreglo (int A[], int dimension);///**2DO EJERCICIO/////////////////
-
+int SumarElementos (int A[], int dimension);///**3ER EJERCICIO////////////////
 
 
 
@@ -11,15 +11,49 @@ void MostrarAreglo (int A[], int dimension);///**2DO EJERCICIO/////////////////
 
 int main()
 {
+    int opcion;
     int A[5] = {};//Arreglo creado
 
-    ///**1ER EJERCICIO/////////////////////////////////////////////////////////////////
-    int CantidadElementos = CargarArreglo (A, 5);
-    printf ("\nSe han ingresado %d elementos en el arreglo\n", CantidadElementos);
+        ///**1ER EJERCICIO/////////////////////////////////////////////////////////////////
+        int CantidadElementos = CargarArreglo (A, 5);
+        printf ("\nSe han ingresado %d elementos en el arreglo\n", CantidadElementos);
+        printf("\n\n----------------------------------------------------------------\n");
 
-    ///**2DO EJERCICIO/////////////////////////////////////////////////////////////////
-    printf("\nElementos del arreglo:\n");
-    MostrarAreglo (A, 5);
+        ///**2DO EJERCICIO/////////////////////////////////////////////////////////////////
+        printf("\nElementos del arreglo:\n");
+        MostrarAreglo (A, 5);
+        printf("\n\n----------------------------------------------------------------\n");
+
+
+    do{ //Mostrar el Menu
+        printf("\n*** Menu ***\n");
+        printf("1. Sumar elementos del arreglo.\n");
+        printf("2. Opcion 2\n");
+        printf("3. Salir\n");
+        printf("Ingrese su opcion: \n");
+        scanf("%d", &opcion);
+        printf("\n\n----------------------------------------------------------------\n");
+
+
+        //Evaluar la opcion ingresada
+        switch(opcion){
+        case 1:
+        ///**3ER EJERCICIO///////////////////////////////////////////////////////////////////
+        printf("\nSumando elementos...\n");
+        int Total = SumarElementos (A, 5);
+        printf("\nLa suma de los elementos del arreglo es: %d\n", Total);
+        printf("\n\n----------------------------------------------------------------\n");
+            break;
+        case 2:
+            break;
+        case 3:
+            printf("Saliendo del programa...\n");
+            break;
+        default:
+            printf("Opcion no valida. Por favor, ingrese una opcion valida.\n");
+        }
+    }while (opcion != 3);
+
 
     return 0;
 }
@@ -60,4 +94,16 @@ void MostrarAreglo (int A[], int dimension)
     for (validos=0; validos<dimension; validos++){
         printf("\Indice %d: Valor %d\n", validos, A[validos]);
     }
+}
+
+///**3ER EJERCICIO////////////////////////////////////////////////////////////////////////////////////
+int SumarElementos (int A[], int dimension)
+{
+    int validos;
+    int suma = 0;
+
+    for (validos=0; validos < dimension; validos++){
+        suma += A[validos];
+    }
+    return suma;
 }
