@@ -1,19 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "pila.h"
 ///**PROTOTIPADO//////////////////////////////////////////////////////////////////////////////
-int CargarArreglo (int A[], int dimension);///**1ER EJERCICIO//////////////////
+/*int CargarArreglo (int A[], int dimension);///**1ER EJERCICIO//////////////////
 void MostrarAreglo (int A[], int dimension);///**2DO EJERCICIO/////////////////
 int SumarElementos (int A[], int dimension);///**3ER EJERCICIO////////////////
-
-
+void CopiarAPila (int A[], int dimension, Pila * P);///**4TO EJERCICIO///////*/
+/*float CargarArrFloat (float B[], int dimension);///**5TO EJERCICIO//////
+void MostarArrFloat (float B[], int dimension);
+float SumaArrFloat (float B[], int dimension);///**5TO EJERCICIO///////*/
+char CargarArrChar (char C[], int dimension);///**6TO EJERCICIO/////
+void MostarArrChar (char C[], int dimension);
 
 ///**MAIN/////////////////////////////////////////////////////////////////////////////////////
 
 int main()
 {
     int opcion;
+    Pila P; inicpila(&P);
     int A[5] = {};//Arreglo creado
+    float B[100] = {};//Segundo arreglo creado
+    char C[10] = {};
 
+        /*
         ///**1ER EJERCICIO/////////////////////////////////////////////////////////////////
         int CantidadElementos = CargarArreglo (A, 5);
         printf ("\nSe han ingresado %d elementos en el arreglo\n", CantidadElementos);
@@ -24,12 +33,37 @@ int main()
         MostrarAreglo (A, 5);
         printf("\n\n----------------------------------------------------------------\n");
 
+        ///**5TO EJERCICIO//////////////////////////////////////////////////////////////
+        printf("Creando nuevo arreglo real...\n");
+        int CantidadElemFloat = CargarArrFloat (B, 100);
+        printf("\nSe han ingresado %d elementos en el arreglo\n", CantidadElemFloat);
+        printf("\n\n----------------------------------------------------------------\n");
 
+        printf("\nElementos del arreglo real:\n");
+        MostarArrFloat (B, 100);
+        printf("\n\n----------------------------------------------------------------\n");
+
+        float ResulArrFloat = SumaArrFloat (B, 100);
+        printf("\nLa suma de los elementos del arreglo es:%2.f\n", ResulArrFloat);
+        printf("\n\n----------------------------------------------------------------\n");*/
+
+        ///**6MO EJERCICIO/////////////////////////////////////////////////////////////
+        printf("\nCreando nuevo arreglo char...\n");
+        int CantidadElemChar = CargarArrChar (C, 10);
+        printf("\nSe han ingresado %d elementos en el arreglo\n", CantidadElemChar);
+        printf("\n\n----------------------------------------------------------------\n");
+
+        printf("\nElementos del arreglo char:\n");
+        MostarArrChar (C, 10);
+        printf("\n\n----------------------------------------------------------------\n");
+
+/*
     do{ //Mostrar el Menu
         printf("\n*** Menu ***\n");
         printf("1. Sumar elementos del arreglo.\n");
-        printf("2. Opcion 2\n");
-        printf("3. Salir\n");
+        printf("2. Copiar los elementos del arreglo a una Pila.\n");
+        printf("3. Crear nuevo arreglo real y sumar sus elementos.\n");
+        printf("4. Salir.\n");
         printf("Ingrese su opcion: \n");
         scanf("%d", &opcion);
         printf("\n\n----------------------------------------------------------------\n");
@@ -45,14 +79,21 @@ int main()
         printf("\n\n----------------------------------------------------------------\n");
             break;
         case 2:
+        ///**4TO EJERCICIO//////////////////////////////////////////////////////////////////
+            printf("\nCopiando los elementos del arreglo a la pila...\n");
+            CopiarAPila (A, 5, &P);
+            mostrar(&P);
             break;
         case 3:
+
+            break;
+        case 4:
             printf("Saliendo del programa...\n");
             break;
         default:
             printf("Opcion no valida. Por favor, ingrese una opcion valida.\n");
         }
-    }while (opcion != 3);
+    }while (opcion != 3);*/
 
 
     return 0;
@@ -60,7 +101,7 @@ int main()
 
 
 
-
+/*
 ///**FUNCIONES////////////////////////////////////////////////////////////////////////////////
 
 ///**1ER EJERCICIO//////////////////////////////////////////////////////////////////////////
@@ -92,7 +133,7 @@ void MostrarAreglo (int A[], int dimension)
     int validos;
 
     for (validos=0; validos<dimension; validos++){
-        printf("\Indice %d: Valor %d\n", validos, A[validos]);
+        printf("\nIndice %d: Valor %d\n", validos, A[validos]);
     }
 }
 
@@ -107,3 +148,91 @@ int SumarElementos (int A[], int dimension)
     }
     return suma;
 }
+
+///**4TO EJERCICIO/////////////////////////////////////////////////////////////////////////////////
+void CopiarAPila (int A[], int dimension, Pila * P)
+{
+    int validos;
+
+    for(validos=0; validos < dimension; validos++)
+    {
+        apilar(P, A[validos]);
+    }
+}
+
+///**5TO EJERCICIO//////////////////////////////////////////////////////////////////////
+float CargarArrFloat (float B[], int dimension)
+{
+    char continuar = 's';
+    int validosB;
+
+    while (continuar=='s' && validosB < dimension)
+    {
+        printf("\nIngrese el numero real que desea guardar\n");
+        fflush(stdin);
+        scanf("%f", &B[validosB]);
+        validosB++;
+
+        if(validosB<100){
+            printf("\nDesea seguir guardando numeros? (s/n)\n");
+            fflush(stdin);
+            scanf("%c", &continuar);
+        }
+    }
+    return validosB;
+}
+
+void MostarArrFloat (float B[], int dimension)
+{
+   int validosB;
+
+    for(validosB=0; validosB < dimension; validosB++)
+    {
+        printf("\nIndice %d: Valor %f\n", validosB, B[validosB]);
+    }
+}
+
+float SumaArrFloat (float B[], int dimension)
+{
+    int validosB;
+    float suma = 0;
+
+    for(validosB=0; validosB < dimension; validosB++)
+    {
+        suma += B[validosB];
+    }
+    return suma;
+}*/
+
+///**7TO EJERCICIO///////////////////////////////////////////////////////////////
+char CargarArrChar (char C[], int dimension)
+{
+    char continuar = 's';
+    int validosC;
+
+    while (continuar=='s' && validosC < dimension)
+    {
+        printf("\nIngrese una letra que desea guardar\n");
+        fflush(stdin);
+        scanf("%c", &C[validosC]);
+        validosC++;
+
+        if(validosC<100){
+            printf("\nDesea seguir guardando numeros? (s/n)\n");
+            fflush(stdin);
+            scanf("%c", &continuar);
+        }
+    }
+    return validosC;
+}
+
+void MostarArrChar (char C[], int dimension)
+{
+    int validosC;
+
+    for(validosC=0; validosC < dimension; validosC++)
+    {
+        printf("\nIndice %d: Valor %c\n", validosC, C[validosC]);
+    }
+}
+
