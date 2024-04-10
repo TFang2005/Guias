@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void CargarMatriz(int dimF, int dimC, int M[dimF][dimC]);
+void MostarMatriz(int dimF, int dimC, int M[dimF][dimC]);
+int SumarMatriz(int dimF, int dimC, int M[dimF][dimC]);
+
+int main()
+{
+
+
+    ///Declaracion
+
+    int dimF, dimC;///Para preguntar de que tamaño desea que tenga la matriz, se guarda en dimF y dimC
+
+    ///**Siempre preguntar esto, antes de declarar la matriz
+    printf("Ingrese la dim de filas\n");
+    scanf("%d", &dimF);
+    printf("Ingrese la dim de col\n");
+    scanf("%d", &dimC);
+
+    int M2 [dimF][dimC];//variable
+
+    CargarMatriz(dimF, dimC, M2);
+    MostarMatriz(dimF, dimC, M2);
+    int Resul = SumarMatriz(dimF, dimC, M2);
+    printf("\nLa suma de la matriz es: %d\n", Resul);
+    return 0;
+}
+
+///Cargar
+void CargarMatriz(int dimF, int dimC, int M[dimF][dimC])
+{
+    int f = 0;
+    int c = 0;
+
+    for (f=0; f<dimF; f++){
+        for(c=0; c<dimC; c++){
+            printf("\nIngrese un numero que desea guargar en la matriz\n");
+            scanf("%d", &M[f][c]);
+        }
+    }
+}
+
+///Mostar
+void MostarMatriz(int dimF, int dimC, int M[dimF][dimC])
+{
+    int f = 0;
+    int c = 0;
+
+    for (f=0; f<dimF; f++){
+        for(c=0; c<dimC; c++){
+            printf("|%d|", M[f][c]);
+        }
+        printf("\n");
+    }
+}
+
+///sumar
+int SumarMatriz(int dimF, int dimC, int M[dimF][dimC])
+{
+    int f = 0;
+    int c = 0;
+    int suma = 0;
+
+    for (f=0; f<dimF; f++){
+        for(c=0; c<dimC; c++){
+            suma = suma + M[f][c];
+        }
+    }
+    return suma;
+}
