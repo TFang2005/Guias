@@ -11,16 +11,23 @@ void MostarArrFloat (float B[], int dimension);
 float SumaArrFloat (float B[], int dimension);///**5TO EJERCICIO///////*/
 char CargarArrChar (char C[], int dimension);///**6TO EJERCICIO/////
 void MostarArrChar (char C[], int dimension);
+int EncontrarDato (char C[], int dimension, char dato);
+//int InsertarDato (char C[], int dimension, char elemento);///**7MO EJERCICIO////////
+char BuscarMayor (char C[], int dimension);///**8VO EJERCICIO///////////////
+
+
+
 
 ///**MAIN/////////////////////////////////////////////////////////////////////////////////////
 
 int main()
 {
-    int opcion;
+    int opcion, flag;
+    char dato, elemento;
     Pila P; inicpila(&P);
     int A[5] = {};//Arreglo creado
     float B[100] = {};//Segundo arreglo creado
-    char C[10] = {};
+    char C[10] = {};//Tercer arreglo creado
 
         /*
         ///**1ER EJERCICIO/////////////////////////////////////////////////////////////////
@@ -56,6 +63,31 @@ int main()
         printf("\nElementos del arreglo char:\n");
         MostarArrChar (C, 10);
         printf("\n\n----------------------------------------------------------------\n");
+
+        printf("\nIngrese la letra que desea buscar en el arreglo: \n");
+        fflush(stdin);
+        scanf("%c", &dato);
+
+        flag = EncontrarDato(C, 10, dato);
+
+        if (flag==1){
+            printf("\nLa letra %c si se a encontrado\n", dato);}
+        else{
+            printf("\nLa letra %c no se a encontrado\n", dato);}
+
+        ///**7M0 EJERCICIO///////////////////////////////////////////////////////////////
+
+        /*printf("\nIngrese el caracter que desea agregar al arreglo ordenado alfabeticamente: \n");
+        fflush(stdin);
+        scanf("%c", &elemento);
+        int NuevoChar = InsertarDato (C, 10, elemento);
+        printf("\nCreando nuevo arreglo\n");
+        MostarArrChar (C, NuevoChar);*/
+
+        ///**8VO EJERCICIO////////////////////////////////////////////////////////////
+        printf("\nBuscando el mayor\n");
+        BuscarMayor (C, 10);
+        printf("\nEl mayor de los elementos del arreglo es %c\n", BuscarMayor(C, 10));
 
 /*
     do{ //Mostrar el Menu
@@ -236,3 +268,51 @@ void MostarArrChar (char C[], int dimension)
     }
 }
 
+int EncontrarDato (char C[], int dimension, char dato)
+{
+
+    int validosC;
+    int flag = 0;
+
+    while (validosC<dimension && flag==0){
+        if (dato == C[validosC]){
+                flag=1;
+            }else{
+                validosC++;
+            }
+    }
+
+    return flag;
+}
+/*
+int InsertarDato (char C[], int dimension, char elemento)
+{
+    int validosC;
+
+    int ultPos = validosC-1;
+
+    while(ultPos>=0 && elemento < C[ultPos])
+    {
+        C[ultPos+1]=C[ultPos];
+        ultPos--;
+    }
+
+    C[ultPos+1] = elemento;
+
+    return validosC+1;
+}*/
+
+char BuscarMayor (char C[], int dimension)
+{
+    char MiMayor = C[0];
+    int validosC;
+
+    for(validosC=1; validosC<dimension; validosC++)
+    {
+        if(MiMayor < C[validosC]){
+            MiMayor = C[validosC];
+        }
+    }
+
+    return MiMayor;
+}
