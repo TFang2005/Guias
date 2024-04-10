@@ -8,13 +8,13 @@ void MostarMatriz(int dimF, int dimC, int M[dimF][dimC]);///**2DO EJERCICIO/////
 //int CargarAleatorio (int dimF, int dimC, int M[dimF][dimC]);///**3ER EJERCICIO/////////
 //int SumarMatriz(int dimF, int dimC, int M[dimF][dimC]);///**4TO EJERCICIO///////////////
 float SacarPromedio(int dimF, int dimC, int M[dimF][dimC]);///5TO EJERCICIO////////////
-
+int EncontrarDato (int dimF, int dimC, int Buscar, int M[dimF][dimC]);///6TO EJERCICIO//////
 
 ///**MAIN//////////////////////////////////////////////////////////////////////////
 int main()
 {
     ///Declaracion
-    int dimF, dimC, resul;
+    int dimF, dimC, resul, Buscar, flag;
 
     ///**Siempre preguntar esto, antes de declarar la matriz
     printf("Ingrese la dimension de las filas\n");
@@ -44,6 +44,17 @@ int main()
     float promedio = SacarPromedio(dimF, dimC, M2);
     printf("\nEl promedio de la matriz es: %.2f\n", promedio);
 
+    ///**6TO EJERCICIO//////////////////////////////////////
+    printf("\nIngrese el numero que desea buscar en la matriz; \n");
+    scanf("%d", &Buscar);
+
+    flag = EncontrarDato (dimF, dimC, Buscar, M2);
+
+    if(flag==1){
+        printf("\nEl dato a sido encontrado\n");
+    }else{
+        printf("\nEl dato no a sido encontrado\n");
+    }
 
 
     return 0;
@@ -123,4 +134,22 @@ float SacarPromedio(int dimF, int dimC, int M[dimF][dimC])
     }
 
     return (float)suma/elementos;
+}
+
+///**6TO EJERCICIO/////////////////////////////////////////////////////
+int EncontrarDato (int dimF, int dimC, int Buscar, int M[dimF][dimC])
+{
+    int f, c;
+    int flag = 0;
+
+    for(f=0; f<dimF; f++){
+        for(c=0; c<dimC; c++){
+            if (Buscar == M[f][c]){
+                flag=1;
+            }else{
+                flag=0;
+            }
+        }
+    }
+    return flag;
 }
