@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+///**PROTOTIPADO///////////////////////////////////////////////////////////////////////
+void CargarMatriz(int dimF, int dimC, int M[dimF][dimC]);///**1ER EJERCICIO///////////
+void MostarMatriz(int dimF, int dimC, int M[dimF][dimC]);///**2DO EJERCICIO////////////
+//int CargarAleatorio (int dimF, int dimC, int M[dimF][dimC]);///**3ER EJERCICIO/////////
+int SumarMatriz(int dimF, int dimC, int M[dimF][dimC]);///**4TO EJERCICIO///////////////
+
+
+
+///**MAIN//////////////////////////////////////////////////////////////////////////
+int main()
+{
+    ///Declaracion
+    int dimF, dimC, resul;
+
+    ///**Siempre preguntar esto, antes de declarar la matriz
+    printf("Ingrese la dim de filas\n");
+    scanf("%d", &dimF);
+    printf("Ingrese la dim de col\n");
+    scanf("%d", &dimC);
+
+    int M2 [dimF][dimC];//variable
+
+    ///**1ER EJERCICIO//////////////////////////////////////
+    CargarMatriz(dimF, dimC, M2);
+    ///**2DO EJERCICIO/////////////////////////////////////
+    MostarMatriz(dimF, dimC, M2);
+    int Resul = SumarMatriz(dimF, dimC, M2);
+    printf("\nLa suma de la matriz es: %d\n", Resul);
+
+    /*
+    ///**3ER EJERCICIO///////////////////////////////////
+    srand(time(NULL));
+    CargarAleatorio(dimF, dimC, M2);
+    MostarMatriz(dimF, dimC, M2);*/
+
+    return 0;
+}
+
+///**FUNCIONES///////////////////////////////////////////////////////////////////////
+
+///**1ER EJERCICIO////////////////////////////////////////////////////////////////////
+void CargarMatriz(int dimF, int dimC, int M[dimF][dimC])
+{
+    int f = 0;
+    int c = 0;
+
+    for (f=0; f<dimF; f++){
+        for(c=0; c<dimC; c++){
+            printf("\nIngrese un numero que desea guargar en la matriz\n");
+            scanf("%d", &M[f][c]);
+        }
+    }
+}
+
+///**2DO EJERCICIO/////////////////////////////////////////////////////////////////////
+void MostarMatriz(int dimF, int dimC, int M[dimF][dimC])
+{
+    int f = 0;
+    int c = 0;
+
+    for (f=0; f<dimF; f++){
+        for(c=0; c<dimC; c++){
+            printf("|%d|", M[f][c]);
+        }
+        printf("\n");
+    }
+}
+/*
+///**3ER EJERCICIO////////////////////////////////////////////////////////////
+int CargarAleatorio (int dimF, int dimC, int M[dimF][dimC])
+{
+    int f, c, valor;
+
+    for(f=0; f<dimF; f++){
+        for(c=0; c<dimC; c++){
+            M[f][c] = rand()%101;
+        }
+    }
+    return M[dimF][dimC];
+}
+*/
+
+///**4TO EJERCICIO//////////////////////////////////////////////////
+int SumarMatriz(int dimF, int dimC, int M[dimF][dimC])
+{
+    int f = 0;
+    int c = 0;
+    int suma = 0;
+
+    for (f=0; f<dimF; f++){
+        for(c=0; c<dimC; c++){
+            suma = suma + M[f][c];
+        }
+    }
+    return suma;
+}
+
+///**5TO EJERCICIO//////////////////////////////////////////////////////
+
+float PromedioMatriz(int dimF, int dimC, int M[dimF][dimC])
+{
+    int f, c, division, nums;
+    
+    for(f=0; f<dimF, f++){
+        for(c=0; c<dimC; c++){
+            
+            
+        }
+    }
+    
+}
