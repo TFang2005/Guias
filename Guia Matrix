@@ -153,3 +153,76 @@ int EncontrarDato (int dimF, int dimC, int Buscar, int M[dimF][dimC])
     }
     return flag;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#include <stdio.h>
+#include <stdlib.h>
+void cargarMatriz(int dimF, int dimC, float M[dimF][dimC]);
+float MostarMatrix(int dimF, int dimC, float M[dimF][dimC]);
+float CalcularDeterminante (int dimF, int dimC, float M[dimF][dimF]);
+
+
+int main()
+{
+    float M1[2][2];
+    float determinante = 0;
+
+    int dimF = 2;
+    int dimC = 2;
+
+    cargarMatriz(2, 2, M1);
+    MostarMatrix(2, 2, M1);
+    determinante = CalcularDeterminante (2, 2, M1);
+
+    printf("\nEl determinante de la matrix es: %f", determinante);
+
+    return 0;
+}
+
+///12AVO  EJERCICIO//////////////////////////
+void cargarMatriz(int dimF, int dimC, float M[dimF][dimC])
+{
+    int f=0; // indice para recorrer las filas
+    int c=0; // indice para recorrer las columnas
+
+    for(f=0; f<dimF; f++)
+    {
+        for(c=0; c<dimC; c++)
+        {
+            printf("\nIngrese un dato de tipo entero\n");
+            scanf("%f", &M[f][c]);
+        }
+    }
+}
+
+float MostarMatrix (int dimF, int dimC, float M[dimF][dimC])
+{
+    int f;
+    int c;
+
+    for(f=0; f<dimF; f++)
+    {
+        for(c=0; c<dimC; c++)
+        {
+            printf("| %f |", M[f][c]);
+        }
+        printf("\n"); // para que pase a la próxima fila
+    }
+}
+// a * b - b - c
+
+float CalcularDeterminante (int dimF, int dimC, float M[dimF][dimF])
+{
+    int f;
+    int c;
+    float determinante = 0;
+    float suma = 0;
+
+    for(f=0; f<dimF; f++){
+        for(c=0; c<dimC; c++){
+            determinante = M[0][0] * M[1][1] - M[0][1] * M[1][0];
+        }
+    }
+    return determinante;
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
