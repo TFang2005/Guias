@@ -1,61 +1,108 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "string.h"
 #include <time.h>
-
+///**Constante/////////////////////////////////////////////////////////////////
+const int dimF = 3;
+const int dimC = 3;
+const int FC = 5;
+const int CS = 10;
 ///**PROTOTIPADO///////////////////////////////////////////////////////////////////////
 void CargarMatriz(int dimF, int dimC, int M[dimF][dimC]);///**1ER EJERCICIO///////////
 void MostarMatriz(int dimF, int dimC, int M[dimF][dimC]);///**2DO EJERCICIO////////////
-//int CargarAleatorio (int dimF, int dimC, int M[dimF][dimC]);///**3ER EJERCICIO/////////
-//int SumarMatriz(int dimF, int dimC, int M[dimF][dimC]);///**4TO EJERCICIO///////////////
+int CargarAleatorio (int dimF, int dimC, int M[dimF][dimC]);///**3ER EJERCICIO/////////
+int SumarMatriz(int dimF, int dimC, int M[dimF][dimC]);///**4TO EJERCICIO///////////////
 float SacarPromedio(int dimF, int dimC, int M[dimF][dimC]);///5TO EJERCICIO////////////
 int EncontrarDato (int dimF, int dimC, int Buscar, int M[dimF][dimC]);///6TO EJERCICIO//////
+int CargarStrings ( char P[FC][CS]);///**7MO EJERCICIO////////////////////////////
+void MostrarString( char P[FC][CS],int validos);///**8VO EJERCICIO///////////////////////////
+int BuscarPalabra (char P[][CS], int validos, char BuscarC[]);///**9NO EJERCICIO//////////////////////////////
+
+
+
 
 ///**MAIN//////////////////////////////////////////////////////////////////////////
 int main()
 {
-    ///Declaracion
-    int dimF, dimC, resul, Buscar, flag;
+    {
+        ///Declaracion
+        int resul, Buscar, flag, Validos;
+        char BuscarC[20]= "messi";
+        float promedio;
+        int caso = 0;
+        char continuar = 's';
 
-    ///**Siempre preguntar esto, antes de declarar la matriz
-    printf("Ingrese la dimension de las filas\n");
-    scanf("%d", &dimF);
-    printf("Ingrese la dimension de las columnas\n");
-    scanf("%d", &dimC);
+        int M2 [dimF][dimC];//variable 1
+        char palabras[FC][CS];//Variable 2
 
-    int M2 [dimF][dimC];//variable
+        do
+        {
+            printf("\n\n1.Cargar matriz manualmente tipo int\n2.Mostrar una matriz int\n3.Cargar matriz aleatoriamente tipo int\n");
+            printf("4.Sumar matriz tipo int \n5.Calcular promedio tipo float \n6.Buscar elemento en una matriz tipo int\n");
+            printf("7.Cargar arreglo tipo char \n8.Mostrar arreglo tipo char \n9.Buscar elemento en arreglo tipo char\n");
+            printf("\nIngrese el numero del ejercicio para verlo: \n");
 
-    ///**1ER EJERCICIO//////////////////////////////////////
-    CargarMatriz(dimF, dimC, M2);
+            scanf("%d", &caso);
+            switch(caso)
+            {
 
-    ///**2DO EJERCICIO/////////////////////////////////////
-    MostarMatriz(dimF, dimC, M2);
+            case 1:
+                CargarMatriz(dimF, dimC, M2);
+                break;
+            case 2:
+                MostarMatriz(dimF, dimC, M2);
+                break;
+            case 3:
+                srand(time(NULL));
+                CargarAleatorio(dimF, dimC, M2);
+                MostarMatriz(dimF, dimC, M2);
+                break;
+            case 4:
+                resul = SumarMatriz(dimF, dimC, M2);
+                printf("\n\nLa suma de la matriz es: %d\n", resul);
+                break;
+            case 5:
+                promedio = SacarPromedio(dimF, dimC, M2);
+                printf("\nEl promedio de la matriz es: %.2f\n", promedio);
+                break;
+            case 6:
+                printf("\nIngrese el numero que desea buscar en la matriz; \n");
+                scanf("%d", &Buscar);
 
-    /*///**4TO EJERCICIO//////////////////////////////////////
-    int Resul = SumarMatriz(dimF, dimC, M2);
-    printf("\n\nLa suma de la matriz es: %d\n", Resul);*/
+                flag = EncontrarDato (dimF, dimC, Buscar, M2);
 
-    /*
-    ///**3ER EJERCICIO///////////////////////////////////
-    srand(time(NULL));
-    CargarAleatorio(dimF, dimC, M2);
-    MostarMatriz(dimF, dimC, M2);*/
+                if(flag==1)
+                {
+                    printf("\nEl dato a sido encontrado\n");
+                }
+                else
+                {
+                    printf("\nEl dato no a sido encontrado\n");
+                }
+                break;
+            case 7:
+                Validos = CargarStrings (palabras);
+                printf("\nSe han cargado %d palabras en el arreglo\n", Validos);
+                break;
+            case 8:
+                MostrarString (palabras,Validos);
+                break;
+            case 9:
+                Validos = CargarStrings (palabras);
+                resul = BuscarPalabra(palabras, Validos, BuscarC);
+                printf("\nLa posicion de la palabra es: |%d|", resul);
+                break;
+            default:
+                printf("Error: Numero inavalido, porfavor ingresar numero valido (1/12)");
+                scanf("%d", &caso);
+            }
+            printf("\nDesea ver otro caso (s/n): \n");
+            fflush(stdin);
+            scanf("%c", &continuar);
+        }
+        while(continuar == 's');
 
-    ///**5TO EJERCICIO/////////////////////////////////////
-    float promedio = SacarPromedio(dimF, dimC, M2);
-    printf("\nEl promedio de la matriz es: %.2f\n", promedio);
-
-    ///**6TO EJERCICIO//////////////////////////////////////
-    printf("\nIngrese el numero que desea buscar en la matriz; \n");
-    scanf("%d", &Buscar);
-
-    flag = EncontrarDato (dimF, dimC, Buscar, M2);
-
-    if(flag==1){
-        printf("\nEl dato a sido encontrado\n");
-    }else{
-        printf("\nEl dato no a sido encontrado\n");
     }
-
 
     return 0;
 }
@@ -63,13 +110,16 @@ int main()
 ///**FUNCIONES///////////////////////////////////////////////////////////////////////
 
 ///**1ER EJERCICIO////////////////////////////////////////////////////////////////////
+
 void CargarMatriz(int dimF, int dimC, int M[dimF][dimC])
 {
     int f = 0;
     int c = 0;
 
-    for (f=0; f<dimF; f++){
-        for(c=0; c<dimC; c++){
+    for (f=0; f<dimF; f++)
+    {
+        for(c=0; c<dimC; c++)
+        {
             printf("\nIngrese un numero hasta que la matriz este llena\n");
             scanf("%d", &M[f][c]);
         }
@@ -82,44 +132,51 @@ void MostarMatriz(int dimF, int dimC, int M[dimF][dimC])
     int f = 0;
     int c = 0;
 
-    for (f=0; f<dimF; f++){
-        for(c=0; c<dimC; c++){
+    for (f=0; f<dimF; f++)
+    {
+        for(c=0; c<dimC; c++)
+        {
             printf("|%d|", M[f][c]);
         }
         printf("\n");
     }
 }
-/*
+
 ///**3ER EJERCICIO////////////////////////////////////////////////////////////
 int CargarAleatorio (int dimF, int dimC, int M[dimF][dimC])
 {
     int f, c, valor;
 
-    for(f=0; f<dimF; f++){
-        for(c=0; c<dimC; c++){
+    for(f=0; f<dimF; f++)
+    {
+        for(c=0; c<dimC; c++)
+        {
             M[f][c] = rand()%101;
         }
     }
     return M[dimF][dimC];
 }
-*/
+
 
 ///**4TO EJERCICIO//////////////////////////////////////////////////
-/*int SumarMatriz(int dimF, int dimC, int M[dimF][dimC])
+int SumarMatriz(int dimF, int dimC, int M[dimF][dimC])
 {
     int f = 0;
     int c = 0;
     int suma = 0;
 
-    for (f=0; f<dimF; f++){
-        for(c=0; c<dimC; c++){
+    for (f=0; f<dimF; f++)
+    {
+        for(c=0; c<dimC; c++)
+        {
             suma = suma + M[f][c];
         }
     }
     return suma;
-}*/
+}
 
 ///**5TO EJERCICIO//////////////////////////////////////////////////////
+
 float SacarPromedio(int dimF, int dimC, int M[dimF][dimC])
 {
     int f, c;
@@ -127,9 +184,11 @@ float SacarPromedio(int dimF, int dimC, int M[dimF][dimC])
     int suma = 0;
     int elementos = dimF * dimC;
 
-    for(f=0; f<dimF; f++){
-        for(c=0; c<dimC; c++){
-         suma += M[f][c];
+    for(f=0; f<dimF; f++)
+    {
+        for(c=0; c<dimC; c++)
+        {
+            suma += M[f][c];
         }
     }
 
@@ -142,11 +201,16 @@ int EncontrarDato (int dimF, int dimC, int Buscar, int M[dimF][dimC])
     int f, c;
     int flag = 0;
 
-    for(f=0; f<dimF; f++){
-        for(c=0; c<dimC; c++){
-            if (Buscar == M[f][c]){
+    for(f=0; f<dimF; f++)
+    {
+        for(c=0; c<dimC; c++)
+        {
+            if (Buscar == M[f][c])
+            {
                 flag=1;
-            }else{
+            }
+            else
+            {
                 flag=0;
             }
         }
@@ -154,75 +218,50 @@ int EncontrarDato (int dimF, int dimC, int Buscar, int M[dimF][dimC])
     return flag;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#include <stdio.h>
-#include <stdlib.h>
-void cargarMatriz(int dimF, int dimC, float M[dimF][dimC]);
-float MostarMatrix(int dimF, int dimC, float M[dimF][dimC]);
-float CalcularDeterminante (int dimF, int dimC, float M[dimF][dimF]);
+///**7MO EJERICIO/////////////////////////////////////////////////////////////
 
-
-int main()
+int CargarStrings ( char P[FC][CS])
 {
-    float M1[2][2];
-    float determinante = 0;
+    int validos = 0;
+    char continuar = 's';
 
-    int dimF = 2;
-    int dimC = 2;
-
-    cargarMatriz(2, 2, M1);
-    MostarMatrix(2, 2, M1);
-    determinante = CalcularDeterminante (2, 2, M1);
-
-    printf("\nEl determinante de la matrix es: %f", determinante);
-
-    return 0;
-}
-
-///12AVO  EJERCICIO//////////////////////////
-void cargarMatriz(int dimF, int dimC, float M[dimF][dimC])
-{
-    int f=0; // indice para recorrer las filas
-    int c=0; // indice para recorrer las columnas
-
-    for(f=0; f<dimF; f++)
+    while (continuar == 's' && validos < FC)
     {
-        for(c=0; c<dimC; c++)
-        {
-            printf("\nIngrese un dato de tipo entero\n");
-            scanf("%f", &M[f][c]);
-        }
+        printf("\Ingrese una palabra que desea guardar: \n");
+        fflush(stdin);
+        scanf("%s", &P[validos]);
+
+        validos++;
+
+
+        printf("Desea continuar cargando datos? (s/n): ");
+        fflush(stdin);
+        scanf("%c", &continuar);
     }
+    return validos;
 }
 
-float MostarMatrix (int dimF, int dimC, float M[dimF][dimC])
+///**8VO EJERCICIO////////////////////////////////////////////////////
+void MostrarString( char P[FC][CS],int validos)
 {
-    int f;
-    int c;
-
-    for(f=0; f<dimF; f++)
+    for(int f=0; f<validos; f++)
     {
-        for(c=0; c<dimC; c++)
-        {
-            printf("| %f |", M[f][c]);
-        }
-        printf("\n"); // para que pase a la próxima fila
+        printf("|%s|", P[f]);
+        printf("\n");
     }
 }
-// a * b - b - c
 
-float CalcularDeterminante (int dimF, int dimC, float M[dimF][dimF])
+///**9NO EJERCICIO///////////////////////////////////////////////////
+int BuscarPalabra (char P[][CS], int validos, char BuscarC[])
 {
-    int f;
-    int c;
-    float determinante = 0;
-    float suma = 0;
+    int Dato = -1;
 
-    for(f=0; f<dimF; f++){
-        for(c=0; c<dimC; c++){
-            determinante = M[0][0] * M[1][1] - M[0][1] * M[1][0];
+    for(int f=0; f<validos; f++)
+    {
+        if(strcmp(P[f], BuscarC)== 0)
+        {
+            Dato = f;
         }
     }
-    return determinante;
+    return Dato;
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
