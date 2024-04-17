@@ -1,0 +1,227 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "pila.h"
+///** //////////////////////////////////////////////////////////////////////////
+///** /////////////PROTOTIPADO//////////////////////////////////////////////////
+///** //////////////////////////////////////////////////////////////////////////
+void IngresarNums (Pila * p);///**1ER EJERCICIO/////////////////////////////////
+void PasarDatos (Pila * p, Pila * q);///**2DO EJERCICIO///////////////////////////
+void ConservarOrden (Pila * p);///**3ER EJERCICIO////////////////////////////
+int EncontrarMenor (Pila * p);///**4TO EJERCICIO/////////////////////////////
+Pila OrdenarPorSeleccion(Pila p);///5TO EJERCICIO///////////////////////////
+void InsertarNum(Pila * p, int NumInsertar);///**6TO EJERCICIO//////////////
+Pila OrdenarPorInserccion(Pila p);///7MO EJERCICIO//////////////
+int SumaTopeyAnterior(Pila * p);
+
+///**/////////////MAIN//////////////////////////////////////////////////////
+int main()
+{
+    Pila p;
+    inicpila(&p);
+    Pila q;
+    inicpila(&q);
+    Pila ordenada;
+    inicpila(&ordenada);
+
+    int opcion=0, menor=0, NumInsert=0, result=0;
+    char continuar = 's';
+
+    do
+    {
+        printf("\n*** MENU ***\n");
+        printf("\n1. Cargar Pila A.\n");
+        printf("\n2. Pasar a Pila B.\n");
+        printf("\n3. Pasar a Pila B conservando orden.\n");
+        printf("\n4. Encontrar menor de la pila.\n");
+        printf("\n5. Ordenar por seleccion.\n");
+        printf("\n6. Insertar numero.\n");
+        printf("\n7. Ordenada por inserccion\n");
+        printf("\n8.Suma topes.\n");
+        printf("\nIngrese su opcion: \n");
+        scanf("%d", &opcion);
+
+        switch(opcion)
+        {
+        case 1:///**1ER EJERCICIO///////////////////////////////////
+            IngresarNums(&p);
+            printf("\nPila A:\n");
+            mostrar(&p);
+            break;
+        case 2:///**2DO EJERCICIO///////////////////////////////////
+            PasarDatos(&p, &q);
+            printf("\nPila B:\n");
+            mostrar(&q);
+            break;
+        case 3:
+            ConservarOrden (&p);
+            printf("\nPila B:\n");
+            mostrar(&p);
+            break;
+        case 4:
+            menor=EncontrarMenor(&p);
+            printf("\nEl menor de la Pila A es: %d\n", menor);
+            mostrar(&p);
+            break;
+        case 5:
+            ordenada=OrdenarPorSeleccion(p);
+            printf("\nPila Ordenada:\n");
+            mostrar(&ordenada);
+            break;
+        case 6:
+            printf("\nPorfavor ingrese el numero que desea insertar\n");
+            scanf("%d", &NumInsert);
+            InsertarNum(&p, NumInsert);
+            mostrar(&p);
+            break;
+        case 7:
+            ordenada=OrdenarPorInserccion(p);
+            printf("\nPila ordenada\n");
+            mostrar(&ordenada);
+        case 8:
+            result = SumaTopeyAnterior(&p);
+            printf("\nLa suma de los topes es: %d\n", result);
+            break;
+        }
+    }
+    while(continuar=='s');
+
+
+
+
+
+    return 0;
+}
+///** //////////////////////////////////////////////////////////////
+///** //////////////////////////FUNCIONES///////////////////////////
+///** //////////////////////////////////////////////////////////////
+
+///**1ER EJERCICIO////////////////////////////////////////////////
+void IngresarNums (Pila * p)
+{
+    char continuar = 's';
+
+    do
+    {
+        leer(p);
+        printf("\nDesea seguir cargando datos? (s/n)\n");
+        fflush(stdin);
+        scanf("%c", &continuar);
+    }
+    while(continuar=='s');
+}
+
+///**2DO EJERCICIO//////////////////////////////////////////////
+
+void PasarDatos (Pila * p, Pila * q)
+{
+    while(!pilavacia(p))
+    {
+        apilar(q, desapilar(p));
+    }
+}
+
+///**3ER EJERCICIO/////////////////////////////////////////////
+void ConservarOrden (Pila * p)
+{
+    Pila aux;
+    inicpila(&aux);
+
+    while(!pilavacia(p))
+    {
+        apilar(&aux, desapilar(p));
+    }
+
+    while(!pilavacia(&aux))
+    {
+        apilar(p, desapilar(&aux));
+    }
+
+}
+
+///**4TO EJERCICIO///////////////////////////////////////////
+int EncontrarMenor (Pila * p)
+{
+    Pila aux;
+    inicpila(&aux);
+    int menor = 0;
+
+    if(!pilavacia(p))
+    {
+        menor = desapilar(p);
+    }
+
+    while(!pilavacia(p))
+    {
+        if(tope(p)>menor)
+        {
+            apilar(&aux, desapilar(p));
+        }
+        else
+        {
+            if(tope(p)<menor)
+            {
+                apilar(&aux, menor);
+                menor = desapilar(p);
+            }
+        }
+    }
+
+    while(!pilavacia(&aux))
+    {
+        apilar(p, desapilar(&aux));
+    }
+    return menor;
+}
+
+///**5TO EJERCICIO////////////////////////////////////////////////
+Pila OrdenarPorSeleccion(Pila p)
+{
+    Pila ordenada; inicpila(&ordenada);
+    int menor=0;
+
+    while(!pilavacia(&p)){
+        menor = EncontrarMenor(&p);
+        apilar(&ordenada, menor);
+    }
+    return ordenada;
+}
+
+///**6TO EJERCICIO////////////////////////////////////////////
+void InsertarNum(Pila * p, int NumInsert)
+{
+    Pila aux; inicpila(&aux);
+
+    while(!pilavacia(p) && tope(p)>NumInsert){
+        apilar(&aux, desapilar(p));
+    }
+        apilar(p, NumInsert);
+
+    while(!pilavacia(&aux)){
+        apilar(p, desapilar(&aux));
+    }
+}
+
+///**7MO EJERCICIO////////////////////////////////////////////////
+Pila OrdenarPorInserccion(Pila p)
+{
+    Pila ordenada; inicpila(&ordenada);
+
+    while(!pilavacia(&p)){
+        InsertarNum(&ordenada, desapilar(&p));
+    }
+    return ordenada;
+}
+
+///**8VO EJERCICIO///////////////////////////////////////////////////
+int SumaTopeyAnterior(Pila * p)
+{
+    int suma = 0;
+    int TopeNum = 0;
+
+    while(!pilavacia(p)){
+        TopeNum = tope(p);
+        suma = TopeNum + tope(p);
+    }
+    return suma;
+}
+
