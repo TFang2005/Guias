@@ -1,0 +1,127 @@
+#include <stdio.h>
+#include <stdlib.h>
+///**CONSTANTES///////////////////////////////////////////////////////////////////////////////
+const int dimF=20;
+const int dimC=30;
+///**PROTOTIPADO/////////////////////////////////////////////////////////////////////////////
+int CargarSoftware(int legajos[], int anios[],char nombres[dimF][dimC], int dimension);///1ER EJERCICIO///////////////
+void MostrarSoftware(int legajos[], int anios[],char nombres[dimF][dimC], int validos);///2DO EJERCICIO//////////////
+int EncontrarLegajo(int legajos[], int validos, int NumLeg);
+
+///**MAIN////////////////////////////////////////////////////////////////////////////////
+int main()
+{
+    int validos=0, Pos=0, NumLeg=0;
+    int legajos[20];
+    char nombres[dimF][dimC];
+    int anios[20];
+
+    ///**1ER EJERCICIO////////////////////////////////////////////////////////////////
+    validos = CargarSoftware(legajos, anios, nombres, 20);
+    printf("\nSe cargaron %d legajos\n", validos);
+
+    ///**2DO EJERCICIO///////////////////////////////////////////////////////////////
+    MostrarSoftware(legajos, anios,nombres, validos);
+
+    ///**3ER EJERCICIO///////////////////////////////////////////////////////////////
+    printf("\nPorfavor ingrese el legajo que desea buscar: \n");
+    scanf("%d", &NumLeg);
+    Pos=EncontrarLegajo(legajos, validos, NumLeg);
+    if(Pos!=-1)
+    {
+        printf("\nEl legajo se encontro en la posicion: %d", Pos);
+    }
+    else
+    {
+        printf("\nEl legajo no se a encontrado\n");
+    }
+
+
+
+
+    return 0;
+}
+///**FUNCIONES//////////////////////////////////////////////////////////////////////////////////////
+
+///**1ER EJERCICIO//////////////////////////////////////
+int CargarSoftware(int legajos[], int anios[],char nombres[dimF][dimC], int dimension)
+{
+    char continuar = 's';
+    int validos=0;
+
+    while(validos<dimension && continuar=='s')
+    {
+        printf("Ingrese legajo del alumno: \n");
+        scanf("%d", &legajos[validos]);
+
+        fflush(stdin);
+        printf("\nPor ultimo ingrese la edad del alumno: \n");
+        scanf("%d", &anios[validos]);
+
+        fflush(stdin);
+        printf("\nAhora ingrese el nombre del alumno: \n");
+        scanf("%s", &nombres[validos]);
+        validos++;
+
+        printf("\nDesea seguir cargando datos? (s/n)\n");
+        fflush(stdin);
+        scanf("%c", &continuar);
+    }
+    return validos;
+}
+
+///1DO EJERCICIO////////////////////////////////////////////
+void MostrarSoftware(int legajos[], int anios[],char nombres[dimF][dimC], int validos)
+{
+    int i=0;
+
+    while(i<validos)
+    {
+        printf("Legajo: %d\n", legajos[i]);
+        printf("Años: %d\n", anios[i]);
+        printf("Nombre: %s\n", nombres[i]);
+        printf("---------------------------------\n");
+        i++;
+
+    }
+}
+
+///2ER EJERCICIO////////////////////////////////////////////////
+int EncontrarLegajo(int legajos[], int validos, int NumLeg)
+{
+    int i=0;
+
+    while(i<validos)
+    {
+        if(NumLeg==legajos[i])
+        {
+            return i;
+        }
+        else
+        {
+            i++;
+        }
+    }
+    return -1;
+}
+
+///**3TO EJERCICO//////////////////////////////////////////////////
+void EncontrarAlumno(int legajos[], int anios[],char nombres[dimF][dimC], int validos)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
