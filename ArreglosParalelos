@@ -7,11 +7,14 @@ const int dimC=30;
 int CargarSoftware(int legajos[], int anios[],char nombres[dimF][dimC], int dimension);///1ER EJERCICIO///////////////
 void MostrarSoftware(int legajos[], int anios[],char nombres[dimF][dimC], int validos);///2DO EJERCICIO//////////////
 int EncontrarLegajo(int legajos[], int validos, int NumLeg);
+char EncontrarAlumno(int legajos[], int anios[],char nombres[dimF][dimC], int validos,int NumLeg);
+
 
 ///**MAIN////////////////////////////////////////////////////////////////////////////////
 int main()
 {
     int validos=0, Pos=0, NumLeg=0;
+    char Nom;
     int legajos[20];
     char nombres[dimF][dimC];
     int anios[20];
@@ -34,6 +37,15 @@ int main()
     else
     {
         printf("\nEl legajo no se a encontrado\n");
+    }
+    ///**3ER EJERCICIO////////////////////////////////////////////////////////////////////
+    Nom = EncontrarAlumno(legajos, anios, nombres, validos, NumLeg);
+    if(Nom!=-1)
+    {
+        printf("\nEl nombre del alumno es: %s", Nom);
+    }else
+    {
+        printf("\nNo se encontro el legajo\n");
     }
 
 
@@ -106,22 +118,20 @@ int EncontrarLegajo(int legajos[], int validos, int NumLeg)
 }
 
 ///**3TO EJERCICO//////////////////////////////////////////////////
-void EncontrarAlumno(int legajos[], int anios[],char nombres[dimF][dimC], int validos)
+char EncontrarAlumno(int legajos[], int anios[],char nombres[dimF][dimC], int validos,int NumLeg)
+{
+    int i=0;
 
+    int leg=EncontrarLegajo(legajos, validos, NumLeg);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    while(i<validos)
+    {
+        if(legajos==leg){
+            return nombres;
+        }else
+        {
+            i++;
+        }
+    }
+   return -1;
+}
