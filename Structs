@@ -11,6 +11,7 @@ typedef struct
     char nombre[30];
     char genero;
 } stAlumno;
+
 ///**/////////////////////////////////////////////////////////////
 ///**PROTOTIPADO//////////////////////////////////////////////////
 ///**/////////////////////////////////////////////////////////////
@@ -23,7 +24,9 @@ void MostrarAlumno(stAlumno A);
 void MostarArrStruct(stAlumno A[], int validos);
 ///3
 int BuscarAlumno(stAlumno A[], int validos, int matricula);
-
+///4
+void OrdenarPorSeleccion(stAlumno A[], int  validos);
+void MostarArrStruct(stAlumno A[], int validos);
 
 
 
@@ -42,7 +45,7 @@ int main()
     do
     {
         printf("---MENU---");
-        printf("\n1.Cargar Alumnos\n2.Mostrar Alumnos\n");
+        printf("\n1.Cargar Alumnos\n2.Mostrar Alumnos\n3.Buscar Alumno\n4.Ordenar Alumnos.\n");
         printf("\nIngrese la opcion que desea realizar: \n");
         scanf("%d", &opcion);
 
@@ -69,7 +72,12 @@ int main()
                 printf("\nEl legajo se a encontrado.\n");
             }
             break;
-            
+        case 4:
+            printf("\nOrdenando alumnos.\n");
+            OrdenarPorSeleccion(ArrAlumno, validos);
+            MostarArrStruct(ArrAlumno, validos);
+            break;
+
         default:
             printf("\nERROR: Ingrese una opcion valida\n");
             break;
@@ -158,3 +166,105 @@ int BuscarAlumno(stAlumno A[], int validos, int matricula)
     }
     return flag;
 }
+
+///4
+int SubFuncion(stAlumno A[], int validos,int pos)
+{
+    int menor=A[pos].matricula;
+    int PosMenor=pos;
+    int index=pos+1;
+
+    while(index<validos)
+    {
+        if(menor>A[index].matricula)
+        {
+            menor=A[index].matricula;
+            PosMenor=index;
+        }
+        else
+        {
+            index++;
+        }
+    }
+    return PosMenor;
+}
+
+void OrdenarPorSeleccion(stAlumno A[], int  validos)
+{
+    int aux;
+    int Posmenor;
+    int i=0;
+
+    while(i<validos-1)
+    {
+        Posmenor= SubFuncion(A, validos, i);
+
+        aux=A[Posmenor].matricula;
+
+        A[Posmenor].matricula=A[i].matricula;
+
+        A[i].matricula=aux;
+
+        i++;
+    }
+}
+
+///5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
