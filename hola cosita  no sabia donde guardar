@@ -1,0 +1,124 @@
+#include <stdio.h>
+#include <stdlib.h>
+///**/////////////////////////////////////////////////////////////
+///PROTOTIPADO////////////////////////////////////////////////////
+///**/////////////////////////////////////////////////////////////
+///1///////////////////////////////////////////////////
+int AgregarFinal(int archivoInt[], int dimension);
+void mostrarInt(int archivoInt[], int validos);
+int cantRegistros (int archivoInt[], int validos);
+///2///////////////////////////////////////////////////
+
+
+///**/////////////////////////////////////////////////////////////
+///MAIN///////////////////////////////////////////////////////////
+///**/////////////////////////////////////////////////////////////
+int main()
+{
+    int archivoInt[50]= {};
+    int validos=0, resul=0, opcion=0;
+
+    char continuar=0;
+
+    do{
+
+       printf("---MENU---\n");
+       printf("\n1.Cargar elementos en un archivo, mostrar y contar cuantos elementos hay.\n");
+       printf("Ingrese la opcion que desea realizar: \n");
+       scanf("%d", &opcion);
+
+       switch(opcion)
+       {
+       case 1:///1//////////////////////////////////////////////////////////////////////////
+            validos=AgregarFinal(archivoInt, 10);
+            printf("\nSe guardaron %d elementos en el arreglo.\n", validos);
+            mostrarInt(archivoInt, validos);
+            resul = cantRegistros (archivoInt, validos);
+            printf("\nEn el archivo se encuentran: %d elementos guardados.\n", resul);
+        break;
+       case 2:///2//////////////////////////////////////////////////////////////////////////
+        break;
+       case 3:///3//////////////////////////////////////////////////////////////////////////
+       default:
+           printf("\nERROR: Porfavor ingrese una opcion valida.\n");
+        break;
+       }
+    }while(continuar=='s');
+
+    return 0;
+}
+///**//////////////////////////////////////////////////////////////////
+///FUNCIONES///////////////////////////////////////////////////////////
+///**//////////////////////////////////////////////////////////////////
+
+///1///////////////////////////////////////////////////////////////////
+int AgregarFinal(int archivoInt[], int dimension)
+{
+    FILE *fp = fopen ("archivoInt", "ab");
+
+    int validos=0;
+    char control='s';
+
+    if (fp)
+    {
+        while(control=='s' && validos<dimension)
+        {
+            printf("Por favor ingrese un elemento: \n");
+            scanf("%d", &archivoInt[validos]);
+            fwrite(&archivoInt[validos], sizeof(int), 1, fp);
+
+            validos++;
+
+            printf("\nDesea seguir agregando elementos? (s/n)\n");
+            fflush(stdin);
+            scanf("%c", &control);
+        }
+        fclose (fp);
+    }
+    else
+    {
+        printf("\nNo pudo abrirse el archivo.\n");
+    }
+    return validos;
+}
+
+void mostrarInt(int archivoInt[], int validos)
+{
+    int i=0;
+
+    FILE *fp =fopen("archivoInt", "rb");
+    if(fp)
+    {
+        printf("\nEl contenido del archivo es:\n");
+        while(fread(&archivoInt, sizeof(int), 1, fp) !=0)
+        {
+            printf("\nIndice %d: Valor %d", i, archivoInt);
+            i++;
+        }
+        printf("\n");
+        fclose(fp);
+    }
+    else
+    {
+        printf("\nNo se pudo abrir.\n");
+    }
+}
+
+int cantRegistros (int archivoInt[], int validos)
+{
+    int contador=0,i=0;
+
+    FILE *fp = fopen ("archivoInt", "rb");
+    if (fp)
+    {
+        while(fread(&archivoInt, sizeof(int), 1, fp) !=0)
+        {
+            contador++;
+        }
+        fclose(fp);
+    }else
+    {
+        printf("\nNo se pudo abrir.\n");
+    }
+    return contador;
+}
