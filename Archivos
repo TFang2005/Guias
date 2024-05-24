@@ -3,10 +3,20 @@
 ///**/////////////////////////////////////////////////////////////
 ///PROTOTIPADO////////////////////////////////////////////////////
 ///**/////////////////////////////////////////////////////////////
-int AgregarFinal(int archivoInt[], int dimension);
-void mostrarInt(int archivoInt[], int validos);
-int cantRegistros (int archivoInt[], int validos);
-
+///1///////////////////////////////////////////////////
+void AgregarFinal(char archivoInt[]);
+void mostrarInt(char archivoInt[]);
+int cantRegistros (char archivoInt[]);
+///2///////////////////////////////////////////////////
+typedef struct
+{
+    int legajo;
+    char nombreYapellido [30];
+    int edad;
+    int anio;
+} stAlumno;
+void AgregarAlumnoArchivo(char archivoAlumno[]);
+void MostrarAlumnoArchivo(char archivoAlumno[]);
 
 
 ///**/////////////////////////////////////////////////////////////
@@ -14,18 +24,43 @@ int cantRegistros (int archivoInt[], int validos);
 ///**/////////////////////////////////////////////////////////////
 int main()
 {
-    int archivoInt[50]= {};
-    int validos=0, resul=0;
+    char archivo[] = "archivo";
+    char archivoAlum[] ="archivoAlumno";
 
-    validos=AgregarFinal(archivoInt, 10);
-    printf("\nSe cargaron %d elementos.", validos);
+    stAlumno ArrAlumno[30];
 
-    mostrarInt(archivoInt, validos);
+    int resul=0, opcion=0, validos=0;
+    char continuar;
 
-    resul = cantRegistros (archivoInt, validos);
-    printf("\nSe encuentra %d elementos.", resul);
+    do
+    {
 
+        printf("---MENU---\n");
+        printf("\n1.Cargar elementos en un archivo, mostrar y contar cuantos elementos hay.\n2.Cargar archivo de alumnos.\n3.Mostar archivo de alumnos.\n");
+        printf("Ingrese la opcion que desea realizar: \n");
+        scanf("%d", &opcion);
 
+        switch(opcion)
+        {
+        case 1:///1//////////////////////////////////////////////////////////////////////////
+            AgregarFinal(archivo);
+            mostrarInt(archivo);
+
+            resul = cantRegistros (archivo);
+            printf("\nEn el archivo se encuentran: %d elementos guardados.\n", resul);
+            break;
+        case 2:///2//////////////////////////////////////////////////////////////////////////
+            AgregarAlumnoArchivo(archivoAlum);
+            break;
+        case 3:///3//////////////////////////////////////////////////////////////////////////
+            MostrarAlumnoArchivo(archivoAlum);
+            break;
+        default:
+            printf("\nERROR: Porfavor ingrese una opcion valida.\n");
+            break;
+        }
+    }
+    while(continuar=='s');
 
     return 0;
 }
@@ -33,26 +68,22 @@ int main()
 ///FUNCIONES///////////////////////////////////////////////////////////
 ///**//////////////////////////////////////////////////////////////////
 
-
-int AgregarFinal(int archivoInt[], int dimension)
+///1///////////////////////////////////////////////////////////////////
+void AgregarFinal(char archivoInt[])
 {
-    FILE *fp = fopen ("archivoInt", "ab");
+    FILE *fp = fopen (archivoInt, "ab");
 
-    int validos=0;
     char control='s';
-
-
+    int num;
     if (fp)
     {
-        while(control=='s' && validos<dimension)
+        while(control=='s')
         {
-            printf("Por favor ingrese un elemento.\n");
-            scanf("%d", &archivoInt[validos]);
-            fwrite(&archivoInt[validos], sizeof(int), 1, fp);
+            printf("Por favor ingrese un elemento: \n");
+            scanf("%d", &num);
+            fwrite(&num, sizeof(int), 1, fp);
 
-            validos++;
-
-            printf("\nDesea seguir agregando elementos? (s/n).");
+            printf("\nDesea seguir agregando elementos? (s/n)\n");
             fflush(stdin);
             scanf("%c", &control);
         }
@@ -60,24 +91,22 @@ int AgregarFinal(int archivoInt[], int dimension)
     }
     else
     {
-        printf("No pudo abrirse\n");
+        printf("\nNo pudo abrirse el archivo.\n");
     }
-    return validos;
 }
 
-void mostrarInt(int archivoInt[], int validos)
+void mostrarInt(char archivoInt[])
 {
-    int i=0;
-
-    FILE *fp =fopen("archivoInt", "rb");
+    int aux;
+    FILE *fp =fopen(archivoInt, "rb");
     if(fp)
     {
         printf("\nEl contenido del archivo es:\n");
-        while(fread(&archivoInt, sizeof(int), 1, fp) !=0)
+        while(fread(&aux, sizeof(int), 1, fp) !=0)
         {
-            printf("\nIndice %d: Valor %d", i, archivoInt);
-            i++;
+            printf("Valor: %d \n",aux);
         }
+        printf("\n");
         fclose(fp);
     }
     else
@@ -86,37 +115,97 @@ void mostrarInt(int archivoInt[], int validos)
     }
 }
 
-int cantRegistros (int archivoInt[], int validos)
+int cantRegistros (char archivoInt[])
 {
-    int contador=0,i=0;
+    int contador=0, aux=0;
 
-    FILE *fp = fopen ("archivoInt", "rb");
+    FILE *fp = fopen (archivoInt, "rb");
+
     if (fp)
     {
-        while(fread(&archivoInt, sizeof(int), 1, fp) !=0)
+        while(fread(&aux, sizeof(int), 1, fp) !=0)
         {
             contador++;
         }
         fclose(fp);
-    }else
+    }
+    else
     {
         printf("\nNo se pudo abrir.\n");
     }
     return contador;
 }
 
+///2////////////////////////////////////////////////////////////////////
+stAlumno CargarAlumno()
+{
+    stAlumno A;
 
+    printf("\nIngrese el legajo del alumno: \n");
+    scanf("%d", &A.legajo);
 
+    printf("\Ingrese Nombre y Apellido del alumno: \n");
+    fflush(stdin);
+    gets(A.nombreYapellido);
 
+    printf("Ingrese la edad del alumno: \n");
+    scanf("%d", &A.edad);
 
+    printf("Ingrese el año del alumno: \n");
+    scanf("%d", &A.anio);
 
+    return A;
+}
 
+void AgregarAlumnoArchivo(char archivoAlumno[])
+{
+    char continuar='s';
 
+    FILE *archivo = fopen(archivoAlumno, "ab");
+    stAlumno aux;
+    if(archivo)
+    {
+        while(continuar=='s')
+        {
+            aux = CargarAlumno();
+            fwrite(&aux, sizeof(stAlumno), 1, archivo);
 
+            printf("\nDesea seguir cargando alumnos? (s|n)\n");
+            fflush(stdin);
+            scanf("%c", &continuar);
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nNo pudo abrirse el archivo\n");
+    }
+}
 
+void MostrarAlumno(stAlumno A)
+{
+    printf("El legajo del alumno es: %d.\n", A.legajo);
+    printf("El Nombre y Apellido del alumno es: %s.\n", A.nombreYapellido);
+    printf("La edad del alumno es: %d.\n", A.edad);
+    printf("El año del alumno es: %d.\n", A.anio);
+}
 
+void MostrarAlumnoArchivo(char archivoAlumno[])
+{
+    FILE *archivo = fopen(archivoAlumno, "rb");
+    stAlumno aux;
 
-
-
-
+    if(archivo)
+    {
+        printf("\nEl contenido del archivo es... \n");
+        while(fread(&aux, sizeof(stAlumno), 1, archivo) !=0)
+        {
+            MostrarAlumno;
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nEl archivo no pudo abrirse.\n");
+    }
+}
 
