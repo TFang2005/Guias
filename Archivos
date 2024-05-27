@@ -1,13 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "pila.h"
+
 ///**/////////////////////////////////////////////////////////////
 ///PROTOTIPADO////////////////////////////////////////////////////
 ///**/////////////////////////////////////////////////////////////
+
 ///1///////////////////////////////////////////////////
 void AgregarFinal(char archivoInt[]);
-void mostrarInt(char archivoInt[]);
-int cantRegistros (char archivoInt[]);
 ///2///////////////////////////////////////////////////
+void mostrarInt(char archivoInt[]);
+///3//////////////////////////////////////////////////
+int cantRegistros (char archivoInt[]);
+///4///////////////////////////////////////////////////
 typedef struct
 {
     int legajo;
@@ -16,7 +21,16 @@ typedef struct
     int anio;
 } stAlumno;
 void AgregarAlumnoArchivo(char archivoAlumno[]);
+///5///////////////////////////////////////////////////
 void MostrarAlumnoArchivo(char archivoAlumno[]);
+///6//////////////////////////////////////////////////
+void AgregarAlumnoFinal(char archivoAlumno[]);
+///7//////////////////////////////////////////////////
+void PasarMayores(char archivoAlumno[], Pila* Mayores);
+///8//////////////////////////////////////////////////
+int ContarMayores(char archivoAlumno[]);
+///9//////////////////////////////////////////////////
+void MostrarMayores(char archivoAlumno[]);
 
 
 ///**/////////////////////////////////////////////////////////////
@@ -26,17 +40,22 @@ int main()
 {
     char archivo[] = "archivo";
     char archivoAlum[] ="archivoAlumno";
+    char continuar;
 
     stAlumno ArrAlumno[30];
 
     int resul=0, opcion=0, validos=0;
-    char continuar;
+
+    Pila Mayores;
+    inicpila(&Mayores);
 
     do
     {
 
         printf("---MENU---\n");
-        printf("\n1.Cargar elementos en un archivo, mostrar y contar cuantos elementos hay.\n2.Cargar archivo de alumnos.\n3.Mostar archivo de alumnos.\n");
+        printf("\n1.2.3.Cargar elementos en un archivo, mostrar y contar cuantos elementos hay.\n4.Cargar archivo de alumnos.\n5.Mostar archivo de alumnos.\n");
+        printf("6.Agregar alumno al archivo.\n7.Pasar a una Pila los legajos de los alumnos mayores.\n8.Contar cuantos alumnos mayores se encuentran.\n");
+        printf("9.Mostrar alumnos entre 15 y 18 anios.\n");
         printf("Ingrese la opcion que desea realizar: \n");
         scanf("%d", &opcion);
 
@@ -44,16 +63,31 @@ int main()
         {
         case 1:///1//////////////////////////////////////////////////////////////////////////
             AgregarFinal(archivo);
-            mostrarInt(archivo);
+            mostrarInt(archivo);///2///////////////////////////////////////////////////////
 
-            resul = cantRegistros (archivo);
+            resul = cantRegistros (archivo);///3//////////////////////////////////////////
             printf("\nEn el archivo se encuentran: %d elementos guardados.\n", resul);
             break;
-        case 2:///2//////////////////////////////////////////////////////////////////////////
+        case 4:///4//////////////////////////////////////////////////////////////////////////
             AgregarAlumnoArchivo(archivoAlum);
             break;
-        case 3:///3//////////////////////////////////////////////////////////////////////////
+        case 5:///5//////////////////////////////////////////////////////////////////////////
             MostrarAlumnoArchivo(archivoAlum);
+            break;
+        case 6:///6////////////////////////////////////////////////////////////////////////
+            AgregarAlumnoFinal(archivoAlum);
+            break;
+        case 7:///7//////////////////////////////////////////////////////////////////////////
+            PasarMayores(archivoAlum, &Mayores);
+            printf("\nLos legajos de los alumnos mayores son...\n");
+            mostrar(&Mayores);
+            break;
+        case 8:///8///////////////////////////////////////////////////////////////////////////
+            resul = ContarMayores(archivoAlum);
+            printf("\nLos alumnos mayores que se encuentran en el archivo son: %d\n", resul);
+            break;
+        case 9:///9///////////////////////////////////////////////////////////////////////////
+            MostrarMayores(archivoAlum);
             break;
         default:
             printf("\nERROR: Porfavor ingrese una opcion valida.\n");
@@ -95,7 +129,7 @@ void AgregarFinal(char archivoInt[])
     }
 }
 
-void mostrarInt(char archivoInt[])
+void mostrarInt(char archivoInt[])///2/////////////////////////////////////
 {
     int aux;
     FILE *fp =fopen(archivoInt, "rb");
@@ -115,7 +149,7 @@ void mostrarInt(char archivoInt[])
     }
 }
 
-int cantRegistros (char archivoInt[])
+int cantRegistros (char archivoInt[])///3///////////////////////////////////
 {
     int contador=0, aux=0;
 
@@ -136,7 +170,7 @@ int cantRegistros (char archivoInt[])
     return contador;
 }
 
-///2////////////////////////////////////////////////////////////////////
+///4////////////////////////////////////////////////////////////////////
 stAlumno CargarAlumno()
 {
     stAlumno A;
@@ -151,7 +185,7 @@ stAlumno CargarAlumno()
     printf("Ingrese la edad del alumno: \n");
     scanf("%d", &A.edad);
 
-    printf("Ingrese el año del alumno: \n");
+    printf("Ingrese el anio del alumno: \n");
     scanf("%d", &A.anio);
 
     return A;
@@ -178,29 +212,132 @@ void AgregarAlumnoArchivo(char archivoAlumno[])
     }
     else
     {
-        printf("\nNo pudo abrirse el archivo\n");
+        printf("\nNo pudo abrirse el archivo,\n");
     }
 }
-
+///5///////////////////////////////////////////////////////////////////////////////
 void MostrarAlumno(stAlumno A)
 {
     printf("El legajo del alumno es: %d.\n", A.legajo);
     printf("El Nombre y Apellido del alumno es: %s.\n", A.nombreYapellido);
     printf("La edad del alumno es: %d.\n", A.edad);
     printf("El año del alumno es: %d.\n", A.anio);
+    printf("--------------------------------------------------\n");
 }
 
 void MostrarAlumnoArchivo(char archivoAlumno[])
 {
     FILE *archivo = fopen(archivoAlumno, "rb");
     stAlumno aux;
+    int i=0;
 
     if(archivo)
     {
-        printf("\nEl contenido del archivo es... \n");
+        printf("\nEl contenido del archivo es... \n\n");
         while(fread(&aux, sizeof(stAlumno), 1, archivo) !=0)
         {
-            MostrarAlumno;
+            MostrarAlumno(aux);
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nEl archivo no pudo abrirse.\n");
+    }
+}
+
+///6//////////////////////////////////////////////////////////////////////////////
+void AgregarAlumnoFinal(char archivoAlumno[])
+{
+    FILE *archivo= fopen(archivoAlumno, "ab");
+    stAlumno aux;
+
+    if(archivo)
+    {
+        printf("\nPorfavor ingrese el alumno a agregar al archivo...\n");
+        aux = CargarAlumno(aux);
+        fwrite(&aux, sizeof(stAlumno), 1, archivo);
+
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nNo pudo abrirse el archivo.\n");
+    }
+}
+
+///7/////////////////////////////////////////////////////////////////////////////
+void PasarMayores(char archivoAlumno[], Pila* Mayores)
+{
+    FILE *archivo= fopen(archivoAlumno, "rb");
+    stAlumno aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stAlumno), 1, archivo) !=0)
+        {
+            if(aux.edad >= 18)
+            {
+                apilar(Mayores, aux.legajo);
+            }
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nEl archivo no pudo abrirse.\n");
+    }
+}
+
+///8/////////////////////////////////////////////////////////////////////////////
+int ContarMayores(char archivoAlumno[])
+{
+    FILE *archivo= fopen(archivoAlumno, "rb");
+    stAlumno aux;
+
+    int contador=0;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stAlumno), 1, archivo) !=0)
+        {
+            if(aux.edad >= 18)
+            {
+                contador++;
+            }
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nEl archivo no pudo abrirse.\n");
+    }
+    return contador;
+}
+
+///9/////////////////////////////////////////////////////////////////////////////
+void SubMostrarMayores(stAlumno A)
+{
+    if(A.edad >= 15 && A.edad <= 18)
+    {
+        printf("El legajo del alumno es: %d.\n", A.legajo);
+        printf("El Nombre y Apellido del alumno es: %s.\n", A.nombreYapellido);
+        printf("La edad del alumno es: %d.\n", A.edad);
+        printf("El año del alumno es: %d.\n", A.anio);
+        printf("--------------------------------------------------\n");
+    }
+}
+
+void MostrarMayores(char archivoAlumno[])
+{
+    FILE *archivo= fopen(archivoAlumno, "rb");
+    stAlumno aux;
+
+    if(archivo)
+    {
+        while (fread(&aux, sizeof(stAlumno), 1, archivo) !=0)
+        {
+            SubMostrarMayores(aux);
         }
         fclose(archivo);
     }else
@@ -208,4 +345,17 @@ void MostrarAlumnoArchivo(char archivoAlumno[])
         printf("\nEl archivo no pudo abrirse.\n");
     }
 }
+
+///10///////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
 
