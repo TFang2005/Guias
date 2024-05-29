@@ -35,6 +35,11 @@ void MostrarMayores(char archivoAlumno[]);
 void MostrarUnicoMayor(char archivoAlumno[]);
 ///11/////////////////////////////////////////////////
 int FiltrarAnio(char archivoAlumno[], int buscar);
+///12/////////////////////////////////////////////////
+int CargarAlumnoStruct(stAlumno A[], int dimension);
+
+
+
 
 
 ///**/////////////////////////////////////////////////////////////
@@ -93,15 +98,19 @@ int main()
         case 9:///9///////////////////////////////////////////////////////////////////////////
             MostrarMayores(archivoAlum);
             break;
-        case 10:
+        case 10:///10/////////////////////////////////////////////////////////////////////////
             printf("\nEl alumno mayor es...\n");
             MostrarUnicoMayor(archivoAlum);
             break;
-        case 11:
+        case 11:///11/////////////////////////////////////////////////////////////////////////
             printf("\nIngrese el año que desea buscar: \n");
             scanf("%d", &buscar);
             resul=FiltrarAnio(archivoAlum, buscar);
             printf("\nEn el anio %d se encuentran %d alumnos\n", buscar, resul);
+            break;
+        case 12:
+            validos=CargarAlumnoStruct(ArrAlumno, 30);
+            printf("\nSe cargaron %d alumnos", validos);
 
             break;
         default:
@@ -410,7 +419,52 @@ int FiltrarAnio(char archivoAlumno[], int buscar)
     return contador;
 }
 
+///12//////////////////////////////////////////////////////////////////////////
+int CargarAlumnoStruct(stAlumno A[], int dimension)
+{
+    int validos=0;
+    char control='s';
 
+    while(validos<dimension && control=='s')
+    {
+        printf("\nIngrese el legajo del alumno: \n");
+        scanf("%d", &A[validos].legajo);
+
+        printf("\nIngrese nombre y apellido del alumno: \n");
+        fflush(stdin);
+        gets(A[validos].nombreYapellido);
+
+        printf("\nIngrese la edad del alumno: \n");
+        scanf("%d", &A[validos].legajo);
+
+        printf("\nIngrese anio del alumno: \n");
+        scanf("%d", &A[validos].anio);
+
+        validos++;
+
+        printf("\nDesea seguir agregando alumnos? (s|n)");
+        fflush(stdin);
+        scanf("%c", &control);
+    
+    return validos;
+}
+
+void PasarAlumnoArchivo(char archivoAlumno[], stAlumno A[], int validos)
+{
+    FILE *archivo=fopen(archivoAlumno, "ab");
+    
+    if(archivo)
+    {
+        A=fwrite(A, sizeof(stAlumno), validos, archivo);
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nNo pudo abrirse el archivo.\n");
+    }
+}
+
+ 
 
 
 
