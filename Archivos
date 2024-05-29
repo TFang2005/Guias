@@ -31,6 +31,10 @@ void PasarMayores(char archivoAlumno[], Pila* Mayores);
 int ContarMayores(char archivoAlumno[]);
 ///9//////////////////////////////////////////////////
 void MostrarMayores(char archivoAlumno[]);
+///10/////////////////////////////////////////////////
+void MostrarUnicoMayor(char archivoAlumno[]);
+///11/////////////////////////////////////////////////
+int FiltrarAnio(char archivoAlumno[], int buscar);
 
 
 ///**/////////////////////////////////////////////////////////////
@@ -40,11 +44,11 @@ int main()
 {
     char archivo[] = "archivo";
     char archivoAlum[] ="archivoAlumno";
-    char continuar;
+    char continuar='s';
 
     stAlumno ArrAlumno[30];
 
-    int resul=0, opcion=0, validos=0;
+    int resul=0, opcion=0, validos=0, buscar=0;
 
     Pila Mayores;
     inicpila(&Mayores);
@@ -52,10 +56,10 @@ int main()
     do
     {
 
-        printf("---MENU---\n");
+        printf("\n\n---MENU---\n\n");
         printf("\n1.2.3.Cargar elementos en un archivo, mostrar y contar cuantos elementos hay.\n4.Cargar archivo de alumnos.\n5.Mostar archivo de alumnos.\n");
         printf("6.Agregar alumno al archivo.\n7.Pasar a una Pila los legajos de los alumnos mayores.\n8.Contar cuantos alumnos mayores se encuentran.\n");
-        printf("9.Mostrar alumnos entre 15 y 18 anios.\n");
+        printf("9.Mostrar alumnos entre 15 y 18 anios.\n10.Mostrar el alumno mas grande.\n11.Cantidad de alumnos que cursan determinado año.\n");
         printf("Ingrese la opcion que desea realizar: \n");
         scanf("%d", &opcion);
 
@@ -88,6 +92,17 @@ int main()
             break;
         case 9:///9///////////////////////////////////////////////////////////////////////////
             MostrarMayores(archivoAlum);
+            break;
+        case 10:
+            printf("\nEl alumno mayor es...\n");
+            MostrarUnicoMayor(archivoAlum);
+            break;
+        case 11:
+            printf("\nIngrese el año que desea buscar: \n");
+            scanf("%d", &buscar);
+            resul=FiltrarAnio(archivoAlum, buscar);
+            printf("\nEn el anio %d se encuentran %d alumnos\n", buscar, resul);
+
             break;
         default:
             printf("\nERROR: Porfavor ingrese una opcion valida.\n");
@@ -347,11 +362,53 @@ void MostrarMayores(char archivoAlumno[])
 }
 
 ///10///////////////////////////////////////////////////////////////////////////
+void MostrarUnicoMayor(char archivoAlumno[])
+{
+    FILE* archivo=fopen(archivoAlumno, "rb");
+    stAlumno aux, mayor;
 
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stAlumno),1, archivo) !=0)
+        {
+            if(aux.edad < mayor.edad)
+            {
+                aux=mayor;
+            }
+        }
+        MostrarAlumno(aux);
+        fclose(archivo);
+    }
+    else
+    {
+       printf("\nNo pudo abrirse el archivo.\n");
+    }
+}
 
+///11//////////////////////////////////////////////////////////////////////////
+int FiltrarAnio(char archivoAlumno[], int buscar)
+{
+    FILE *archivo=fopen(archivoAlumno, "rb");
+    stAlumno aux;
+    int contador=0;
 
-
-
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stAlumno), 1, archivo) !=0)
+        {
+            if(aux.anio == buscar)
+            {
+                contador++;
+            }
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nEl archivo no pudo abrirse.\n");
+    }
+    return contador;
+}
 
 
 
