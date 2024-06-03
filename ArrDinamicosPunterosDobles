@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <stdlib.h>
+///PROTOTIPADO/////////////////////////////////////////////////
+typedef struct
+{
+    int legajo;
+    char nombreYapellido [30];
+    int edad;
+    int anio;
+} stAlumno;
+///AUX////////////////////////////////////////////////////////
+int totalDeRegistros(char archivoAlum[]);
+///3A/////////////////////////////////////////////////////////
+void PasarAlumnos(char archivoAlum[], stAlumno dinamico[]);
+void MostrarArregloAlumno(stAlumno arr[], int validosArr);
+///3B/////////////////////////////////////////////////////////
+int PasarAlumnosArrCreado(char archivoAlum[]);
+
+
+
+///MAIN////////////////////////////////////////////////////////
+int main()
+{
+    stAlumno *ArrDinamico;///Se crea una estructura de alumnos con punteros
+
+    int opcion=0, registros=0;
+
+    char archivoAlumnos[]="ArchivoAlum";///Se crea el archivo
+    char continuar='s';
+
+    do
+    {
+        printf("\n\n-----MENU-----\n\n");
+        printf("1.Pasar alumnos a un arreglo dinamico en el main.\n");
+        printf("Ingrese una opcion a realizar: \n");
+        scanf("%d", &opcion);
+
+        switch(opcion)
+        {
+        case 1:
+            registros=totalDeRegistros(archivoAlumnos);///Guarda los validos del archivo
+            ArrDinamico=(stAlumno*)malloc(sizeof(stAlumno)*registros);///Guarda el arreglo dinamico en ArrDinamico
+            PasarAlumnos(archivoAlumnos, ArrDinamico);
+            MostrarArregloAlumno(ArrDinamico, registros);
+            break;
+        case 2:
+            
+            break;
+        default:
+            printf("\nERROR: Ingrese una opcion valida.\n");
+            break;
+        }
+
+        printf("\nDesea seguir realizando ejercicios? (s|n)");
+        fflush(stdin);
+        scanf("%c", &continuar);
+
+    }
+    while(continuar=='s');
+
+
+
+
+
+
+    return 0;
+}
+///FUNCIONES///////////////////////////////////////////////////
+///AUX/////////////////////////
+///1A/////////////////////////
+int totalDeRegistros(char archivoAlum[])
+{
+    int cant = 0, totalAlumnos = 0;
+    FILE*archivo = fopen(archivoAlum,"rb");
+    if(archivo)
+    {
+        fseek(archivo,0,SEEK_END);///Lleva el curso del archivo al ultimo registro
+        cant = ftell(archivo);///Guardar la cantidad de saltos que dio el fseek
+        totalAlumnos = cant/ sizeof(stAlumno);///Divide la cantidad de bits que retorna fteel con el tamaño de alumnos.
+        fclose(archivo);
+    }
+    else
+    {
+        perror("error.\n");
+    }
+    return totalAlumnos;
+}
+///PasarAlumnos///////////
+void PasarAlumnos(char archivoAlum[], stAlumno dinamico[])
+{
+    stAlumno aux;
+    int i=0;
+    FILE *archivo=fopen(archivoAlum, "rb");
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stAlumno), 1, archivo) > 0)///Lee los registros del archivo
+        {
+            dinamico[i] = aux;///Guarda los elementos del archivo en el arreglo dinamico
+            i++;
+        }
+        fclose(archivo);
+    }else
+    {
+        perror("\nERROR\n");
+    }
+
+
+
+}
+
+///MostarArreglo//////////
+void MostrarArregloAlumno(stAlumno arr[], int validosArr)
+{
+    int i=0;
+
+    for(i=0;i<validosArr;i++)
+    {
+         printf("| Nombre: %s, Edad: %d, legajo: %d, anio de cursada: %d |\n",
+                arr[i].nombreYapellido,arr[i].edad,arr[i].legajo,arr[i].anio);
+    }
+}
+
+///2B/////////////////////
+int PasarAlumnosArrCreado(char archivoAlum[])
+{
+    int registros=totalDeRegistros(archivoAlum);
+    
+    stAlumno *ArrDinamico=(stAlumno*)malloc(sizeof(stAlumno)*registros);
+    stAlumno aux;
+    int i=0;
+    
+    FILE *archivo=fopen(archivoAlum, "rb");
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stAlumno),1 , archivo) >0)
+        {
+            ArrDinamico[i] = aux;
+            i++;
+        }
+        fclose(archivo);
+    }else
+    {
+        perror("\nERROR.\n");
+    }
+    return ArrDinamico;
+}
