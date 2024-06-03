@@ -1,0 +1,316 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+     int legajo;
+     char nombreYapellido [30];
+     int edad;
+     int anio;
+}stAlumno;
+////////////////////////////////PROTOTIPADOS////////////////////////////////
+int cargarArreglo(int array[],int dim);
+void mostrarArreglo(int array[], int val);
+int cantPares(int array[], int val);
+int pasaarParesAarregloDinamico(int array[],int validos, int arrayDina[]);
+int pasarParesYretornarArreglo(int array[], int validos);
+int pasarParesAarregloDinamicoConPunterosDobles(int array[],int validos, int **arregloDinamico);
+int* redemensionarArreglo(stAlumno *dinamico[],int valDina,int nuevaDim,char archivo[]);
+////////////////////////////////PRTOTIPADOS////////////////////////////////
+
+int main()
+{
+  stAlumno *arregloDinamico;
+  char archivo[] = {"Alumnos.dat"};
+  int array[10];
+  int *arrayDina;
+  int valArray;
+    char control = 's';
+    while(control == 's')
+    {
+        int punto;
+        system("cls");
+        printf("1. cambiar valores con punteros dobles.\n");
+        printf("2. cargar arreglo y pasar pares con array en main\n");
+        printf("3. cargar arreglo y pasar pares con array en funcion\n");
+        printf("4. cargar arreglo y pasar pares pero con array en funcion y puntero dobles\n");
+        printf("--------------------------AHORA CON ARCHIVOS  STRUCT--------------------------\n");
+        printf("5. Pasar alumnos a arreglo con array en main\n");
+        printf("6. Pasar alumnos a arreglo con array en funcion.\n");
+        printf("7. Pasar alumnos a arreglo con array en funcion y punteros dobles.\n");
+        printf("8. Ridemensionar el arreglo.\n");
+        fflush(stdin);
+        scanf("%d",&punto);
+        switch(punto)
+        {
+        case 1:
+        {
+             system("cls");
+             int valor = 1;
+             int * pint = &valor;
+             int ** ppint = &pint;
+
+             printf("Direccion de memoria de valor: %d\n",&valor);
+             printf("Direccion de memoria de pint: %d\n",&pint);
+             printf("Direccion de memoria de ppint: %d\n\n",&ppint);
+
+             *pint = 10;
+             printf("Ahora valor vale: %d\n",valor);
+
+             valor = 1;
+             pint = &valor;
+             ppint = &pint;
+             **ppint = 100;
+             printf("Ahora valor vale: %d\n",valor);
+             break;
+        }
+        case 2:
+        {
+             system("cls");
+             valArray = cargarArreglo(array,10);
+             int pares = cantPares(array,valArray);
+             printf("pares %d",pares);
+             arrayDina = (int*)malloc(sizeof(int) * pares);
+             pasaarParesAarregloDinamico(array,valArray,arrayDina);
+             printf("\narreglo original:\n");
+             mostrarArreglo(array,valArray);
+             printf("\narreglo pares:\n");
+             mostrarArreglo(arrayDina,pares);
+        }
+             break;
+        case 3:
+             system("cls");
+             valArray = cargarArreglo(array,10);
+             arrayDina = pasarParesYretornarArreglo(array,valArray);
+             int cant = cantPares(array,valArray);
+
+             printf("\narreglo original:\n");
+             mostrarArreglo(array,valArray);
+             printf("\narreglo pares:\n");
+             mostrarArreglo(arrayDina,cant);
+             break;
+        case 4:
+             system("cls");
+             valArray = cargarArreglo(array,10);
+             int valPares = pasarParesAarregloDinamicoConPunterosDobles(array,valArray,&arrayDina);
+
+             printf("\narreglo original:\n");
+             mostrarArreglo(array,valArray);
+             printf("\narreglo pares:\n");
+             mostrarArreglo(arrayDina,valPares);
+             break;
+        case 5:
+        {
+             system("cls");
+             int registros = totalDeRegistros(archivo);
+             arregloDinamico = (stAlumno*)malloc(sizeof(stAlumno) * registros);
+             PasarParesAlumno(archivo,arregloDinamico);
+             mostrarArregloAlumno(arregloDinamico,registros);
+             break;
+        }
+        case 6:
+             system("cls");
+             arregloDinamico = pasarAlumnosConDinamicoEnFuncion(archivo);
+             mostrarArregloAlumno(arregloDinamico,totalDeRegistros(archivo));
+             break;
+        case 7:
+             system("cls");
+             int validosDinamico = pasarAlumnosConDinamicoEnFuncionYpunterosDobles(archivo,&arregloDinamico);
+             mostrarArregloAlumno(arregloDinamico,validosDinamico);
+             break;
+        case 8:
+             system("cls");
+             int registros = totalDeRegistros(archivo);
+             arregloDinamico = (stAlumno*)malloc(sizeof(stAlumno) * registros);
+             arregloDinamico = redemensionarArreglo(arregloDinamico,registros,10,archivo);
+             mostrarArregloAlumno(arregloDinamico,10);
+             break;
+        default:
+             printf("Error.\n");
+             break;
+        }
+        printf("\n Desea ver otro ejercicio? s / n.\n");
+        fflush(stdin);
+        scanf("%c",&control);
+    }
+    return 0;
+}
+////////////////////////////////FUNCIONES////////////////////////////////
+///Cargar arreglo
+int cargarArreglo(int array[],int dim)
+{
+    char control = 's';
+    int i = 0;
+    while(control == 's' && i < dim)
+    {
+        printf("Ingrese un numero:\t");
+        scanf("%d",&array[i]);
+        i++;
+
+        printf("\nDesea cargar otro numero? s / n.\n");
+        fflush(stdin);
+        scanf("%c",&control);
+    }
+return i;
+}
+///Mostrar arreglo
+void mostrarArreglo(int array[], int val)
+{
+    for(int i = 0; i < val; i++)
+    {
+        printf("| %d |",array[i]);
+    }
+}
+///2a
+int cantPares(int array[], int val)
+{
+    int pares = 0;
+    for(int i = 0; i < val; i++)
+    {
+        if((array[i] % 2) == 0)
+        {
+          pares++;
+        }
+    }
+return pares;
+}
+int pasaarParesAarregloDinamico(int array[],int validos, int arrayDina[])
+{
+    int j = 0;
+    for(int i = 0; i < validos; i++)
+    {
+        if(array[i] % 2 == 0)
+        {
+            arrayDina[j] = array[i];
+            j++;
+        }
+    }
+}
+
+///2B
+int pasarParesYretornarArreglo(int array[], int validos)
+{
+    int i = 0, j = 0;
+    int cant = cantPares(array,validos);
+    int *arrayPares = (int*)malloc(sizeof(int)*cant);
+    for(i = 0; i < validos;i++)
+    {
+        if(array[i] % 2 == 0)
+        {
+            arrayPares[j] = array[i];
+            j++;
+        }
+    }
+return arrayPares;
+}
+
+///2C
+int pasarParesAarregloDinamicoConPunterosDobles(int array[],int validos, int **arregloDinamico)
+{
+    int cant = cantPares(array,validos);
+    *arregloDinamico = (int*)malloc(sizeof(int)*cant);
+     pasaarParesAarregloDinamico(array,validos,*arregloDinamico);
+
+return cant;
+}
+
+/////////////////////////////ARCHIVOS/////////////////////////////
+///Cantidad de registros
+int totalDeRegistros(char archivo[])
+{
+    int cant = 0, totalAlumnos = 0;
+    FILE*buffer = fopen(archivo,"rb");
+    if(buffer)
+    {
+        fseek(buffer,0,SEEK_END);
+        cant = ftell(buffer);
+        totalAlumnos = cant/ sizeof(stAlumno);
+        fclose(buffer);
+    }
+    else
+    {
+        perror("error.\n");
+    }
+return totalAlumnos;
+}
+
+///3A
+void PasarParesAlumno(char archivo[],stAlumno dinamico[])
+{
+    stAlumno A;
+    int i = 0;
+    FILE*buffer= fopen(archivo,"rb");
+    if(buffer)
+    {
+        while(fread(&A,sizeof(stAlumno),1,buffer) > 0)
+        {
+            dinamico[i] = A;
+            i++;
+        }
+        fclose(buffer);
+    }
+    else
+    {
+        perror("error.\n");
+    }
+}
+void mostrarArregloAlumno(stAlumno array[], int validos)
+{
+    for(int i = 0; i < validos;i++)
+    {
+        printf("| Nombre: %s, Edad: %d, legajo: %d, anio de cursada: %d |\n",
+                array[i].nombreYapellido,array[i].edad,array[i].legajo,array[i].anio);
+    }
+}
+
+///3B
+int pasarAlumnosConDinamicoEnFuncion(char archivo[])
+{
+    int registros = totalDeRegistros(archivo);
+    stAlumno *arregloDinamico = (stAlumno*)malloc(sizeof(stAlumno) * registros);
+    stAlumno A;
+    int i = 0;
+    FILE*buffer= fopen(archivo,"rb");
+    if(buffer)
+    {
+        while(fread(&A,sizeof(stAlumno),1,buffer) > 0)
+        {
+            arregloDinamico[i] = A;
+            i++;
+        }
+        fclose(buffer);
+    }
+    else
+    {
+        perror("error.\n");
+    }
+return arregloDinamico;
+}
+
+///3C
+int pasarAlumnosConDinamicoEnFuncionYpunterosDobles(char archivo[], stAlumno **arregloDinamico)
+{
+    int registros = totalDeRegistros(archivo);
+    *arregloDinamico = (stAlumno*)malloc(sizeof(stAlumno) * registros);
+
+    stAlumno A;
+    int i = 0;
+
+    FILE*buffer= fopen(archivo,"rb");
+    if(buffer)
+    {
+        PasarParesAlumno(archivo,*arregloDinamico);
+    }
+    else
+    {
+        perror("error.\n");
+    }
+return registros;
+}
+
+///4
+int* redemensionarArreglo(stAlumno *dinamico[],int valDina,int nuevaDim,char archivo[])
+{
+    *dinamico = (stAlumno*)realloc(dinamico,sizeof(stAlumno) * nuevaDim);
+    PasarParesAlumno(archivo,*dinamico);
+return dinamico;
+}
