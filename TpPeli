@@ -1,0 +1,213 @@
+#include <stdio.h>
+#include <stdlib.h>
+///PROTOTIPADO///////////////////////////////////////
+
+///ESTRUC PELICULAS//////////////////////////////////
+typedef struct
+{
+    int idPelicula;
+    char nombre[50];
+    int anio;
+    char genero[10];
+    char actores[3][50];
+    int calificacion;
+    int estado;
+} stPelicula;
+
+///AgregarPeliculas//////////////////////////////////
+void CargarPeliculas(char pelis[]);
+
+///MostrarPelis//////////////////////////////////////
+void MostrarMuchasPeliculas(char pelis[]);
+
+///AgregarUnaId//////////////////////////////////////
+int AgregarId(char pelis[]);
+int maxId = 0;
+
+
+///MAIN//////////////////////////////////////////////
+int main()
+{
+    char nuevaPeli[]="Peliculas";///Archivo en el que guardan las peliculas///////////////
+
+    ///MENU//////////////////////////////////////////
+    int opcion=0;
+    char control='s';
+    ///**////////////////////////////////////////////
+
+    ///ID///////////////////////////////////////////
+
+    do
+    {
+        printf("\n--------MENU PELICULAS--------\n");
+        printf("1.Cargar peliculas.\n2.Mostrar la peliculas cargadas.\n");
+        printf("Ingrese la opcion a realizar: \n");
+        scanf("%d", &opcion);
+
+        switch(opcion)
+        {
+        case 1:///AgregarPeliculas//////////////////
+            CargarPeliculas(nuevaPeli);
+            break;
+        case 2:///MostrasPelis/////////////
+            MostrarMuchasPeliculas(nuevaPeli);
+            break;
+        default:
+            printf("\nERROR: INGRESE UNA OPCION VALIDAD.\n");
+            break;
+        }
+
+        printf("\nDesea realizar otra operacion? (s|n)\n");
+        fflush(stdin);
+        scanf("%c", &control);
+    }
+    while(control=='s');
+
+    return 0;
+}
+
+///MAIN///////////////////////////////////////////////////////
+
+///AgregarId/////////////////////////////////////////////////
+int AgregarId(char pelis[])
+{
+    FILE *archivo=fopen(pelis, "ab");
+    stPelicula aux;
+    int UltimaID=0;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            if(aux.idPelicula > UltimaID)
+            {
+                UltimaID=aux.idPelicula;
+            }
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+    return UltimaID;
+}
+
+///AgregarActores////////////////////////////////////////////
+
+
+///1*AgregarUnaPelicula////////////////////////////////////////
+stPelicula AgregarUnaPeli(char pelis[])
+{
+    stPelicula nuevaPeli;
+    int j=0;
+
+    maxId=AgregarId(pelis);
+    nuevaPeli.idPelicula=++maxId;
+
+    printf("\nIngrese el nombre de la pelicula: \n");
+    fflush(stdin);
+    gets(nuevaPeli.nombre);
+
+    printf("Ingrese el anio de la pelicula: \n");
+    scanf("%d", &nuevaPeli.anio);
+
+    printf("Ingrese el genero de la pelicula: \n");
+    fflush(stdin);
+    gets(nuevaPeli.genero);
+
+    for(j=0; j<3; j++)
+    {
+        printf("Ingrese los actores de la pelicula: \n");
+        gets(nuevaPeli.actores[j]);
+    }
+
+    printf("Ingrese la calificacion de la pelicula: \n");
+    scanf("%d", &nuevaPeli.calificacion);
+
+    nuevaPeli.estado=1;///1 significa que la pelicula se encuentra.
+
+    return nuevaPeli;
+}
+
+///1*CargarMuchasPeliculas/////////////////////////////////////
+void CargarPeliculas(char pelis[])
+{
+    stPelicula nuevaPeli;
+    char control='s';
+
+    FILE* archivo=fopen(pelis, "ab");
+
+    if(archivo)
+    {
+        while(control=='s')
+        {
+            nuevaPeli = AgregarUnaPeli(pelis);
+            fwrite(&nuevaPeli, sizeof(stPelicula), 1, archivo);
+
+            printf("\nHay mas peliculas para cargar? (s|n)");
+            fflush(stdin);
+            scanf("%c", &control);
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///2*MostrarUnaPelicula///////////////////////////////////////
+void MostrarUnaPelicula(stPelicula nuevaPeli)
+{
+    int actor=1;
+
+    printf("\nID de la pelicula: %d\n", nuevaPeli.idPelicula);
+    printf("\nEl nombre de la pelicula es: %s\n", nuevaPeli.nombre);
+    printf("El anio de la pelicula es: %d\n", nuevaPeli.anio);
+    printf("El genero de la pelicula es: %s\n", nuevaPeli.genero);
+    for(int j=0; j<3; j++)
+    {
+        printf("El actor de la pelicula es: %s (%d|3)\n",nuevaPeli.actores[j], actor++);
+    }
+    printf("La calificacion de la pelicula es: %d\n", nuevaPeli.calificacion);
+    printf("Estado de la peli: %d\n", nuevaPeli.estado);
+    printf("----------------------------------------------------------------------\n");
+}
+
+///2*MostrarMuchasPeliculas///////////////////////////////////
+void MostrarMuchasPeliculas(char pelis[])
+{
+    FILE *archivo=fopen(pelis,"rb");
+    stPelicula aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            MostrarUnaPelicula(aux);
+
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
