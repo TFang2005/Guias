@@ -443,7 +443,7 @@ void BorrarTodasPelisYnoGuardar(char pelis[], char eliminarPeli[])
 
 
 ///BuscarYmodificarUnaPelicula/////////////////////////////////
-void BuscarYmodificarUnaPelicula(char pelis[], int idBuscar )
+void BuscarYmodificarUnaPelicula(char pelis[], int idBuscar)
 {
     FILE *archivo= fopen(pelis, "r+b");
     stPelicula aux;
@@ -464,13 +464,14 @@ void BuscarYmodificarUnaPelicula(char pelis[], int idBuscar )
                 int opcion=0;
 
                 char nuevoNombre[50];
+                char nuevoGenero[30];
                 int nuevoAnio=0;
 
                 do
                 {
                     printf("\n\n-----MENU-----\n\n");
                     printf("\n--MODIFICACION DE PELICULAS--\n");
-                    printf("1.Modificar nombre.\n2.Modificar anio.\n");
+                    printf("1.Modificar nombre.\n2.Modificar anio.\n2.Modificar genero.\n");
                     printf("Ingrese la opcion a realizar: \n");
                     scanf("%d", &opcion);
 
@@ -488,6 +489,13 @@ void BuscarYmodificarUnaPelicula(char pelis[], int idBuscar )
                         scanf("%d", &nuevoAnio);
 
                         ModificarAnio(pelis, nuevoAnio);
+                        break;
+                    case 3:
+                        printf("\nIngrese el/los nuevos generos: \n");
+                        fflush(stdin);
+                        gets(nuevoGenero);
+
+                        ModificarGenero(pelis, nuevoGenero);
                         break;
                     default:
                         printf("\nERROR: Ingrese una opcion valida.\n");
@@ -539,8 +547,6 @@ void ModificarNombre(char pelis[], char nuevoNombre[])
     {
         printf("\nERROR: No pudo abrirse el archivo.\n");
     }
-
-
 }
 
 ///**ANIO///////////////////////////////////////////////////////
@@ -568,4 +574,45 @@ void ModificarAnio(char pelis[], int nuevoAnio)
 
 
 }
+
+void ModificarGenero(char pelis[], char nuevoGenero[])
+{
+    FILE *archivo= fopen(pelis,"r+b");
+    stPelicula aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            strcpy(aux.genero, nuevoGenero);
+            fseek(archivo, -sizeof(stPelicula), SEEK_CUR);
+            fwrite(&aux, sizeof(stPelicula), 1, archivo);
+            printf("\nGenero modificado correctamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: El archivo no pudo abrise correctamente.\n");
+    }
+}
+
+void ModificarActores(char pelis[], char )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
