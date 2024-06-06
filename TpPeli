@@ -41,11 +41,20 @@ void RecuperarBajas(char eliminarPeli[], char pelis[], int idBuscar);
 ///BorrarTodasLasPeliculas/////////////////////////////
 void BorrarTodasPelisYnoGuardar(char pelis[], char eliminarPeli[]);
 
+///BuscarYmodificarUnaPelicula//////////////
+void BuscarYmodificarUnaPelicula(char pelis[], int idBuscar);
+
+///MENU/////////////////////////////////////
+void Menu(char pelis[]);
+
+///Modificaciones//////////////////////////
+void ModificarNombre(char pelis[], char nuevoNombre[]);
 
 
 ///MAIN//////////////////////////////////////////////
 int main()
 {
+    system("color 3F");
     char nuevaPeli[]="Peliculas";///Archivo en el que guardan las peliculas///////////////
     char bajaPeli[]="PeliculasEliminadas";///Archivo en el que guardan las peliculas que fueron eliminadas/////////////
 
@@ -59,7 +68,7 @@ int main()
     {
         printf("\n--------MENU PELICULAS--------\n");
         printf("1.Cargar peliculas.\n2.Mostrar la peliculas cargadas.\n3.Cargar solo UNA pelicula.\n4.Buscar y dar de baja una pelicula.\n5.Mostrar peliculas que fueron dada de baja.\n");
-        printf("6.Restaurar una pelicula eliminda.\n7.Eliminar TODAS las peliculas registradas.\n");
+        printf("6.Restaurar una pelicula eliminada.\n7.Eliminar TODAS las peliculas registradas.\n8.Buscar y modificar un dato.\n");
         printf("Ingrese la opcion a realizar: \n");
         scanf("%d", &opcion);
         system("pause");
@@ -68,12 +77,15 @@ int main()
         switch(opcion)
         {
         case 1:///AgregarPeliculas//////////////////
+            system("color 2F");
             CargarPeliculas(nuevaPeli, maxId);
             break;
         case 2:///MostrasPelis/////////////
+            system("color 1F");
             MostrarMuchasPeliculas(nuevaPeli);
             break;
         case 3:///CargarSoloUnaPelicula////////////
+            system("color 4F");
             CargarUnaPeli(nuevaPeli, maxId);
             break;
         case 4:
@@ -100,11 +112,18 @@ int main()
             if(control=='s')
             {
                 BorrarTodasPelisYnoGuardar(nuevaPeli, bajaPeli);
-            }else
+            }
+            else
             {
                 printf("\nNo se realizara la opcion seleccionada.\nRetrocediendo...\n");
                 break;
             }
+            break;
+        case 8:
+            printf("\nIngrese el ID de la pelicula que desea modificar: \n");
+            scanf("%d", &idBuscar);
+
+            BuscarYmodificarUnaPelicula(nuevaPeli, idBuscar);
             break;
         default:
             printf("\nERROR: INGRESE UNA OPCION VALIDAD.\n");
@@ -148,7 +167,6 @@ void AgregarId(char pelis[], int *maxId)
         printf("\nERROR: No pudo abrirse el archivo.\n");
     }
 }
-///**********FUNCIONES PARA AGREGAR******/////////////////////////////////////////////
 
 ///Validad si una pelicula se encuentra/////////////////////////////////////////
 bool VerificarPelicula(char nombre[], char pelis[])
@@ -167,7 +185,8 @@ bool VerificarPelicula(char nombre[], char pelis[])
             }
         }
         fclose(archivo);
-    }else
+    }
+    else
     {
         printf("\nERROR: No pudo abrirse el archivo.\n");
     }
@@ -228,10 +247,10 @@ void CargarPeliculas(char pelis[], int maxId)
         {
             nuevaPeli = AgregarUnaPeli(pelis, &maxId);
 
-            if(nuevaPeli.idPelicula !=-1){
-            fwrite(&nuevaPeli, sizeof(stPelicula), 1, archivo);
+            if(nuevaPeli.idPelicula !=-1)
+            {
+                fwrite(&nuevaPeli, sizeof(stPelicula), 1, archivo);
             }
-
             printf("\nHay mas peliculas para cargar? (s|n)");
             fflush(stdin);
             scanf("%c", &control);
@@ -254,17 +273,20 @@ void CargarUnaPeli(char pelis[], int *maxId)
     {
         AgregarId(pelis, &maxId);
         aux=AgregarUnaPeli(pelis, &maxId);
-        if(aux.idPelicula!=-1){
-        fwrite(&aux, sizeof(stPelicula), 1, archivo);
+        if(aux.idPelicula!=-1)
+        {
+            fwrite(&aux, sizeof(stPelicula), 1, archivo);
         }
-
         fclose(archivo);
-    }else
+    }
+    else
     {
         printf("\nERROR: El archivo no pudo abrirse.\n");
     }
 }
+///**////////////////////////////////////////////////////////////////////////////////////
 ///*******FUNCIONES PARA MOSTRAR****/////////////////////////////////////////////////////
+///**////////////////////////////////////////////////////////////////////////////////////
 
 ///2*MostrarUnaPelicula///////////////////////////////////////
 void MostrarUnaPelicula(stPelicula nuevaPeli)
@@ -295,7 +317,6 @@ void MostrarMuchasPeliculas(char pelis[])
         while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
         {
             MostrarUnaPelicula(aux);
-
         }
         fclose(archivo);
     }
@@ -328,7 +349,7 @@ void BuscarYeliminarPelicula(char pelis[], char eliminarPeli[], int idBuscar)
                 aux.estado=0;
                 fseek(archivo, -sizeof(stPelicula), SEEK_CUR);
                 fwrite(&aux, sizeof(stPelicula), 1, archivo);
-                fwrite(&aux, sizeof(stPelicula),1 , archivoDos);
+                fwrite(&aux, sizeof(stPelicula),1, archivoDos);
                 printf("\nPelicula eliminada correctamente.\n");
                 break;
             }
@@ -339,7 +360,8 @@ void BuscarYeliminarPelicula(char pelis[], char eliminarPeli[], int idBuscar)
         }
         fclose(archivo);
         fclose(archivoDos);
-    }else
+    }
+    else
     {
         printf("\nEl archivo no pudo abrise.\n");
     }
@@ -365,7 +387,7 @@ void MostrarPeliculasBajadas(char eliminarPeli[])
         printf("\nERROR: El archivo no pudo abrirse.\n");
     }
 }
-
+///NO FUNCIONA:C//////////////////////////////////////////////////////////////////
 void RecuperarBajas(char eliminarPeli[], char pelis[], int idBuscar)
 {
     FILE *archivo= fopen(eliminarPeli, "r+b");
@@ -394,7 +416,8 @@ void RecuperarBajas(char eliminarPeli[], char pelis[], int idBuscar)
         }
         fclose(archivoDos);
         fclose(archivo);
-    }else
+    }
+    else
     {
         printf("\nERROR: No pudo abrirse uno o dos archivos.\n");
     }
@@ -407,7 +430,8 @@ void BorrarTodasPelisYnoGuardar(char pelis[], char eliminarPeli[])
     if(archivo && archivoDos)
     {
         printf("\nSe han borrado todas las pelis.\n");
-    }else
+    }
+    else
     {
         printf("\nERROR: No se han podido borrar las peliculas.\n");
     }
@@ -418,31 +442,130 @@ void BorrarTodasPelisYnoGuardar(char pelis[], char eliminarPeli[])
 ///*/////////////////////////////////////////////////////////////////////////////////////////
 
 
+///BuscarYmodificarUnaPelicula/////////////////////////////////
+void BuscarYmodificarUnaPelicula(char pelis[], int idBuscar )
+{
+    FILE *archivo= fopen(pelis, "r+b");
+    stPelicula aux;
+
+    bool encontrado=false;
+
+    char continuar='s';
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            if(aux.idPelicula==idBuscar)
+            {
+                encontrado=true;
+
+                char continuar='s';
+                int opcion=0;
+
+                char nuevoNombre[50];
+                int nuevoAnio=0;
+
+                do
+                {
+                    printf("\n\n-----MENU-----\n\n");
+                    printf("\n--MODIFICACION DE PELICULAS--\n");
+                    printf("1.Modificar nombre.\n2.Modificar anio.\n");
+                    printf("Ingrese la opcion a realizar: \n");
+                    scanf("%d", &opcion);
+
+                    switch(opcion)
+                    {
+                    case 1:
+                        printf("\nIngrese el nuevo nombre: \n");
+                        fflush(stdin);
+                        gets(nuevoNombre);
+
+                        ModificarNombre(pelis, nuevoNombre);
+                        break;
+                    case 2:
+                        printf("\nIngrese el nuevo anio: \n");
+                        scanf("%d", &nuevoAnio);
+
+                        ModificarAnio(pelis, nuevoAnio);
+                        break;
+                    default:
+                        printf("\nERROR: Ingrese una opcion valida.\n");
+                        break;
+                    }
+                    printf("\nDesea modificar un campo algo mas? (s|n)");
+                    fflush(stdin);
+                    scanf("%c", &continuar);
+                }
+                while(continuar=='s');
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se ha encontrado el ID buscado.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///*/////////////////////////////////////////////////////////////
+///**ModificarNombre/////////////////////////////////////////////
+///*/////////////////////////////////////////////////////////////
+
+///***NOMBRE/////////////////////////////////////////////////////
+void ModificarNombre(char pelis[], char nuevoNombre[])
+{
+    FILE *archivo= fopen(pelis, "r+b");
+    stPelicula aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            strcpy(aux.nombre, nuevoNombre);
+            fseek(archivo, -sizeof(stPelicula), SEEK_CUR);
+            fwrite(&aux, sizeof(stPelicula), 1, archivo);
+            printf("\nNombre modificado correctamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
 
 
+}
+
+///**ANIO///////////////////////////////////////////////////////
+void ModificarAnio(char pelis[], int nuevoAnio)
+{
+    FILE *archivo= fopen(pelis, "r+b");
+    stPelicula aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula),1,archivo) >0)
+        {
+            aux.anio=nuevoAnio;
+            fseek(archivo, -sizeof(stPelicula), SEEK_CUR);
+            fwrite(&aux, sizeof(stPelicula), 1, archivo);
+            printf("\nEl anio fue modificado correctamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
