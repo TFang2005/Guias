@@ -50,6 +50,10 @@ void Menu(char pelis[]);
 ///Modificaciones//////////////////////////
 void ModificarNombre(char pelis[], char nuevoNombre[]);
 
+///Busqueda//////////////////////////////
+void BuscarYmostrarUnaPelicula(char pelis[]);
+
+
 
 ///MAIN//////////////////////////////////////////////
 int main()
@@ -68,7 +72,7 @@ int main()
     {
         printf("\n--------MENU PELICULAS--------\n");
         printf("1.Cargar peliculas.\n2.Mostrar la peliculas cargadas.\n3.Cargar solo UNA pelicula.\n4.Buscar y dar de baja una pelicula.\n5.Mostrar peliculas que fueron dada de baja.\n");
-        printf("6.Restaurar una pelicula eliminada.\n7.Eliminar TODAS las peliculas registradas.\n8.Buscar y modificar un dato.\n");
+        printf("6.Restaurar una pelicula eliminada.\n7.Eliminar TODAS las peliculas registradas.\n8.Buscar y modificar un dato.\n9.Buscar una pelicula.\n");
         printf("Ingrese la opcion a realizar: \n");
         scanf("%d", &opcion);
         system("pause");
@@ -77,15 +81,12 @@ int main()
         switch(opcion)
         {
         case 1:///AgregarPeliculas//////////////////
-            system("color 2F");
             CargarPeliculas(nuevaPeli, maxId);
             break;
         case 2:///MostrasPelis/////////////
-            system("color 1F");
             MostrarMuchasPeliculas(nuevaPeli);
             break;
         case 3:///CargarSoloUnaPelicula////////////
-            system("color 4F");
             CargarUnaPeli(nuevaPeli, maxId);
             break;
         case 4:
@@ -124,6 +125,9 @@ int main()
             scanf("%d", &idBuscar);
 
             BuscarYmodificarUnaPelicula(nuevaPeli, idBuscar);
+            break;
+        case 9:
+            BuscarYmostrarUnaPelicula(nuevaPeli);
             break;
         default:
             printf("\nERROR: INGRESE UNA OPCION VALIDAD.\n");
@@ -387,7 +391,7 @@ void MostrarPeliculasBajadas(char eliminarPeli[])
         printf("\nERROR: El archivo no pudo abrirse.\n");
     }
 }
-///NO FUNCIONA:C//////////////////////////////////////////////////////////////////
+///RecuperarBajas//////////////////////////////////////////////////////////////////
 void RecuperarBajas(char eliminarPeli[], char pelis[], int idBuscar)
 {
     FILE *archivo= fopen(eliminarPeli, "r+b");
@@ -405,7 +409,10 @@ void RecuperarBajas(char eliminarPeli[], char pelis[], int idBuscar)
                 encontrado=true;
                 aux.estado=1;
                 fseek(archivo, -sizeof(stPelicula), SEEK_CUR);
-                fwrite(&aux, sizeof(stPelicula), 1, archivoDos);
+                fwrite(&aux, sizeof(stPelicula), 1, archivo);
+
+                fseek(archivoDos, sizeof(stPelicula), SEEK_END);
+                fwrite(&aux, sizeof(stPelicula), 1 ,archivoDos);
                 printf("\nPelicula restaurada.\n");
                 break;
             }
@@ -700,14 +707,283 @@ void ModificarEstado(char pelis[], int nuevoEstado)
 }
 
 
+///**///////////////////////////////////////////////////////////
+///CONSULTA/////////////////////////////////////////////////////
+///**///////////////////////////////////////////////////////////
 
+void BuscarYmostrarUnaPelicula(char pelis[])
+{
+    FILE *archivo= fopen(pelis, "rb");
+    stPelicula aux;
 
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
 
+                char continuar='s';
+                int opcion=0;
 
+                char BuscarNombre[50];
+                char BuscarGenero[30];
+                char BuscarActor[3][50];
+                int BuscarAnio=0;
+                int BuscarCalifi=0;
+                int BuscarEstado=0;
 
+                do
+                {
+                    printf("\n\n-----MENU-----\n\n");
+                    printf("\n--BUSQUEDA DE PELICULAS--\n");
+                    printf("1.Por nombre.\n2.Por anio.\n3.Por genero.\n4.Por actores.\n5.Por calificacion.\n6.Buscar por Estado.\n");
+                    printf("Ingrese la opcion a realizar: \n");
+                    scanf("%d", &opcion);
 
+                    switch(opcion)
+                    {
+                    case 1:
+                        printf("\nIngrese el nombre a buscar: \n");
+                        fflush(stdin);
+                        gets(BuscarNombre);
 
+                        BuscarPorNombre(pelis, BuscarNombre);
+                        break;
+                    case 2:
+                        printf("\nIngrese el anio a buscar: \n");
+                        scanf("%d", &BuscarAnio);
 
+                        BuscarPorAnio(pelis, BuscarAnio);
+                        break;
+                    case 3:
+                        printf("\nIngrese los generos a buscar: \n");
+                        fflush(stdin);
+                        gets(BuscarGenero);
+
+                        BuscarPorGenero(pelis, BuscarGenero);
+                        break;
+                    case 4:
+                        printf("\nIngrese los actores a buscar: \n");
+                        for(int i=0; i<3; i++)
+                        {
+                            printf("Actor: \n");
+                            fflush(stdin);
+                            gets(BuscarActor[i]);
+                        }
+
+                        BuscarPorActor(pelis, BuscarActor);
+                        break;
+                    case 5:
+                        printf("\nIngrese la calificacion a buscar: \n");
+                        scanf("%d", &BuscarCalifi);
+
+                        BuscarPorCalificacion(pelis, BuscarCalifi);
+                        break;
+                    case 6:
+                        printf("\nIngrese el estado a buscar (1:Activo | 0:Inactivo)");
+                        scanf("%d", &BuscarEstado);
+
+                        BuscarPorEstado(pelis, BuscarEstado);
+                        break;
+                    default:
+                        printf("\nERROR: Ingrese una opcion valida.\n");
+                        break;
+                    }
+                    printf("\nDesea seguir buscando una pelicula? (s|n)");
+                    fflush(stdin);
+                    scanf("%c", &continuar);
+                }
+                while(continuar=='s');
+                break;
+            }
+            fclose(archivo);
+        }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///BuscarPorNombre//////////////////////////////
+void BuscarPorNombre(char pelis[], char BuscarNombre[])
+{
+    FILE *archivo= fopen(pelis, "rb");
+    stPelicula aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            if(strcpy(aux.nombre, BuscarNombre))
+            {
+                encontrado=true;
+                MostrarUnaPelicula(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nNo se encontró ninguna película con ese nombre.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///BuscarPorAnio/////////////////////////////////
+void BuscarPorAnio(char pelis[], int BuscarAnio)
+{
+    FILE *archivo= fopen(pelis, "rb");
+    stPelicula aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            if(aux.anio==BuscarAnio)
+            {
+                encontrado=true;
+                MostrarUnaPelicula(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nNo se encontró ninguna película con ese nombre.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///BuscarPorGenero/////////////////////////////////
+
+void BuscarPorGenero(char pelis[], char BuscarGenero[])
+{
+    FILE *archivo= fopen(pelis, "rb");
+    stPelicula aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            if(strcpy(aux.genero, BuscarGenero))
+            {
+                encontrado=true;
+                MostrarUnaPelicula(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nNo se encontró ninguna película con ese nombre.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///BuscarPorActor///////////////////////////////////
+void BuscarPorActor(char pelis[], char BuscarActor[][50])
+{
+    FILE *archivo= fopen(pelis, "rb");
+    stPelicula aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            for(int i=0; i<3; i++)
+            {
+                strcpy(aux.actores[i], BuscarActor[i]);
+            }
+            MostrarUnaPelicula(aux);
+            break;
+
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: No se pudo abrir el archivo.\n");
+    }
+
+}
+
+///BuscarPorCalificacion////////////////////////////
+void BuscarPorCalificacion(char pelis[], int BuscarCalificacion)
+{
+    FILE *archivo= fopen(pelis, "rb");
+    stPelicula aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            if(aux.calificacion==BuscarCalificacion)
+            {
+                encontrado=true;
+                MostrarUnaPelicula(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nNo se encontró ninguna película con ese nombre.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///BuscarPorEstado////////////////////////////////
+void BuscarPorEstado(char pelis[], int BuscarEstado)
+{
+    FILE *archivo= fopen(pelis, "rb");
+    stPelicula aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            if(aux.estado==BuscarEstado)
+            {
+                encontrado=true;
+                MostrarUnaPelicula(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nNo se encontró ninguna película con ese nombre.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
 
 
 
