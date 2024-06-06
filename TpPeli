@@ -35,8 +35,11 @@ void BuscarYeliminarPelicula(char pelis[], char eliminarPeli[], int idBuscar);
 ///MostrarPeliculasBajadas/////////////////////////////
 void MostrarPeliculasBajadas(char eliminarPeli[]);
 
+///RepotenerPeliculas//////////////////////////////////
+void RecuperarBajas(char eliminarPeli[], char pelis[], int idBuscar);
+
 ///BorrarTodasLasPeliculas/////////////////////////////
-void BorrarTodasPelisYnoGuardar(char pelis[]);
+void BorrarTodasPelisYnoGuardar(char pelis[], char eliminarPeli[]);
 
 
 
@@ -56,20 +59,22 @@ int main()
     {
         printf("\n--------MENU PELICULAS--------\n");
         printf("1.Cargar peliculas.\n2.Mostrar la peliculas cargadas.\n3.Cargar solo UNA pelicula.\n4.Buscar y dar de baja una pelicula.\n5.Mostrar peliculas que fueron dada de baja.\n");
-        printf("6.Eliminar TODAS las peliculas registradas.\n");
+        printf("6.Restaurar una pelicula eliminda.\n7.Eliminar TODAS las peliculas registradas.\n");
         printf("Ingrese la opcion a realizar: \n");
         scanf("%d", &opcion);
+        system("pause");
+        system("cls");
 
         switch(opcion)
         {
         case 1:///AgregarPeliculas//////////////////
-            CargarPeliculas(nuevaPeli, &maxId);
+            CargarPeliculas(nuevaPeli, maxId);
             break;
         case 2:///MostrasPelis/////////////
             MostrarMuchasPeliculas(nuevaPeli);
             break;
         case 3:///CargarSoloUnaPelicula////////////
-            CargarUnaPeli(nuevaPeli, &maxId);
+            CargarUnaPeli(nuevaPeli, maxId);
             break;
         case 4:
             printf("\nIngrese la ID que desea buscar en el archivo: \n");
@@ -81,6 +86,12 @@ int main()
             MostrarPeliculasBajadas(bajaPeli);
             break;
         case 6:
+            printf("\nIngrese la ID que desea buscar en el archivo: \n");
+            scanf("%d", &idBuscar);
+
+            RecuperarBajas(bajaPeli, nuevaPeli, idBuscar);
+            break;
+        case 7:
             printf("\n\n------!!ATENCION!!------\n\n");
             printf("Esta opcion BORRARA y NO GUARDARA las peliculas elimindas, desea continuar? (s|n)\n\n");
             fflush(stdin);
@@ -88,7 +99,7 @@ int main()
 
             if(control=='s')
             {
-               BorrarTodasPelisYnoGuardar(nuevaPeli);
+                BorrarTodasPelisYnoGuardar(nuevaPeli, bajaPeli);
             }else
             {
                 printf("\nNo se realizara la opcion seleccionada.\nRetrocediendo...\n");
@@ -295,7 +306,7 @@ void MostrarMuchasPeliculas(char pelis[])
 }
 
 ///*/////////////////////////////////////////////////////////////////////////////////////////
-///FUNCIONES PARA LA BAJA DE ARCHIVOS///////////////////////////////////////////////////////
+///FUNCIONES PARA LA BAJA DE ARCHIVOS////////////////////////////////////////////////////////
 ///*/////////////////////////////////////////////////////////////////////////////////////////
 
 ///**BuscarYeliminarUnaPelicula///////////////////////////////////////////////////
@@ -335,7 +346,6 @@ void BuscarYeliminarPelicula(char pelis[], char eliminarPeli[], int idBuscar)
 }
 
 ///MostrarElArchivoDePeliculasEliminadas/////////////////////////////////////////
-
 void MostrarPeliculasBajadas(char eliminarPeli[])
 {
     FILE *archivo=fopen(eliminarPeli,"rb");
@@ -356,11 +366,45 @@ void MostrarPeliculasBajadas(char eliminarPeli[])
     }
 }
 
+void RecuperarBajas(char eliminarPeli[], char pelis[], int idBuscar)
+{
+    FILE *archivo= fopen(eliminarPeli, "r+b");
+    FILE *archivoDos= fopen(pelis, "r+b");
+
+    bool encontrado=false;
+    stPelicula aux;
+
+    if(archivo && archivoDos)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            if(aux.idPelicula==idBuscar)
+            {
+                encontrado=true;
+                aux.estado=1;
+                fseek(archivo, -sizeof(stPelicula), SEEK_CUR);
+                fwrite(&aux, sizeof(stPelicula), 1, archivoDos);
+                printf("\nPelicula restaurada.\n");
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nNo se encontro el id a buscar.\n");
+        }
+        fclose(archivoDos);
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: No pudo abrirse uno o dos archivos.\n");
+    }
+}
 ///BorrarTodasLasPeliculasCargadas//////////////////////////////////////////////
-void BorrarTodasPelisYnoGuardar(char pelis[])
+void BorrarTodasPelisYnoGuardar(char pelis[], char eliminarPeli[])
 {
     FILE *archivo=fopen(pelis,"wb");
-    if(archivo)
+    FILE *archivoDos=fopen(eliminarPeli, "wb");
+    if(archivo && archivoDos)
     {
         printf("\nSe han borrado todas las pelis.\n");
     }else
@@ -368,6 +412,34 @@ void BorrarTodasPelisYnoGuardar(char pelis[])
         printf("\nERROR: No se han podido borrar las peliculas.\n");
     }
 }
+
+///*/////////////////////////////////////////////////////////////////////////////////////////
+///FUNCIONES PARA LA MODIFICACION DE ARCHIVOS////////////////////////////////////////////////
+///*/////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
