@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+
 ///PROTOTIPADO///////////////////////////////////////
 
 ///ESTRUC PELICULAS//////////////////////////////////
@@ -13,44 +16,84 @@ typedef struct
     int calificacion;
     int estado;
 } stPelicula;
+///VerificarSiLaPeliculaExiste///////////////////////
+bool VerificarPelicula(char nombre[], char pelis[]);
 
 ///AgregarPeliculas//////////////////////////////////
-void CargarPeliculas(char pelis[]);
+stPelicula AgregarUnaPeli(char pelis[], int *maxId);
+void CargarPeliculas(char pelis[], int maxId);
 
 ///MostrarPelis//////////////////////////////////////
 void MostrarMuchasPeliculas(char pelis[]);
 
 ///AgregarUnaId//////////////////////////////////////
-int AgregarId(char pelis[]);
-int maxId = 0;
+void AgregarId(char pelis[], int *maxId);
+
+///BuscarYeliminarUnaPelicula////////////////////////
+void BuscarYeliminarPelicula(char pelis[], char eliminarPeli[], int idBuscar);
+
+///MostrarPeliculasBajadas/////////////////////////////
+void MostrarPeliculasBajadas(char eliminarPeli[]);
+
+///BorrarTodasLasPeliculas/////////////////////////////
+void BorrarTodasPelisYnoGuardar(char pelis[]);
+
 
 
 ///MAIN//////////////////////////////////////////////
 int main()
 {
     char nuevaPeli[]="Peliculas";///Archivo en el que guardan las peliculas///////////////
+    char bajaPeli[]="PeliculasEliminadas";///Archivo en el que guardan las peliculas que fueron eliminadas/////////////
 
     ///MENU//////////////////////////////////////////
-    int opcion=0;
+    int opcion=0, maxId=0, idBuscar=0;
     char control='s';
     ///**////////////////////////////////////////////
 
-    ///ID///////////////////////////////////////////
 
     do
     {
         printf("\n--------MENU PELICULAS--------\n");
-        printf("1.Cargar peliculas.\n2.Mostrar la peliculas cargadas.\n");
+        printf("1.Cargar peliculas.\n2.Mostrar la peliculas cargadas.\n3.Cargar solo UNA pelicula.\n4.Buscar y dar de baja una pelicula.\n5.Mostrar peliculas que fueron dada de baja.\n");
+        printf("6.Eliminar TODAS las peliculas registradas.\n");
         printf("Ingrese la opcion a realizar: \n");
         scanf("%d", &opcion);
 
         switch(opcion)
         {
         case 1:///AgregarPeliculas//////////////////
-            CargarPeliculas(nuevaPeli);
+            CargarPeliculas(nuevaPeli, &maxId);
             break;
         case 2:///MostrasPelis/////////////
             MostrarMuchasPeliculas(nuevaPeli);
+            break;
+        case 3:///CargarSoloUnaPelicula////////////
+            CargarUnaPeli(nuevaPeli, &maxId);
+            break;
+        case 4:
+            printf("\nIngrese la ID que desea buscar en el archivo: \n");
+            scanf("%d",&idBuscar);
+
+            BuscarYeliminarPelicula(nuevaPeli, bajaPeli, idBuscar);
+            break;
+        case 5:
+            MostrarPeliculasBajadas(bajaPeli);
+            break;
+        case 6:
+            printf("\n\n------!!ATENCION!!------\n\n");
+            printf("Esta opcion BORRARA y NO GUARDARA las peliculas elimindas, desea continuar? (s|n)\n\n");
+            fflush(stdin);
+            scanf("%c", &control);
+
+            if(control=='s')
+            {
+               BorrarTodasPelisYnoGuardar(nuevaPeli);
+            }else
+            {
+                printf("\nNo se realizara la opcion seleccionada.\nRetrocediendo...\n");
+                break;
+            }
             break;
         default:
             printf("\nERROR: INGRESE UNA OPCION VALIDAD.\n");
@@ -65,49 +108,78 @@ int main()
 
     return 0;
 }
+///*/////////////////////////////////////////////////////////////////////////////////////////
+///FUNCIONES PARA LA CARGA DE ARCHIVOS///////////////////////////////////////////////////////
+///*/////////////////////////////////////////////////////////////////////////////////////////
 
-///MAIN///////////////////////////////////////////////////////
+///*******FUNCION PARA LA ID******//////////////////////////////////////////////////////
 
 ///AgregarId/////////////////////////////////////////////////
-int AgregarId(char pelis[])
+void AgregarId(char pelis[], int *maxId)
 {
-    FILE *archivo=fopen(pelis, "ab");
+    FILE *archivo=fopen(pelis, "rb");
     stPelicula aux;
-    int UltimaID=0;
 
     if(archivo)
     {
         while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
         {
-            if(aux.idPelicula > UltimaID)
+            if(aux.idPelicula > (*maxId))
             {
-                UltimaID=aux.idPelicula;
+                (*maxId)=aux.idPelicula;
             }
         }
         fclose(archivo);
+        (*maxId)++;
     }
     else
     {
         printf("\nERROR: No pudo abrirse el archivo.\n");
     }
-    return UltimaID;
+}
+///**********FUNCIONES PARA AGREGAR******/////////////////////////////////////////////
+
+///Validad si una pelicula se encuentra/////////////////////////////////////////
+bool VerificarPelicula(char nombre[], char pelis[])
+{
+    FILE *archivo=fopen(pelis, "rb");
+    stPelicula aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            if(strcmp(aux.nombre, nombre) == 0)
+            {
+                fclose(archivo);
+                return true;//El archivo ya existe
+            }
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+    return false;
 }
 
-///AgregarActores////////////////////////////////////////////
-
-
 ///1*AgregarUnaPelicula////////////////////////////////////////
-stPelicula AgregarUnaPeli(char pelis[])
+stPelicula AgregarUnaPeli(char pelis[], int *maxId)
 {
     stPelicula nuevaPeli;
     int j=0;
 
-    maxId=AgregarId(pelis);
-    nuevaPeli.idPelicula=++maxId;
+    nuevaPeli.idPelicula= (*maxId);
 
     printf("\nIngrese el nombre de la pelicula: \n");
     fflush(stdin);
     gets(nuevaPeli.nombre);
+    if(VerificarPelicula(nuevaPeli.nombre,pelis))
+    {
+        printf("\nERROR: La pelicula ya se encuentra cargada en el archivo.\n");
+        nuevaPeli.idPelicula= -1;
+        return nuevaPeli;
+    }
 
     printf("Ingrese el anio de la pelicula: \n");
     scanf("%d", &nuevaPeli.anio);
@@ -127,11 +199,12 @@ stPelicula AgregarUnaPeli(char pelis[])
 
     nuevaPeli.estado=1;///1 significa que la pelicula se encuentra.
 
+    (*maxId)++;
     return nuevaPeli;
 }
 
 ///1*CargarMuchasPeliculas/////////////////////////////////////
-void CargarPeliculas(char pelis[])
+void CargarPeliculas(char pelis[], int maxId)
 {
     stPelicula nuevaPeli;
     char control='s';
@@ -142,8 +215,11 @@ void CargarPeliculas(char pelis[])
     {
         while(control=='s')
         {
-            nuevaPeli = AgregarUnaPeli(pelis);
+            nuevaPeli = AgregarUnaPeli(pelis, &maxId);
+
+            if(nuevaPeli.idPelicula !=-1){
             fwrite(&nuevaPeli, sizeof(stPelicula), 1, archivo);
+            }
 
             printf("\nHay mas peliculas para cargar? (s|n)");
             fflush(stdin);
@@ -156,6 +232,28 @@ void CargarPeliculas(char pelis[])
         printf("\nERROR: No pudo abrirse el archivo.\n");
     }
 }
+
+///AgregarSoloUnaPelicula//////////////////////////////////////
+void CargarUnaPeli(char pelis[], int *maxId)
+{
+    FILE *archivo=fopen(pelis, "ab");
+    stPelicula aux;
+
+    if(archivo)
+    {
+        AgregarId(pelis, &maxId);
+        aux=AgregarUnaPeli(pelis, &maxId);
+        if(aux.idPelicula!=-1){
+        fwrite(&aux, sizeof(stPelicula), 1, archivo);
+        }
+
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+///*******FUNCIONES PARA MOSTRAR****/////////////////////////////////////////////////////
 
 ///2*MostrarUnaPelicula///////////////////////////////////////
 void MostrarUnaPelicula(stPelicula nuevaPeli)
@@ -196,15 +294,80 @@ void MostrarMuchasPeliculas(char pelis[])
     }
 }
 
+///*/////////////////////////////////////////////////////////////////////////////////////////
+///FUNCIONES PARA LA BAJA DE ARCHIVOS///////////////////////////////////////////////////////
+///*/////////////////////////////////////////////////////////////////////////////////////////
 
+///**BuscarYeliminarUnaPelicula///////////////////////////////////////////////////
+void BuscarYeliminarPelicula(char pelis[], char eliminarPeli[], int idBuscar)
+{
+    FILE *archivo=fopen(pelis, "r+b");
+    FILE *archivoDos=fopen(eliminarPeli, "ab");
 
+    bool encontrada=0;
+    stPelicula aux;
 
+    if(archivo && archivoDos)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            if(aux.idPelicula==idBuscar)
+            {
+                encontrada=true;
+                aux.estado=0;
+                fseek(archivo, -sizeof(stPelicula), SEEK_CUR);
+                fwrite(&aux, sizeof(stPelicula), 1, archivo);
+                fwrite(&aux, sizeof(stPelicula),1 , archivoDos);
+                printf("\nPelicula eliminada correctamente.\n");
+                break;
+            }
+        }
+        if(!encontrada)
+        {
+            printf("\nNo se encontro ninguna pelicula con esa id.\n");
+        }
+        fclose(archivo);
+        fclose(archivoDos);
+    }else
+    {
+        printf("\nEl archivo no pudo abrise.\n");
+    }
+}
 
+///MostrarElArchivoDePeliculasEliminadas/////////////////////////////////////////
 
+void MostrarPeliculasBajadas(char eliminarPeli[])
+{
+    FILE *archivo=fopen(eliminarPeli,"rb");
+    stPelicula aux;
 
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            MostrarUnaPelicula(aux);
 
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
 
-
+///BorrarTodasLasPeliculasCargadas//////////////////////////////////////////////
+void BorrarTodasPelisYnoGuardar(char pelis[])
+{
+    FILE *archivo=fopen(pelis,"wb");
+    if(archivo)
+    {
+        printf("\nSe han borrado todas las pelis.\n");
+    }else
+    {
+        printf("\nERROR: No se han podido borrar las peliculas.\n");
+    }
+}
 
 
 
