@@ -461,17 +461,20 @@ void BuscarYmodificarUnaPelicula(char pelis[], int idBuscar)
                 encontrado=true;
 
                 char continuar='s';
-                int opcion=0;
+                int opcion=0, actor=1;
 
                 char nuevoNombre[50];
                 char nuevoGenero[30];
+                char nuevoActor[3][50];
                 int nuevoAnio=0;
+                int nuevaCalifi=0;
+                int nuevoEstado=0;
 
                 do
                 {
                     printf("\n\n-----MENU-----\n\n");
                     printf("\n--MODIFICACION DE PELICULAS--\n");
-                    printf("1.Modificar nombre.\n2.Modificar anio.\n2.Modificar genero.\n");
+                    printf("1.Modificar nombre.\n2.Modificar anio.\n3.Modificar genero.\n4.Modificar actores.\n");
                     printf("Ingrese la opcion a realizar: \n");
                     scanf("%d", &opcion);
 
@@ -496,6 +499,29 @@ void BuscarYmodificarUnaPelicula(char pelis[], int idBuscar)
                         gets(nuevoGenero);
 
                         ModificarGenero(pelis, nuevoGenero);
+                        break;
+                    case 4:
+                        printf("\nIngrese los nuevos actores: \n");
+                        for(int i=0; i<3; i++)
+                        {
+                            printf("Actor: \n");
+                            fflush(stdin);
+                            gets(nuevoActor[i]);
+                        }
+
+                        ModificarActores(pelis, nuevoActor);
+                        break;
+                    case 5:
+                        printf("\nIngrese la nueva calificacion: \n");
+                        scanf("%d", &nuevaCalifi);
+
+                        ModificarCalificacion(pelis, nuevaCalifi);
+                        break;
+                    case 6:
+                        printf("\nIngrese el estado de la pelicula (1:Activo | 0:Inactivo)");
+                        scanf("%d", &nuevoEstado);
+
+                        ModificarEstado(pelis, nuevoEstado);
                         break;
                     default:
                         printf("\nERROR: Ingrese una opcion valida.\n");
@@ -575,6 +601,7 @@ void ModificarAnio(char pelis[], int nuevoAnio)
 
 }
 
+///**Genero///////////////////////////////////////////////////////
 void ModificarGenero(char pelis[], char nuevoGenero[])
 {
     FILE *archivo= fopen(pelis,"r+b");
@@ -591,16 +618,86 @@ void ModificarGenero(char pelis[], char nuevoGenero[])
             break;
         }
         fclose(archivo);
-    }else
+    }
+    else
     {
         printf("\nERROR: El archivo no pudo abrise correctamente.\n");
     }
 }
 
-void ModificarActores(char pelis[], char )
+///**Actores//////////////////////////////////////////////////////
+void ModificarActores(char pelis[], char nuevosActor[][50])
+{
+    FILE *archivo= fopen(pelis, "r+b");
+    stPelicula aux;
 
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            for(int i=0; i<3; i++)
+            {
+                strcpy(aux.actores[i], nuevosActor[i]);
+            }
+            fseek(archivo, -sizeof(stPelicula), SEEK_CUR);
+            fwrite(&aux, sizeof(stPelicula), 1, archivo);
+            printf("\nActores de la película modificados correctamente.\n");
+            break;
 
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: No se pudo abrir el archivo.\n");
+    }
 
+}
+
+///**calificacion/////////////////////////////////////////////////
+void ModificarCalificacion(char pelis[], int nuevaCali)
+{
+    FILE *archivo= fopen(pelis, "r+b");
+    stPelicula aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            aux.calificacion=nuevaCali;
+            fseek(archivo, -sizeof(stPelicula), SEEK_CUR);
+            fwrite(&aux, sizeof(stPelicula), 1, archivo);
+            printf("\nLa calificacion fue modificada exitosamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///**estado////////////////////////////////////////////////////
+void ModificarEstado(char pelis[], int nuevoEstado)
+{
+    FILE *archivo= fopen(pelis, "r+b");
+    stPelicula aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stPelicula), 1, archivo) >0)
+        {
+            aux.estado=nuevoEstado;
+            fseek(archivo, -sizeof(stPelicula), SEEK_CUR);
+            fwrite(&aux, sizeof(stPelicula), 1, archivo);
+            printf("\nEl estado fue modificado exitosamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: El archivo no pudo abrirse correctamente.\n");
+    }
+}
 
 
 
