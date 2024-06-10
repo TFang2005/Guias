@@ -1,0 +1,171 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+///**////////////////////////////////////
+///PROTOTIPADO///////////////////////////
+///**////////////////////////////////////
+
+///ESTRUCTURA////////
+typedef struct
+{
+    char nombreYapellido[50];
+    int legajo;
+    char dni[16];
+    char antiguedad[30];
+    char sexo;
+    int* cantidadDeVentas;
+    float sueldo;
+    int estado;
+} stEmpleado;
+
+///**CARGAR EL ARCHIVO DE EMPLEADOS////////////////////////////////
+void cargarArchivoEmpleados(char emple[]);
+
+///**MOSTRAR EL ARCHIVO DE EMPLEADOS///////////////////
+void mostrarEmpleados(char emple[]);
+
+
+
+
+
+
+
+
+
+///**////////////////////////////////////
+///MAIN//////////////////////////////////
+///**////////////////////////////////////
+
+int main()
+{
+    char empleados[]="ArchivoEmpleados";
+
+
+    cargarArchivoEmpleados(empleados);
+    mostrarEmpleados(empleados);
+
+
+
+
+
+
+    return 0;
+}
+
+///**////////////////////////////////////
+///FUNCIONES/////////////////////////////
+///**////////////////////////////////////
+
+///VERIFICAR SI EL EMPLEADO YA FUE CARGADO///////
+bool VerificarDNI
+
+///CARGAR UN SOLO EMPLEADO///////////////
+stEmpleado cargarUnEmpleado()
+{
+    stEmpleado nuevoEmpleado;
+
+    printf("Ingrese el nombre y el apellido del empleado.\n");
+    fflush(stdin);
+    gets(nuevoEmpleado.nombreYapellido);
+
+    printf("Ingrese el legajo el empleado.\n");
+    scanf("%d", &nuevoEmpleado.legajo);
+
+    printf("Ingrese el dni del empleado.\n");
+    fflush(stdin);
+    gets(nuevoEmpleado.dni);
+
+    printf("Ingrese la antiguedad del empleado.(D/M/A)\n");
+    fflush(stdin);
+    gets(nuevoEmpleado.antiguedad);
+
+    printf("Ingrese el sexo del empleado.(M,F,O)\n");
+    fflush(stdin);
+    scanf("%c", &nuevoEmpleado.sexo);
+
+    printf("Ingrese la cantidad de ventas del empleado.\n");
+    scanf("%d", &nuevoEmpleado.cantidadDeVentas);
+
+    printf("Ingrese el sueldo del empleado.\n");
+    scanf("%f", &nuevoEmpleado.sueldo);
+
+    printf("Ingrese el estado del empleado.(1 Activo, 0 Inactivo)\n");
+    scanf("%d", &nuevoEmpleado.estado);
+
+    return nuevoEmpleado;
+}
+
+///CARGAR ARCHIVO DE EMPLEADOS//////////
+void cargarArchivoEmpleados(char emple[])
+{
+    FILE *archivo=fopen(emple, "ab");
+    stEmpleado aux;
+
+    char control='s';
+
+    if(archivo)
+    {
+        while(control=='s')
+        {
+            aux = cargarUnEmpleado();
+            fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+
+            printf("\nDesea seguir cargando nuevos empleados al archivo? (s|n)");
+            fflush(stdin);
+            scanf("%c", &control);
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse para cargar nuevos empleados.\n");
+    }
+}
+
+///MOSTRAR UN SOLO EMPLEADO//////////////
+void mostrarUnEmpleado(stEmpleado nuevoEmpleado)
+{
+    printf("\nEl nombre y Apellido del empleado: %s\n", nuevoEmpleado.nombreYapellido);
+    printf("El legajo del empleado es: %d\n", nuevoEmpleado.legajo);
+    printf("El dni del empleado es: %s\n", nuevoEmpleado.dni);
+    printf("La antiguedad del empleado es: %s\n", nuevoEmpleado.antiguedad);
+    printf("El sexo del empleado: %c\n", nuevoEmpleado.sexo);
+    printf("La cantidad de ventas del empleado es: %d\n", nuevoEmpleado.cantidadDeVentas);
+    printf("El sueldo del empleado es: %.2f\n", nuevoEmpleado.sueldo);
+    printf("El estado del empleado es: %d\n", nuevoEmpleado.estado);
+}
+
+///MOSTRAR ARCHIVO DE EMPLEADOS/////////
+void mostrarEmpleados(char emple[])
+{
+    FILE *archivo= fopen(emple, "rb");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            mostrarUnEmpleado(aux);
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+
+///**//////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
