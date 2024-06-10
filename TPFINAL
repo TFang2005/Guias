@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#inclde <string.h>
 ///**////////////////////////////////////
 ///PROTOTIPADO///////////////////////////
 ///**////////////////////////////////////
@@ -38,16 +39,36 @@ void mostrarEmpleados(char emple[]);
 
 int main()
 {
+    system("color 3F");
     char empleados[]="ArchivoEmpleados";
 
+    char control='s';
+    int opcion=0;
 
-    cargarArchivoEmpleados(empleados);
-    mostrarEmpleados(empleados);
+    do
+    {
+        printf("\n-----MENU-----\n");
+        printf("1.Agregar empleados al archivo.\n2.Mostrar el archivo de empleados.\n");
+        printf("Ingrese la opcion que desea realizar.\n");
+        scanf("%d", &opcion);
 
-
-
-
-
+        switch(opcion)
+        {
+        case 1:
+            cargarArchivoEmpleados(empleados);
+            break;
+        case 2:
+            mostrarEmpleados(empleados);
+            break;
+        default:
+            printf("\nERROR: Opcion no valida.\n");
+            break;
+        }
+        printf("\nDesea realizar otra opcion: (s|n)\n");
+        fflush(stdin);
+        scanf("%c", &control);
+    }
+    while(control=='s');
 
     return 0;
 }
@@ -56,17 +77,72 @@ int main()
 ///FUNCIONES/////////////////////////////
 ///**////////////////////////////////////
 
-///VERIFICAR SI EL EMPLEADO YA FUE CARGADO///////
-bool VerificarDNI
+///VERIFICAR SI EL EMPLEADO YA FUE CARGADO POR DNI///////
+bool verificarDNI(char dni[], char emple[])
+{
+    FILE *archivo=fopen(emple, "rb");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcmp(aux.dni, dni) == 0)
+            {
+                fclose(archivo);
+                return true;//El archivo ya existe
+            }
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+    return false;
+}
+
+///SEGUNDO VERIFICADOR POR NOMBRE////////////////
+bool verificarNombre(char nombreyApellido[], char emple[])
+{
+    FILE *archivo=fopen(emple, "rb");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcmp(aux.nombreYapellido, nombreyApellido) == 0)
+            {
+                fclose(archivo);
+                return true;//El archivo ya existe
+            }
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+    return false;
+}
 
 ///CARGAR UN SOLO EMPLEADO///////////////
-stEmpleado cargarUnEmpleado()
+stEmpleado cargarUnEmpleado(char emple[])
 {
+    system("color 2F");
     stEmpleado nuevoEmpleado;
 
     printf("Ingrese el nombre y el apellido del empleado.\n");
     fflush(stdin);
     gets(nuevoEmpleado.nombreYapellido);
+
+    if(verificarNombre(nuevoEmpleado.nombreYapellido, emple))
+    {
+        printf("\nERROR: El empleado ya existe en el archivo.\n");
+        nuevoEmpleado.estado=-1;
+        return nuevoEmpleado;
+    }
 
     printf("Ingrese el legajo el empleado.\n");
     scanf("%d", &nuevoEmpleado.legajo);
@@ -74,6 +150,13 @@ stEmpleado cargarUnEmpleado()
     printf("Ingrese el dni del empleado.\n");
     fflush(stdin);
     gets(nuevoEmpleado.dni);
+
+    if(verificarDNI(nuevoEmpleado.dni, emple))
+    {
+        printf("\nERROR: El empleado ya existe en el archivo.\n");
+        nuevoEmpleado.estado= -1;
+        return nuevoEmpleado;
+    }
 
     printf("Ingrese la antiguedad del empleado.(D/M/A)\n");
     fflush(stdin);
@@ -107,8 +190,11 @@ void cargarArchivoEmpleados(char emple[])
     {
         while(control=='s')
         {
-            aux = cargarUnEmpleado();
-            fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+            aux = cargarUnEmpleado(emple);
+            if(aux.estado !=-1)
+            {
+                fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+            }
 
             printf("\nDesea seguir cargando nuevos empleados al archivo? (s|n)");
             fflush(stdin);
@@ -133,6 +219,7 @@ void mostrarUnEmpleado(stEmpleado nuevoEmpleado)
     printf("La cantidad de ventas del empleado es: %d\n", nuevoEmpleado.cantidadDeVentas);
     printf("El sueldo del empleado es: %.2f\n", nuevoEmpleado.sueldo);
     printf("El estado del empleado es: %d\n", nuevoEmpleado.estado);
+    printf("\n-----------------------------------------------------------\n");
 }
 
 ///MOSTRAR ARCHIVO DE EMPLEADOS/////////
@@ -156,16 +243,3 @@ void mostrarEmpleados(char emple[])
 }
 
 ///**//////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
