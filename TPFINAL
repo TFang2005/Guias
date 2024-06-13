@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#inclde <string.h>
+#include <string.h>
 ///**////////////////////////////////////
 ///PROTOTIPADO///////////////////////////
 ///**////////////////////////////////////
@@ -26,6 +26,8 @@ void cargarArchivoEmpleados(char emple[]);
 void mostrarEmpleados(char emple[]);
 
 
+void buscarYmodificar(char emple[], char dniBuscar[]);
+
 
 
 
@@ -42,7 +44,7 @@ int main()
     system("color 3F");
     char empleados[]="ArchivoEmpleados";
 
-    char control='s';
+    char control='s', dniBuscar[50];
     int opcion=0;
 
     do
@@ -59,6 +61,13 @@ int main()
             break;
         case 2:
             mostrarEmpleados(empleados);
+            break;
+        case 3:
+            printf("\nIngrese el DNI que desea buscar y modificar: \n");
+            fflush(stdin);
+            gets(dniBuscar);
+
+            buscarYmodificar(empleados, dniBuscar);
             break;
         default:
             printf("\nERROR: Opcion no valida.\n");
@@ -243,3 +252,181 @@ void mostrarEmpleados(char emple[])
 }
 
 ///**//////////////////////////////////
+
+
+///BUSCAR Y MODIFICAR UNA PELICULA//////
+void buscarYmodificar(char emple[], char dniBuscar[])
+{
+    FILE *archivo=fopen(emple, "r+b");
+    stEmpleado aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1,archivo) >0)
+        {
+            if(strcmp(aux.dni, dniBuscar) == 0)
+            {
+                encontrado=true;
+
+                int opcion=0;
+                char control='s';
+
+                int nuevoLegajo=0, nuevaVenta=0;
+                float nuevoSueldo=0;
+
+                do
+                {
+                    printf("\n\n-----MENU-----\n\n");
+                    printf("\n---SUBMENU MODIFICAR EMPLEADOS---\n");
+                    printf("1.Modificar nombre.\n2.Modificar legajo.\n3.Modificar la cantidad de ventas.\n4.Modifcar el sueldo.\n");
+                    printf("\nIngrese la opcion del campo que desea modficar: \n");
+                    scanf("%d", &opcion);
+
+                    switch(opcion)
+                    {
+                    case 1:
+                        break;
+                    case 2:
+                        printf("\nIngrese el nuevo legajo del empleado: \n");
+                        scanf("%d", &nuevoLegajo);
+
+                        modificarLegajo(emple, nuevoLegajo);
+                        break;
+                    case 3:
+                        printf("\nIngrese la nueva cantida de ventas del empleado: \n");
+                        scanf("%d", &nuevaVenta);
+
+                        modificarVentas(emple, nuevaVenta);
+                        break;
+                    case 4:
+                        printf("\nIngrese el nuevo sueldo del empleado: \n");
+                        scanf("%f", &nuevoSueldo);
+
+                        modificarSueldo(emple, nuevoSueldo);
+                        break;
+                    default:
+                        printf("\nERROR: La opcion no fue valida.\n");
+                        break;
+                    }
+
+                    printf("\nDesea modifcar otro campo? (s|n)");
+                    fflush(stdin);
+                    scanf("%c", &control);
+                }
+                while(control=='s');
+            }
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse correctamente.\n");
+    }
+}
+
+///**MODIFICAR LEGAJO//////////////////////
+void modificarLegajo(char emple[], int nuevoLegajo)
+{
+    FILE *archivo=fopen(emple, "r+b");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            aux.legajo= nuevoLegajo;
+
+            fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+            fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+            printf("\nLegajo modificado correctamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+///**MODIFICAR CANTIDAD DE VENTAS//////////
+void modificarVentas(char emple[], int nuevaVenta)
+{
+    FILE *archivo= fopen(emple, "r+b");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            aux.cantidadDeVentas = nuevaVenta;
+
+            fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+            fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+            printf("\nCantidad de ventas modificada con exito.\n");
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo noi pudo abrirse.\n");
+    }
+}
+
+///**MDOFICAR SUELDO///////////
+void modificarSueldo(char emple[], float nuevoSueldo)
+{
+    FILE *archivo= fopen(emple, "r+b");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            aux.sueldo = nuevoSueldo;
+
+            fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+            fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+            printf("\nEl sueldo a sido modificado exitosamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
