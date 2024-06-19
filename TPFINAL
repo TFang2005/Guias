@@ -19,18 +19,16 @@ typedef struct
     int estado;
 } stEmpleado;
 
-///**CARGAR EL ARCHIVO DE EMPLEADOS////////////////////////////////
+///**CARGAR EL ARCHIVO DE EMPLEADOS/////////////////////////////////
 void cargarArchivoEmpleados(char emple[]);
 
-///**MOSTRAR EL ARCHIVO DE EMPLEADOS///////////////////
+///**MOSTRAR EL ARCHIVO DE EMPLEADOS////////////////////////////////
 void mostrarEmpleados(char emple[]);
 
-
+///**BUSCAR Y MODIFICAR UN ARCHIVO//////////////////////////////////
 void buscarYmodificar(char emple[], char dniBuscar[]);
 
-
-
-
+void menuParaBuscar(char emple[]);
 
 
 
@@ -50,7 +48,7 @@ int main()
     do
     {
         printf("\n-----MENU-----\n");
-        printf("1.Agregar empleados al archivo.\n2.Mostrar el archivo de empleados.\n");
+        printf("1.Agregar empleados al archivo.\n2.Mostrar el archivo de empleados.\n3.Buscar y modificar un empleado del archivo.\n4.Buscar empleado.\n");
         printf("Ingrese la opcion que desea realizar.\n");
         scanf("%d", &opcion);
 
@@ -68,6 +66,9 @@ int main()
             gets(dniBuscar);
 
             buscarYmodificar(empleados, dniBuscar);
+            break;
+        case 4:
+            menuParaBuscar(empleados);
             break;
         default:
             printf("\nERROR: Opcion no valida.\n");
@@ -251,10 +252,13 @@ void mostrarEmpleados(char emple[])
     }
 }
 
-///**//////////////////////////////////
+///---------------------------------------------/////////////////////////////////
+///---BUSQUEDA Y MODIFICACION DE UN EMPLEADO----/////////////////////////////////
+///---------------------------------------------/////////////////////////////////
 
-
+///----------------------------------------
 ///BUSCAR Y MODIFICAR UNA PELICULA//////
+///----------------------------------------
 void buscarYmodificar(char emple[], char dniBuscar[])
 {
     FILE *archivo=fopen(emple, "r+b");
@@ -280,27 +284,25 @@ void buscarYmodificar(char emple[], char dniBuscar[])
                 {
                     printf("\n\n-----MENU-----\n\n");
                     printf("\n---SUBMENU MODIFICAR EMPLEADOS---\n");
-                    printf("1.Modificar nombre.\n2.Modificar legajo.\n3.Modificar la cantidad de ventas.\n4.Modifcar el sueldo.\n");
+                    printf("1.Modificar legajo.\n2.Modificar la cantidad de ventas.\n3.Modifcar el sueldo.\n");
                     printf("\nIngrese la opcion del campo que desea modficar: \n");
                     scanf("%d", &opcion);
 
                     switch(opcion)
                     {
                     case 1:
-                        break;
-                    case 2:
                         printf("\nIngrese el nuevo legajo del empleado: \n");
                         scanf("%d", &nuevoLegajo);
 
                         modificarLegajo(emple, nuevoLegajo);
                         break;
-                    case 3:
+                    case 2:
                         printf("\nIngrese la nueva cantida de ventas del empleado: \n");
                         scanf("%d", &nuevaVenta);
 
                         modificarVentas(emple, nuevaVenta);
                         break;
-                    case 4:
+                    case 3:
                         printf("\nIngrese el nuevo sueldo del empleado: \n");
                         scanf("%f", &nuevoSueldo);
 
@@ -326,7 +328,9 @@ void buscarYmodificar(char emple[], char dniBuscar[])
     }
 }
 
+///----------------------------------------
 ///**MODIFICAR LEGAJO//////////////////////
+///----------------------------------------
 void modificarLegajo(char emple[], int nuevoLegajo)
 {
     FILE *archivo=fopen(emple, "r+b");
@@ -350,7 +354,10 @@ void modificarLegajo(char emple[], int nuevoLegajo)
         printf("\nERROR: El archivo no pudo abrirse.\n");
     }
 }
+
+///----------------------------------------
 ///**MODIFICAR CANTIDAD DE VENTAS//////////
+///----------------------------------------
 void modificarVentas(char emple[], int nuevaVenta)
 {
     FILE *archivo= fopen(emple, "r+b");
@@ -375,7 +382,9 @@ void modificarVentas(char emple[], int nuevaVenta)
     }
 }
 
-///**MDOFICAR SUELDO///////////
+///----------------------------------------
+///**MODIFICAR SUELDO//////////////////////
+///----------------------------------------
 void modificarSueldo(char emple[], float nuevoSueldo)
 {
     FILE *archivo= fopen(emple, "r+b");
@@ -393,13 +402,219 @@ void modificarSueldo(char emple[], float nuevoSueldo)
             break;
         }
         fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+
+///**/////////////////////////////////////
+///**BUSCAR Y MOSTRAR UN EMPLEADO/////////
+///**/////////////////////////////////////
+
+///---------------------------------------
+///**MENU PARA BUSCAR EMPLEADO////////////
+///---------------------------------------
+void menuParaBuscar(char emple[])
+{
+    FILE *archivo= fopen(emple, "rb");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1 ,archivo) >0)
+        {
+            char control='s';
+            int opcion=0;
+
+            char nombreApellido[50];
+            char dni[16];
+            char anti[50];
+            int legajo=0;
+
+            do
+            {
+                printf("\n----------MENU---------");
+                printf("\n--SUB-MENU PARA BUSCAR--\n");
+                printf("1.Buscar por nombre.\n2.Buscar por legajo.\n3.Buscar por DNI.\n2");
+                printf("\nIngrese la opcion que desea realizar: \n");
+                scanf("%d", &opcion);
+
+                switch(opcion)
+                {
+                case 1:
+                    printf("\nIngrese el nombre del empleado que desea buscar: \n");
+                    fflush(stdin);
+                    gets(nombreApellido);
+
+                    BuscarPorNombre(emple, nombreApellido);
+                    break;
+                case 2:
+                    printf("\nIngrese el legajo del empleado que desea buscar: \n");
+                    scanf("%d", &legajo);
+
+                    buscarPorLegajp(emple, legajo);
+                    break;
+                case 3:
+                    printf("\nIngrese el DNI del empleado que desea buscar: \n");
+                    fflush(stdin);
+                    gets(dni);
+
+                    buscarPorDni(emple, dni);
+                    break;
+                case 4:
+                    printf("\nIngrese la antiguedad del empleado que desea buscar: \n");
+                    fflush(stdin);
+                    gets(anti);
+
+                    buscarPorAntiguedad(emple, anti);
+                    break;
+                default:
+                    printf("\nERROR: Opcion no valida.\n");
+                    break;
+                }
+
+                printf("\nDesea seguir buscando por otras opciones? (s|n).\n");
+                fflush(stdin);
+                scanf("%c", &control);
+            }while(control=='s');
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: No se pudo abrir el archivo.\n");
+    }
+}
+
+
+///---------------------------------------
+///**BUSCAR POR NOMBRE////////////////////
+///---------------------------------------
+void BuscarPorNombre(char emple[], char buscarNombre[])
+{
+    FILE *archivo=fopen(emple, "rb");
+    stEmpleado aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1 ,archivo) >0)
+        {
+            if(strcpy(aux.nombreYapellido, buscarNombre))
+            {
+                encontrado=true;
+                mostrarUnEmpleado(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nNo se encontrado ningun empleado con este nombre.\n");
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///---------------------------------------
+///**BUSCAR POR LEGAJO////////////////////
+///---------------------------------------
+void buscarPorLegajp(char emple[], int buscarLegajo)
+{
+    FILE *archivo= fopen(emple, "rb");
+    stEmpleado aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(aux.legajo==buscarLegajo)
+            {
+                encontrado= true;
+                mostrarUnEmpleado(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se encontro ningun empleado con este legajo.\n");
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: No pudo abirse el archivo.\n");
+    }
+}
+
+///---------------------------------------
+///**BUSCAR POR DNI///////////////////////
+///---------------------------------------
+void buscarPorDni(char emple[], int buscarDni)
+{
+    FILE *archivo= fopen(emple, "rb");
+    stEmpleado aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcpy(aux.dni, buscarDni))
+            {
+                encontrado=true;
+                mostrarUnEmpleado(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se encontro ningun empleado con este DNI.\n");
+        }
+        fclose(archivo);
     }else
     {
         printf("\nERROR: El archivo no pudo abrirse.\n");
     }
 }
 
+///---------------------------------------
+///**BUSCAR POR ANTIGUEDAD////////////////
+///---------------------------------------
+void buscarPorAntiguedad(char emple[], char buscarAnti[])
+{
+    FILE *archivo= fopen(emple, "rb");
+    stEmpleado aux;
 
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcpy(aux.antiguedad, buscarAnti))
+            {
+                encontrado=true;
+                mostrarUnEmpleado(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se encontro ningun empleado con este antiguedad.\n");
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
 
 
 
