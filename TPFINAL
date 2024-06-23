@@ -17,10 +17,16 @@ typedef struct
     char antiguedad[30];
     char sexo;
     int* cantidadDeVentas;
-    float* sueldo;
-    Pila *sueldosPasados;
+    int sueldo;
     int estado;
+    Pila* sueldosPasados;
 } stEmpleado;
+
+#define ADMIN_USER "admin"
+#define ADMIN_PASS "admin123"
+#define MAX_INTENTOS 3
+
+int validarCredenciales(int intento);
 
 ///**CARGAR EL ARCHIVO DE EMPLEADOS////////////////////////////////
 void cargarArchivoEmpleados(char emple[]);
@@ -58,13 +64,16 @@ int main()
     char eliminados[]="EmpleadosEliminados";///Archivo de empleados dado de baja
 
     char control='s', buscarDni[16];
-    int opcion=0;
+    int opcion=0, intento = 1;
+
+    if(validarCredenciales(intento))
+    {
 
     do
     {
         printf("\n-----MENU-----\n");
         printf("1.Agregar empleados al archivo.\n2.Mostrar el archivo de empleados.\n3.Buscar y Eliminar un empleado del archivo.\n4.Mostrar empleados dado de baja.\n5.Modificar empleados.\n6.Buscar un empleado y mostrarlo.\n");
-        printf("6.Ordenar empleados por nombre\n7.Ordenar empleados por legajo.\n");
+        printf("7.Ordenar empleados por nombre\n8.Ordenar empleados por legajo.\n9.Mostrar sueldos pasados del empleado.\n");
         printf("Ingrese la opcion que desea realizar.\n");
         scanf("%d", &opcion);
         system("pause");
@@ -104,6 +113,13 @@ int main()
         case 8:
             ordenarPorLegajo(empleados);
             break;
+        case 9:
+            printf("\nIngrese el DNI del empleado cuyos sueldos pasados desea ver: \n");
+            fflush(stdin);
+            gets(buscarDni);
+
+            mostrarSueldosPasados(empleados, buscarDni);
+            break;
         default:
             printf("\nERROR: Opcion no valida.\n");
             break;
@@ -114,12 +130,46 @@ int main()
     }
     while(control=='s');
 
+    }else
+    {
+        printf("\nACCESO DENEGADO.\n");
+        return 1;
+    }
     return 0;
 }
 
 ///**////////////////////////////////////
 ///FUNCIONES/////////////////////////////
 ///**////////////////////////////////////
+
+int validarCredenciales(int intento)
+{
+    char usuario[50], contra[50];
+
+    if(intento == MAX_INTENTOS)
+    {
+        printf("\nHa alcanzado el maximo de intentos permitidos.\n");
+        return 0;
+    }
+
+    printf("\nIngrese el usuario: \n");
+    fflush(stdin);
+    gets(usuario);
+
+    printf("\nIngrese la contrasenia: \n");
+    fflush(stdin);
+    gets(contra);
+
+    if(strcmp(usuario, ADMIN_USER) == 0 && strcmp(contra,ADMIN_PASS) == 0)
+    {
+        return 1;
+    }else
+    {
+        printf("\nUsuario o contraseña incorrectos. Intentos restantes: %d\n", MAX_INTENTOS-intento);
+        return validarCredenciales(intento+1);
+    }
+}
+
 
 ///-----------------------------------------------------------/////////////////
 ///----------APARTADO EXCLUSIVAMENTE DE ALTA------------------/////////////////
@@ -217,7 +267,7 @@ stEmpleado cargarUnEmpleado(char emple[])
     scanf("%d", &nuevoEmpleado.cantidadDeVentas);
 
     printf("Ingrese el sueldo del empleado.\n");
-    scanf("%f", &nuevoEmpleado.sueldo);
+    scanf("%d", &nuevoEmpleado.sueldo);
 
     nuevoEmpleado.estado = 1;
 
@@ -266,7 +316,7 @@ void mostrarUnEmpleado(stEmpleado nuevoEmpleado)
     printf("La antiguedad del empleado es: %s\n", nuevoEmpleado.antiguedad);
     printf("El sexo del empleado: %c\n", nuevoEmpleado.sexo);
     printf("La cantidad de ventas del empleado es: %d\n", nuevoEmpleado.cantidadDeVentas);
-    printf("El sueldo del empleado es: %.2f\n", nuevoEmpleado.sueldo);
+    printf("El sueldo del empleado es: %d\n", nuevoEmpleado.sueldo);
     printf("El estado del empleado es: %d\n", nuevoEmpleado.estado);
     printf("\n-----------------------------------------------------------\n");
 }
@@ -291,6 +341,36 @@ void mostrarEmpleados(char emple[])
     }
 }
 
+///MOSTRAR SUELDOS PASADOS DEL EMPLEADO/////////
+void mostrarSueldosPasados(char emple[], char dni[])
+{
+    FILE *archivo = fopen(emple, "rb");
+    stEmpleado aux;
+    bool encontrado = false;
+
+    if (archivo)
+    {
+        while (fread(&aux, sizeof(stEmpleado), 1, archivo) > 0)
+        {
+            if (strcmp(aux.dni, dni) == 0)
+            {
+                encontrado = true;
+                printf("Sueldos pasados del empleado %s:\n", aux.nombreYapellido);
+                mostrar(&aux.sueldosPasados);
+                break;
+            }
+        }
+        if (!encontrado)
+        {
+            printf("\nERROR: No se encontró ningún empleado con este DNI.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
 ///-----------------------------------------------------------/////////////////
 ///----------APARTADO EXCLUSIVAMENTE DE BAJA------------------/////////////////
 ///-----------------------------------------------------------/////////////////
@@ -362,7 +442,7 @@ void mostrarEmpleBajados(char elimanods[])
 ///BUSCAR Y MODIFICAR UNA EMPLEADO////////////////
 void buscarYmodificarUnEmpleado(char emple[], char dni[])
 {
-    FILE *archivo=fopen(archivo,"r+b");
+    FILE *archivo=fopen(emple,"r+b");
     stEmpleado aux;
 
     bool encontrado=false;
@@ -379,14 +459,13 @@ void buscarYmodificarUnEmpleado(char emple[], char dni[])
                 int opcion=0;
 
                 char nuevoNombre[50];
-                int nuevoLegajo=0, nuevaVenta=0;
-                float nuevoSueldo=0;
+                int nuevoLegajo=0, nuevaVenta=0, nuevoSueldo=0;;
 
                 do
                 {
                     printf("\n\n-----MENU-----\n\n");
                     printf("\n--MODIFICACION DE EMPLEADOS--\n");
-                    printf("1.Modificar nombre y apellido.\n2.Modificar legajo.\n3.Modificar dni.\n4.Modificar antiguedad.\n5.Modificar sexo.\n6.Modificar cantidad de ventas.\n");
+                    printf("1.Modificar nombre y apellido.\n2.Modificar legajo.\n3.Ingrese la nueva cantidad de ventas del empleado.\n4.Ingrese el nuevo sueldo del empleado.\n");
                     printf("7.Modificar sueldo.\n");
                     printf("Ingrese la opcion que desea realizar: \n");
                     scanf("%d", &opcion);
@@ -414,7 +493,7 @@ void buscarYmodificarUnEmpleado(char emple[], char dni[])
                         break;
                     case 4:
                         printf("\nIngrese el nuevo sueldo del empleado: \n");
-                        scanf("%f", &nuevoSueldo);
+                        scanf("%d", &nuevoSueldo);
 
                         modificarSueldo(emple, nuevoSueldo);
                         break;
@@ -521,7 +600,7 @@ void modificarVentas(char emple[], int nuevaVenta)
 ///----------------------------------------
 ///**MODIFICAR SUELDO//////////////////////
 ///----------------------------------------
-void modificarSueldo(char emple[], float nuevoSueldo)
+void modificarSueldo(char emple[], int nuevoSueldo)
 {
     FILE *archivo= fopen(emple, "r+b");
     stEmpleado aux;
@@ -530,6 +609,9 @@ void modificarSueldo(char emple[], float nuevoSueldo)
     {
         while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
         {
+            inicpila(&aux.sueldosPasados);
+            apilar(aux.sueldosPasados, aux.sueldo);
+
             aux.sueldo = nuevoSueldo;
 
             fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
