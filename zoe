@@ -1,0 +1,755 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <stdbool.h>
+typedef struct
+{
+    int id;
+    float monto;
+    int diaInicio;
+    int mesInicio;
+    int anioInicio;
+    int diaVencimiento;
+    int mesVencimiento;
+    int anioVencimiento;
+    int duracion;
+    int estado; //1: activo, 0: finalizado
+    char formaDePago[10]; // debito o credito
+    int cantDeCuotas;
+    //struct* cliente;
+} stPrestamo;
+
+
+//PROTOTIPADO
+int fechaEsValida(stPrestamo A);
+bool fechaEsAnterior(stPrestamo A);
+bool validarIdExiste(char archivo[], int id);
+stPrestamo cargoUnPrestamo ();
+stPrestamo calculoFechaDeVencimiento (stPrestamo A);
+void mostrarUnPrestamo (stPrestamo A);
+void cargoPrestamosEnArchivo (char archivo[]);
+void mostrarArchivoDePrestamos (char archivo[]);
+void buscarYeliminarPrestamoDelArchivo(char archivo[], char eliminados[], int idAbuscar);
+void mostrarArchivoDePrestamosEliminados (char eliminados[]);
+void modificarDatosArchivo(char archivoPrestamo[], int id);
+stPrestamo modificarDato(stPrestamo dato);
+stPrestamo* buscarDato (char archivo[], int datoBuscado);
+int PasoDatosArchivoToArray(char archivo[], stPrestamo arregloPrestamos[], int dimension);
+void mostrarArrayPrestamos(stPrestamo A[], int validos);
+void ordenarInsercionPrestamosMonto(stPrestamo array[], int validos);
+void ordenarInsercionPrestamosId(stPrestamo array[], int validos);
+void intercambioDatos(stPrestamo *a, stPrestamo *b);
+void ordenamientoSeleccionFormaDePagoDuracion(stPrestamo Aprestamos[], int validos);
+
+//FIN PROTOTIPADO
+
+int main()
+{
+    system("color B");
+
+    char archivoPrestamos[] = "archivo.bin";
+    char archivoEliminados[] = "eliminados.bin";
+
+    stPrestamo arregloPrestamos[100];
+
+    int idAbuscar, idSeleccionado, datoBuscado;
+
+    int opcion = 0, campo =0, validos =0;
+    char control = 's';
+
+    do
+    {
+        printf("\n-----MENU-----\n");
+        printf("1) Agregar prestamos al archivo\n");
+        printf("2) Mostrar el arhivo de Prestamos\n");
+        printf("3) Buscar y Eliminar un prestamo del Archivo\n");
+        printf("4) Mostrar Prestamos dados de baja\n");
+        printf("5) Modificar datos\n");
+        printf("6) Buscar un dato y mostrar\n");
+        printf("7) Listar prestamos segun su Monto\n");
+        printf("8) Listar prestamos segun su ID\n");
+        printf("9) Listar prestamos segun su Forma de Pago\n");
+        printf("10) Salir\n");
+        printf("Ingrese la opcion que desea realizar: \n");
+        scanf("%d", &opcion);
+
+        fflush(stdin);
+
+        system ("cls");
+        switch(opcion)
+        {
+        case 1:
+            cargoPrestamosEnArchivo(archivoPrestamos);
+            break;
+        case 2:
+            mostrarArchivoDePrestamos(archivoPrestamos);
+            break;
+        case 3:
+            printf("Ingrese el ID que desea buscar y eliminar: ");
+            scanf("%d", &idAbuscar);
+
+            buscarYeliminarPrestamoDelArchivo(archivoPrestamos,archivoEliminados,idAbuscar);
+            break;
+        case 4:
+            mostrarArchivoDePrestamosEliminados(archivoEliminados);
+            break;
+        case 5:
+            printf("\nIngrese el id del prestamo que desea modificar: ");
+            scanf("%d", &idSeleccionado);
+
+            modificarDatosArchivo(archivoPrestamos,idSeleccionado);
+            break;
+        case 6:
+            printf("\nIngrese el id del prestamo a buscar: ");
+            scanf("%d", &datoBuscado);
+            stPrestamo* aux = buscarDato(archivoPrestamos,datoBuscado);
+
+            if(aux != NULL && aux->estado == 1)
+            {
+                mostrarUnPrestamo(*aux);
+            }
+            else
+            {
+                printf("No existe el id proporcionado\n");
+            }
+            break;
+        case 7:
+            validos = PasoDatosArchivoToArray(archivoPrestamos,arregloPrestamos,100);
+            ordenarInsercionPrestamosMonto(arregloPrestamos,validos);
+
+            printf("Prestamos Ordenados Segun sus Montos\n");
+            mostrarArrayPrestamos(arregloPrestamos,validos);
+            break;
+        case 8:
+            validos = PasoDatosArchivoToArray(archivoPrestamos,arregloPrestamos,100);
+            ordenarInsercionPrestamosId(arregloPrestamos,validos);
+
+            printf("Prestamos Ordenados Segun sus ID\n");
+            mostrarArrayPrestamos(arregloPrestamos,validos);
+            break;
+        case 9:
+            validos = PasoDatosArchivoToArray(archivoPrestamos,arregloPrestamos,100);
+            ordenamientoSeleccionFormaDePagoDuracion(arregloPrestamos,validos);
+
+            printf("Prestamos Ordenados Segun su Forma de Pago\n");
+            mostrarArrayPrestamos(arregloPrestamos,validos);
+            break;
+        case 10:
+            printf("Saliendo...\n");
+            break;
+        default:
+            printf("ERROR. Ingreso mal la opcion\n");
+            break;
+        }
+        printf("Desea regresar al Menu? s:si/n:no \n");
+        fflush(stdin);
+        scanf("%c", &control);
+        system ("cls");
+    }
+
+    while (control == 's');
+
+    return 0;
+}
+
+///---INICIO FUNCIONES--///
+///-----FUNCIONES PARA VALIDAR QUE LOS DATOS SEAN CORRECTOS-----///
+
+///VERIFICAR QUE LA FECHA SEA VÁLIDA ///
+
+int fechaEsValida(stPrestamo A)
+{
+    int fechaCorrecta = 0;
+
+    if (A.mesInicio >= 1 && A.mesInicio <= 12)
+    {
+        switch(A.mesInicio)
+        {
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 8:
+        case 10:
+        case 12:
+            if (A.diaInicio >= 1 && A.diaInicio <= 31)
+            {
+                fechaCorrecta = 1;
+                break;
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+                if (A.diaInicio >= 1 && A.diaInicio <= 30)
+                {
+                    fechaCorrecta = 1;
+                    break;
+
+                case 2:
+                    if (A.anioInicio % 4 == 0 && A.anioInicio % 100 != 0)
+                    {
+                        if (A.diaInicio >= 1 && A.diaInicio <=29)
+                        {
+                            fechaCorrecta = 1;
+                        }
+                        else if (A.diaInicio >=1 && A.diaInicio <= 28)
+                        {
+                            fechaCorrecta = 1;
+                            break;
+                        }
+                    default:
+                        printf("ERROR: Vuelva a intentar\n");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    return fechaCorrecta;
+}
+
+///VALIDO FECHA - QUE LA INGRESADA SEA ANTERIOR A LA ACTUAL///
+
+bool fechaEsAnterior(stPrestamo A)
+
+{
+    time_t tiempoAcutal = time(NULL); //obtengo fecha y hr actual del sistema
+
+    struct tm*tiempo = localtime(&tiempoAcutal);
+
+    if (A.anioInicio < tiempo->tm_year + 1900)
+    {
+        return true;
+
+    }
+    else if (A.anioInicio == tiempo->tm_year + 1900)
+    {
+        if (A.mesInicio < tiempo->tm_mon + 1)
+        {
+            return true;
+
+        }
+        else if (A.mesInicio == tiempo->tm_mon + 1)
+        {
+            if (A.diaInicio < tiempo->tm_mday)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+///---VALIDAR QUE EL ID NO SE REPITA---///
+
+bool validarIdExiste(char archivo[], int id)
+{
+    FILE *archi;
+    archi = fopen (archivo, "rb");
+    stPrestamo aux;
+
+    if (archi != NULL)
+    {
+        while(fread(&aux, sizeof(stPrestamo), 1, archi) > 0)
+        {
+            if (aux.id == id)
+            {
+                fclose(archi);
+                return true; // ya existe en el archivo
+            }
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("Error: El archivo no pudo ser abierto\n");
+    }
+
+    return false; //el id no existe en el archivo
+}
+
+///---FIN DE FUNCIONES DE VALIDACIONES---///
+
+///---INICIO DE FUNCIONES DE CARGA---///
+
+stPrestamo cargoUnPrestamo(char archivo[])
+{
+    stPrestamo nuevoPrestamo;
+    int fechaCorrecta = 0;
+
+    printf ("Ingrese Id: ");
+    scanf("%d", &nuevoPrestamo.id);
+
+    if(validarIdExiste(archivo, nuevoPrestamo.id))
+    {
+        printf("ERROR: el ID ingresado ya existe\n");
+        nuevoPrestamo.estado = -1;
+        return nuevoPrestamo;
+    }
+
+    printf ("\nIngrese el monto del Prestamo: ");
+    scanf("%f", &nuevoPrestamo.monto);
+
+    printf("\nIngrese Fecha de Inicio del Prestamo (DD/MM/AAAA): ");
+    scanf("%d %d %d", &nuevoPrestamo.diaInicio,&nuevoPrestamo.mesInicio,&nuevoPrestamo.anioInicio);
+
+    fechaCorrecta = fechaEsValida(nuevoPrestamo);
+
+    if (fechaCorrecta !=1)
+    {
+
+        printf("ERROR: La fecha ingresada esta mal\nIngrese una nueva fecha: ");
+        scanf("%d %d %d", &nuevoPrestamo.diaInicio,&nuevoPrestamo.mesInicio,&nuevoPrestamo.anioInicio);
+
+    }
+    else if(fechaEsAnterior(nuevoPrestamo))
+    {
+        printf("ERROR: La fecha debe ser posterior a la actual...\n Ingrese nuevamente: ");
+        scanf("%d %d %d", &nuevoPrestamo.diaInicio,&nuevoPrestamo.mesInicio,&nuevoPrestamo.anioInicio);
+    }
+
+
+    printf("\nIngrese Tiempo de Duración del Prestamo (en dias): ");
+    scanf("%d", &nuevoPrestamo.duracion);
+
+    printf("\nIngrese forma de pago (debito - credito): ");
+    fflush(stdin);
+    gets(nuevoPrestamo.formaDePago);
+
+    if (strcmp(nuevoPrestamo.formaDePago, "debito") != 0 )
+    {
+        printf("\nIngrese cantidad de cuotas: ");
+        scanf("%d", &nuevoPrestamo.cantDeCuotas);
+    }
+    nuevoPrestamo.estado = 1;
+
+    return nuevoPrestamo;
+
+}
+
+stPrestamo calculoFechaDeVencimiento (stPrestamo A)
+{
+    int nuevoDia = A.diaInicio + A.duracion;
+    int nuevoMes = A.mesInicio;
+    int nuevoAnio = A.anioInicio;
+
+    while (nuevoDia > 30) //suponiendo que todos los meses son de 30- puede mejorarse
+    {
+        nuevoDia -= 30;
+        nuevoMes++;
+
+        if (nuevoMes>12)
+        {
+            nuevoMes = 1;
+            nuevoAnio++;
+        }
+    }
+
+    A.diaVencimiento= nuevoDia;
+    A.mesVencimiento = nuevoMes;
+    A.anioVencimiento = nuevoAnio;
+
+    return A;
+}
+
+void mostrarUnPrestamo (stPrestamo A)
+{
+    printf("\n------------------------------------------\n");
+    printf("El Id del Prestamo es: %d \n", A.id);
+    printf("El monto del Prestamo es: $%f \n", A.monto);
+    printf("La Fecha de Inicio es: %d /%d /%d \n", A.diaInicio, A.mesInicio, A.anioInicio);
+    printf("La duracion del Prestamo es: %d \n", A.duracion);
+    printf("La forma de Pago es: %s \n", A.formaDePago);
+    printf("Cantidad de Cuotas: %d \n", A.cantDeCuotas);
+    A = calculoFechaDeVencimiento (A);
+    printf("La Fecha de Vencimiento es: %d / %d / %d \n", A.diaVencimiento, A.mesVencimiento, A.anioVencimiento);
+    printf("Estado del Prestamo 1:activo / 0:de baja:  %d \n", A.estado);
+    printf("\n------------------------------------------\n");
+
+}
+
+void cargoPrestamosEnArchivo (char archivo[])
+{
+    FILE * archi;
+    archi = fopen(archivo, "ab");
+
+    char control = 's';
+
+    stPrestamo aux;
+
+    if (archi != NULL)
+    {
+        while (control == 's')
+        {
+            aux = cargoUnPrestamo(archivo);
+
+            fwrite (&aux, sizeof(stPrestamo), 1, archi);
+
+            printf("\nQuiere seguir cargando otro Prestamo? s: si / n: no:  \n");
+            fflush(stdin);
+            scanf("%c", &control);
+            system("cls");
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("Error: no se pudo abrir el archivo\n");
+    }
+}
+
+void mostrarArchivoDePrestamos(char archivo[])
+{
+    FILE *archi;
+    archi = fopen(archivo, "rb");
+
+    stPrestamo aux;
+
+    if (archi != NULL)
+    {
+        while (fread(&aux, sizeof(stPrestamo), 1, archi) > 0)
+        {
+            if (aux.estado == 1)
+            {
+                mostrarUnPrestamo(aux);
+            }
+        }
+
+        fclose(archi);
+    }
+    else
+    {
+        printf ("Error: Primero debe cargar algun dato en el archivo\n");
+    }
+
+}
+///---FUNCION PARA VERIFICAR SI YA ESTA ELIMINADO EL PRESTAMO---///
+
+int VerificarSiYaFueEliminado (char archivoEliminados[], int idAbuscar)
+{
+    FILE *archiDos;
+    archiDos = fopen(archivoEliminados, "rb");
+
+    stPrestamo aux;
+
+    int encontrado = 0;
+
+    if (archiDos != NULL)
+    {
+        rewind(archiDos);
+        while(fread((&aux), sizeof(stPrestamo), 1,archiDos) >0)
+        {
+            if (aux.id == idAbuscar)
+            {
+                encontrado =1;
+                printf("El prestamo con id %d ya se encuentra eliminado\n", idAbuscar);
+            }
+        }
+    }
+    return encontrado;
+}
+
+///---BUSCAR Y ELIMINAR PRESAMOS (BAJA LOGICA)---///
+
+void buscarYeliminarPrestamoDelArchivo(char archivo[], char eliminados[], int idAbuscar)
+{
+    FILE *archi;
+    archi= fopen(archivo,"r+b");
+
+    FILE *archiDos;
+    archiDos = fopen(eliminados, "ab");
+
+    int flag = 0; //para verificar el id en archi
+
+    stPrestamo aux;
+
+    if(archi != NULL && archiDos != NULL)
+    {
+        //llamo ala funcion de verificar si ya el prestamo se encuentra eliminado
+        int encontrado = VerificarSiYaFueEliminado (eliminados, idAbuscar);
+        flag = 1; // flag cambia a 1 pq ya el id se encuentra eliminado
+
+        if (!encontrado)
+        {
+            //busco el ID en el archivo principal
+
+            while(fread(&aux, sizeof(stPrestamo), 1, archi) > 0)
+            {
+                if(aux.id ==idAbuscar)
+                {
+                    flag = 1;
+
+                    aux.estado = 0;
+                    fseek(archi, -sizeof(stPrestamo), SEEK_CUR); //RETROCEDO PARA SOBREESCRIBIR EL ARCHIVO
+                    fwrite(&aux, sizeof(stPrestamo), 1, archi); //ESCRIBO LA ESTRUCTURA ACTUALIZADA
+
+                    fwrite(&aux, sizeof(stPrestamo), 1, archiDos); //ESCRIBO EL REGISTRO EN EL ARCHIVO DE ELIMINADOS
+
+                    printf("\nPrestamo eliminado correctamente.\n");
+                    break; //SALE DEL BUCLE UNA VEZ QUE ENCONTRO EL PRESTAMO Y LO ELIMINO
+                }
+            }
+            if(!flag)
+            {
+                printf("\nERROR: No se encontro ningun Prestamo asociado a ese ID.\n");
+            }
+            fclose(archi);
+            fclose (archiDos);
+        }
+    }
+}
+
+void mostrarArchivoDePrestamosEliminados (char eliminados[])
+{
+    FILE *archi;
+    stPrestamo aux;
+    archi = fopen(eliminados, "rb");
+
+
+    if (archi != NULL)
+    {
+        while (fread(&aux, sizeof(stPrestamo), 1, archi) > 0)
+        {
+            mostrarUnPrestamo(aux);
+        }
+
+        fclose(archi);
+    }
+    else
+    {
+        printf ("Error: Primero debe cargar algun dato en el archivo\n");
+    }
+
+}
+
+///---FUNCIONES PARA MODIFICAR DATOS---///
+
+//--MUESTRO MENU PARA MODIFICAR DATOS--//
+
+
+void modificarDatosArchivo(char archivoPrestamo[], int id)
+{
+    FILE *archi = fopen(archivoPrestamo, "r+b");
+    if (archi != NULL)
+    {
+        stPrestamo aux;
+        while (fread(&aux, sizeof(stPrestamo), 1, archi) > 0)
+        {
+            if (aux.id == id)
+            {
+                aux = modificarDato(aux);
+                fseek(archi, -sizeof(stPrestamo), SEEK_CUR);
+                fwrite(&aux, sizeof(stPrestamo), 1, archi);
+                break;
+            }
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("Error al abrir el archivo: %s\n", archivoPrestamo);
+    }
+}
+
+stPrestamo modificarDato(stPrestamo dato)
+{
+    char control = 's';
+
+    do
+    {
+        printf("1 - Monto = %f\n",dato.monto);
+        printf("2 - Fecha inicio = %i/%i/%i\n",dato.diaInicio, dato.mesInicio, dato.anioInicio);
+        printf("3 - Duracion = %i\n",dato.duracion);
+        printf("4 - Forma de pago = %s\n",dato.formaDePago);
+        printf("\nIngrese el dato que desea modificar: \n");
+
+
+        int selector = 0;
+        scanf("%i", &selector);
+
+        switch(selector)
+        {
+        case 1:
+        {
+            printf("\nIngrese nuevo monto: ");
+            scanf("%f", &dato.monto);
+            break;
+        }
+        case 2:
+        {
+            printf("\nIngrese nueva fecha de inicio: ");
+            scanf("%d %d %d", &dato.diaInicio, &dato.mesInicio, &dato.anioInicio);
+            break;
+        }
+        case 3:
+        {
+            printf("\nIngrese nuevo tiempo de duracion: ");
+            scanf("%d", &dato.duracion);
+            break;
+        }
+        case 4:
+        {
+            printf("\nIngrese nueva forma de pago: ");
+            fflush(stdin);
+            gets(dato.formaDePago);
+            if (strcmp(dato.formaDePago, "debito") != 0)
+            {
+                printf("\nIngrese cantidad de cuotas: ");
+                scanf("%d", &dato.cantDeCuotas);
+            }
+            else
+            {
+                dato.cantDeCuotas = 0;
+            }
+            break;
+        }
+        default:
+        {
+            printf("ERROR. Ingreso mal la opcion\n");
+            break;
+        }
+
+        }
+        printf("Desea realizar otra modificacion? s:si/n:no \n");
+        fflush(stdin);
+        scanf("%c", &control);
+        system ("cls");
+    }
+    while (control == 's');
+    return dato;
+}
+
+stPrestamo* buscarDato (char archivo[], int datoBuscado)
+{
+    FILE * archi;
+    archi = fopen (archivo, "r+b");
+
+    stPrestamo* aux;
+
+    if(archi != NULL)
+    {
+        while(fread(aux, sizeof(stPrestamo), 1, archi)>0)
+        {
+            if(aux->id == datoBuscado)
+            {
+                fclose(archi);
+                return aux;
+            }
+        }
+
+        fclose(archi);
+    }
+    else
+    {
+        printf("ERROR: no se pudo abrir el archivo\n");
+    }
+
+    return NULL;
+}
+
+///----FUNCION PASAR DATOS DEL ARCHIVO TO ARRAY-----///
+int PasoDatosArchivoToArray(char archivo[], stPrestamo arregloPrestamos[], int dimension)
+{
+    FILE *archi;
+    archi = fopen(archivo, "rb");
+    int i = 0; //contador de prestamos
+
+    stPrestamo aux;
+
+    if(archi != NULL)
+    {
+        while(i<dimension && fread(&aux, sizeof(stPrestamo),1,archi)>0)
+        {
+            arregloPrestamos[i] = aux;
+            i++;
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("ERROR: no se pudo abrir el archivo");
+    }
+
+    return i;
+}
+///-----FUNCION PARA MOSTRAR ARRAY DE PRESTAMOS-----///
+
+void mostrarArrayPrestamos(stPrestamo A[], int validos)
+{
+    int i;
+    for (i = 0; i<validos; i++)
+    {
+        mostrarUnPrestamo(A[i]);
+    }
+}
+
+void ordenarInsercionPrestamosMonto(stPrestamo array[], int validos)
+{
+    for (int i = 1; i < validos; i++)
+    {
+        stPrestamo aux = array[i];
+        int j = i - 1;
+
+        while (j >= 0 && array[j].monto > aux.monto)
+        {
+            array[j + 1] = array[j];
+            j--;
+        }
+
+        array[j + 1] = aux;
+    }
+}
+void ordenarInsercionPrestamosId(stPrestamo array[], int validos)
+{
+    for (int i = 1; i < validos; i++)
+    {
+        stPrestamo aux = array[i];
+        int j = i - 1;
+
+        while (j >= 0 && array[j].id > aux.id)
+        {
+            array[j + 1] = array[j];
+            j--;
+        }
+
+        array[j + 1] = aux;
+    }
+}
+void intercambioDatos(stPrestamo *a, stPrestamo *b)
+{
+    stPrestamo aux = *a;
+
+    *a = *b;
+    *b = aux;
+}
+
+void ordenamientoSeleccionFormaDePagoDuracion(stPrestamo Aprestamos[], int validos)
+{
+    int i, j, menorId;
+    stPrestamo temp;
+
+    for (i = 0; i < validos - 1; i++)
+    {
+        menorId = i; //la posicion menor arranca en el contador i
+        for (j = i + 1; j < validos; j++)
+        {
+            if (strcmp(Aprestamos[j].formaDePago, Aprestamos[menorId].formaDePago) < 0) //comparo si es debito o credito
+            {
+                menorId = j;
+            }
+            // Si tienen la misma forma de pago, entonces por duración (menor duración primero)
+            else if (strcmp(Aprestamos[j].formaDePago, Aprestamos[menorId].formaDePago) == 0)
+            {
+                if (Aprestamos[j].duracion < Aprestamos[menorId].duracion)
+                {
+                    menorId = j;
+                }
+            }
+        }
+        // Intercambiar el elemento mínimo encontrado con el primer elemento no ordenado
+        intercambioDatos(&Aprestamos[i], &Aprestamos[menorId]);
+    }
+}
