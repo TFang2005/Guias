@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "pila.h"
+
 ///**////////////////////////////////////
 ///PROTOTIPADO///////////////////////////
 ///**////////////////////////////////////
@@ -15,23 +17,34 @@ typedef struct
     char antiguedad[30];
     char sexo;
     int* cantidadDeVentas;
-    float sueldo;
+    float* sueldo;
+    Pila *sueldosPasados;
     int estado;
 } stEmpleado;
 
-///**CARGAR EL ARCHIVO DE EMPLEADOS/////////////////////////////////
+///**CARGAR EL ARCHIVO DE EMPLEADOS////////////////////////////////
 void cargarArchivoEmpleados(char emple[]);
 
-///**MOSTRAR EL ARCHIVO DE EMPLEADOS////////////////////////////////
+///**MOSTRAR EL ARCHIVO DE EMPLEADOS///////////////////
 void mostrarEmpleados(char emple[]);
 
-///**BUSCAR Y MODIFICAR UN ARCHIVO//////////////////////////////////
-void buscarYmodificar(char emple[], char dniBuscar[]);
+///**BUSCAR Y ELIMINAR UN EMPLEADO DEL ARCHIVO////////////
+void buscarYeliminar(char emple[], char eliminados[], char dni[]);
 
+///**MOSTRAR EMPLEADOS DADO DE BAJA///////////////////////
+void mostrarEmpleBajados(char elimanods[]);
+
+///**MODIFICAR EMPLEADOS/////////////////////////////////
+void buscarYmodificarUnEmpleado(char emple[], char dni[]);
+
+///**BUSCAR EMPLEADOS////////////////////////////////////
 void menuParaBuscar(char emple[]);
 
+///**ORDENAR NOMBRES/////////////////////////////////////
+void ordenarEmpleadoPorNombre(char emple[]);
 
-
+///**ORDENAR POR LEGAJO/////////////////////////////////
+void ordenarPorLegajo(char emple[]);
 
 ///**////////////////////////////////////
 ///MAIN//////////////////////////////////
@@ -40,17 +53,22 @@ void menuParaBuscar(char emple[]);
 int main()
 {
     system("color 3F");
-    char empleados[]="ArchivoEmpleados";
 
-    char control='s', dniBuscar[50];
+    char empleados[]="ArchivoEmpleados";///Archivo de empleados original
+    char eliminados[]="EmpleadosEliminados";///Archivo de empleados dado de baja
+
+    char control='s', buscarDni[16];
     int opcion=0;
 
     do
     {
         printf("\n-----MENU-----\n");
-        printf("1.Agregar empleados al archivo.\n2.Mostrar el archivo de empleados.\n3.Buscar y modificar un empleado del archivo.\n4.Buscar empleado.\n");
+        printf("1.Agregar empleados al archivo.\n2.Mostrar el archivo de empleados.\n3.Buscar y Eliminar un empleado del archivo.\n4.Mostrar empleados dado de baja.\n5.Modificar empleados.\n6.Buscar un empleado y mostrarlo.\n");
+        printf("6.Ordenar empleados por nombre\n7.Ordenar empleados por legajo.\n");
         printf("Ingrese la opcion que desea realizar.\n");
         scanf("%d", &opcion);
+        system("pause");
+        system("cls");
 
         switch(opcion)
         {
@@ -61,14 +79,30 @@ int main()
             mostrarEmpleados(empleados);
             break;
         case 3:
-            printf("\nIngrese el DNI que desea buscar y modificar: \n");
+            printf("\nIngrese el DNI que desea buscar y dar de baja: \n");
             fflush(stdin);
-            gets(dniBuscar);
+            gets(buscarDni);
 
-            buscarYmodificar(empleados, dniBuscar);
+            buscarYeliminar(empleados, eliminados, buscarDni);
             break;
         case 4:
+            mostrarEmpleBajados(eliminados);
+            break;
+        case 5:
+            printf("\nIngrese el DNI del empleado que desea modificar: \n");
+            fflush(stdin);
+            gets(buscarDni);
+
+            buscarYmodificarUnEmpleado(empleados, buscarDni);
+            break;
+        case 6:
             menuParaBuscar(empleados);
+            break;
+        case 7:
+            ordenarEmpleadoPorNombre(empleados);
+            break;
+        case 8:
+            ordenarPorLegajo(empleados);
             break;
         default:
             printf("\nERROR: Opcion no valida.\n");
@@ -86,6 +120,10 @@ int main()
 ///**////////////////////////////////////
 ///FUNCIONES/////////////////////////////
 ///**////////////////////////////////////
+
+///-----------------------------------------------------------/////////////////
+///----------APARTADO EXCLUSIVAMENTE DE ALTA------------------/////////////////
+///-----------------------------------------------------------/////////////////
 
 ///VERIFICAR SI EL EMPLEADO YA FUE CARGADO POR DNI///////
 bool verificarDNI(char dni[], char emple[])
@@ -140,7 +178,6 @@ bool verificarNombre(char nombreyApellido[], char emple[])
 ///CARGAR UN SOLO EMPLEADO///////////////
 stEmpleado cargarUnEmpleado(char emple[])
 {
-    system("color 2F");
     stEmpleado nuevoEmpleado;
 
     printf("Ingrese el nombre y el apellido del empleado.\n");
@@ -182,8 +219,7 @@ stEmpleado cargarUnEmpleado(char emple[])
     printf("Ingrese el sueldo del empleado.\n");
     scanf("%f", &nuevoEmpleado.sueldo);
 
-    printf("Ingrese el estado del empleado.(1 Activo, 0 Inactivo)\n");
-    scanf("%d", &nuevoEmpleado.estado);
+    nuevoEmpleado.estado = 1;
 
     return nuevoEmpleado;
 }
@@ -205,7 +241,6 @@ void cargarArchivoEmpleados(char emple[])
             {
                 fwrite(&aux, sizeof(stEmpleado), 1, archivo);
             }
-
             printf("\nDesea seguir cargando nuevos empleados al archivo? (s|n)");
             fflush(stdin);
             scanf("%c", &control);
@@ -217,6 +252,10 @@ void cargarArchivoEmpleados(char emple[])
         printf("\nERROR: El archivo no pudo abrirse para cargar nuevos empleados.\n");
     }
 }
+
+///-----------------------------------------------------------/////////////////
+///----------APARTADO EXCLUSIVAMENTE DE MUESTRA------------------//////////////
+///-----------------------------------------------------------/////////////////
 
 ///MOSTRAR UN SOLO EMPLEADO//////////////
 void mostrarUnEmpleado(stEmpleado nuevoEmpleado)
@@ -252,106 +291,203 @@ void mostrarEmpleados(char emple[])
     }
 }
 
-///---------------------------------------------/////////////////////////////////
-///---BUSQUEDA Y MODIFICACION DE UN EMPLEADO----/////////////////////////////////
-///---------------------------------------------/////////////////////////////////
+///-----------------------------------------------------------/////////////////
+///----------APARTADO EXCLUSIVAMENTE DE BAJA------------------/////////////////
+///-----------------------------------------------------------/////////////////
 
-///----------------------------------------
-///BUSCAR Y MODIFICAR UNA PELICULA//////
-///----------------------------------------
-void buscarYmodificar(char emple[], char dniBuscar[])
+///BUSCAR Y DAR DE BAJA UN EMPLEADO////////////////////
+void buscarYeliminar(char emple[], char eliminados[], char dni[])
 {
-    FILE *archivo=fopen(emple, "r+b");
-    stEmpleado aux;
+    FILE *archivo= fopen(emple,"r+b");
+    FILE *archivoDos= fopen(eliminados, "ab");
 
     bool encontrado=false;
+    stEmpleado aux;
 
-    if(archivo)
+    if(archivo && archivoDos)
     {
-        while(fread(&aux, sizeof(stEmpleado), 1,archivo) >0)
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
         {
-            if(strcmp(aux.dni, dniBuscar) == 0)
+            if(strcmp(aux.dni, dni) == 0)
             {
                 encontrado=true;
 
-                int opcion=0;
-                char control='s';
-
-                int nuevoLegajo=0, nuevaVenta=0;
-                float nuevoSueldo=0;
-
-                do
-                {
-                    printf("\n\n-----MENU-----\n\n");
-                    printf("\n---SUBMENU MODIFICAR EMPLEADOS---\n");
-                    printf("1.Modificar legajo.\n2.Modificar la cantidad de ventas.\n3.Modifcar el sueldo.\n");
-                    printf("\nIngrese la opcion del campo que desea modficar: \n");
-                    scanf("%d", &opcion);
-
-                    switch(opcion)
-                    {
-                    case 1:
-                        printf("\nIngrese el nuevo legajo del empleado: \n");
-                        scanf("%d", &nuevoLegajo);
-
-                        modificarLegajo(emple, nuevoLegajo);
-                        break;
-                    case 2:
-                        printf("\nIngrese la nueva cantida de ventas del empleado: \n");
-                        scanf("%d", &nuevaVenta);
-
-                        modificarVentas(emple, nuevaVenta);
-                        break;
-                    case 3:
-                        printf("\nIngrese el nuevo sueldo del empleado: \n");
-                        scanf("%f", &nuevoSueldo);
-
-                        modificarSueldo(emple, nuevoSueldo);
-                        break;
-                    default:
-                        printf("\nERROR: La opcion no fue valida.\n");
-                        break;
-                    }
-
-                    printf("\nDesea modifcar otro campo? (s|n)");
-                    fflush(stdin);
-                    scanf("%c", &control);
-                }
-                while(control=='s');
+                aux.estado=0;
+                fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+                fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+                fwrite(&aux, sizeof(stEmpleado), 1, archivoDos);
+                printf("\nPelicula eliminada correctamente.\n");
+                break;
             }
         }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se encontro ningun Empleado asociado a este DNI.\n");
+        }
         fclose(archivo);
+        fclose(archivoDos);
     }
     else
     {
-        printf("\nERROR: El archivo no pudo abrirse correctamente.\n");
+        printf("\nERROR: No se pudo abrir el archivo.\n");
     }
 }
 
-///----------------------------------------
-///**MODIFICAR LEGAJO//////////////////////
-///----------------------------------------
-void modificarLegajo(char emple[], int nuevoLegajo)
+///MOSTRAR EMPLEADOS DADOS DE BAJA/////////////////////
+void mostrarEmpleBajados(char elimanods[])
 {
-    FILE *archivo=fopen(emple, "r+b");
+    FILE *archivo=fopen(elimanods,"rb");
     stEmpleado aux;
 
     if(archivo)
     {
         while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
         {
-            aux.legajo= nuevoLegajo;
-
-            fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
-            fwrite(&aux, sizeof(stEmpleado), 1, archivo);
-            printf("\nLegajo modificado correctamente.\n");
-            break;
+            mostrarUnEmpleado(aux);
         }
         fclose(archivo);
     }
     else
     {
         printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+
+
+///-----------------------------------------------------------/////////////////
+///---APARTADO EXCLUSIVAMENTE DE MODIFICACION DE ARCHIVOS-----/////////////////
+///-----------------------------------------------------------/////////////////
+
+
+///BUSCAR Y MODIFICAR UNA EMPLEADO////////////////
+void buscarYmodificarUnEmpleado(char emple[], char dni[])
+{
+    FILE *archivo=fopen(archivo,"r+b");
+    stEmpleado aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcmp(aux.dni, dni) == 0)
+            {
+                encontrado=true;
+
+                char continuar='s';
+                int opcion=0;
+
+                char nuevoNombre[50];
+                int nuevoLegajo=0, nuevaVenta=0;
+                float nuevoSueldo=0;
+
+                do
+                {
+                    printf("\n\n-----MENU-----\n\n");
+                    printf("\n--MODIFICACION DE EMPLEADOS--\n");
+                    printf("1.Modificar nombre y apellido.\n2.Modificar legajo.\n3.Modificar dni.\n4.Modificar antiguedad.\n5.Modificar sexo.\n6.Modificar cantidad de ventas.\n");
+                    printf("7.Modificar sueldo.\n");
+                    printf("Ingrese la opcion que desea realizar: \n");
+                    scanf("%d", &opcion);
+
+                    switch(opcion)
+                    {
+                    case 1:
+                        printf("\nIngrese el nuevo nombre del empleado: \n");
+                        fflush(stdin);
+                        gets(nuevoNombre);
+
+                        modificarNombre(emple, nuevoNombre);
+                        break;
+                    case 2:
+                        printf("\nIngrese el nuevo legajo: \n");
+                        scanf("%d", &nuevoLegajo);
+
+                        modificarLegajo(emple, nuevoLegajo);
+                        break;
+                    case 3:
+                        printf("\nIngrese la nueva cantidad de ventas del empleados: \n");
+                        scanf("%d", &nuevaVenta);
+
+                        modificarVentas(emple, nuevaVenta);
+                        break;
+                    case 4:
+                        printf("\nIngrese el nuevo sueldo del empleado: \n");
+                        scanf("%f", &nuevoSueldo);
+
+                        modificarSueldo(emple, nuevoSueldo);
+                        break;
+                    default:
+                        printf("\nERROR: La opcion ingresada no es validad.\n");
+                        break;
+                    }
+                    printf("\nDesea seguir modificando empleados? (s|n)");
+                    fflush(stdin);
+                    scanf("%c", &continuar);
+                }
+                while(continuar=='s');
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se ha encontrado el DNI buscado.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrise.\n");
+    }
+}
+
+///**MODIFICAR NOMBRE**///////////////////////////////////
+void modificarNombre(char emple[], char nuevoNombre[])
+{
+    FILE *archivo= fopen(emple,"r+b");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            strcpy(aux.nombreYapellido, nuevoNombre);
+            fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+            fwrite(&aux, sizeof(stEmpleado), 1,archivo);
+            printf("\Nombre modificado correctamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///**MODIFICAR LEGAJO**//////////////////////////////////
+void modificarLegajo(char emple[], int nuevoLegajo)
+{
+    FILE *archivo= fopen(emple, "r+b");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1,archivo) >0)
+        {
+            aux.legajo=nuevoLegajo;
+
+            fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+            fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+            printf("\nEl legajo fue modificado exitosamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse correctamente.\n");
     }
 }
 
@@ -409,9 +545,10 @@ void modificarSueldo(char emple[], float nuevoSueldo)
     }
 }
 
-///**/////////////////////////////////////
-///**BUSCAR Y MOSTRAR UN EMPLEADO/////////
-///**/////////////////////////////////////
+///-----------------------------------------------------------/////////////////
+///---APARTADO EXCLUSIVAMENTE PARA BUSCAR UN ARCHIVO----------/////////////////
+///-----------------------------------------------------------/////////////////
+
 
 ///---------------------------------------
 ///**MENU PARA BUSCAR EMPLEADO////////////
@@ -423,7 +560,7 @@ void menuParaBuscar(char emple[])
 
     if(archivo)
     {
-        while(fread(&aux, sizeof(stEmpleado), 1 ,archivo) >0)
+        while(fread(&aux, sizeof(stEmpleado), 1,archivo) >0)
         {
             char control='s';
             int opcion=0;
@@ -478,10 +615,12 @@ void menuParaBuscar(char emple[])
                 printf("\nDesea seguir buscando por otras opciones? (s|n).\n");
                 fflush(stdin);
                 scanf("%c", &control);
-            }while(control=='s');
+            }
+            while(control=='s');
         }
         fclose(archivo);
-    }else
+    }
+    else
     {
         printf("\nERROR: No se pudo abrir el archivo.\n");
     }
@@ -500,7 +639,7 @@ void BuscarPorNombre(char emple[], char buscarNombre[])
 
     if(archivo)
     {
-        while(fread(&aux, sizeof(stEmpleado), 1 ,archivo) >0)
+        while(fread(&aux, sizeof(stEmpleado), 1,archivo) >0)
         {
             if(strcpy(aux.nombreYapellido, buscarNombre))
             {
@@ -514,7 +653,8 @@ void BuscarPorNombre(char emple[], char buscarNombre[])
             printf("\nNo se encontrado ningun empleado con este nombre.\n");
         }
         fclose(archivo);
-    }else
+    }
+    else
     {
         printf("\nERROR: No pudo abrirse el archivo.\n");
     }
@@ -546,7 +686,8 @@ void buscarPorLegajp(char emple[], int buscarLegajo)
             printf("\nERROR: No se encontro ningun empleado con este legajo.\n");
         }
         fclose(archivo);
-    }else
+    }
+    else
     {
         printf("\nERROR: No pudo abirse el archivo.\n");
     }
@@ -578,7 +719,8 @@ void buscarPorDni(char emple[], int buscarDni)
             printf("\nERROR: No se encontro ningun empleado con este DNI.\n");
         }
         fclose(archivo);
-    }else
+    }
+    else
     {
         printf("\nERROR: El archivo no pudo abrirse.\n");
     }
@@ -610,38 +752,95 @@ void buscarPorAntiguedad(char emple[], char buscarAnti[])
             printf("\nERROR: No se encontro ningun empleado con este antiguedad.\n");
         }
         fclose(archivo);
-    }else
+    }
+    else
     {
         printf("\nERROR: El archivo no pudo abrirse.\n");
     }
 }
 
+///-----------------------------------------------------------/////////////////
+///---APARTADO EXCLUSIVAMENTE PARA ORDENAR LOS ARCHIVOS-------/////////////////
+///-----------------------------------------------------------/////////////////
 
+void ordenarEmpleadoPorNombre(char emple[])
+{
+    FILE *archivo = fopen(emple, "r+b");
 
+    if(archivo)
+    {
+        fseek(archivo, 0, SEEK_END);
+        long cant = ftell(archivo);
+        int numEmpleados = cant / sizeof(stEmpleado);
+        fseek(archivo, 0, SEEK_SET);
 
+        stEmpleado *empleadosArray = malloc(cant);
+        fread(empleadosArray, sizeof(stEmpleado), numEmpleados, archivo);
 
+        for(int i=0; i<numEmpleados -1;i++)
+        {
+            int minIndex = i;
+            for(int j=i +1; j<numEmpleados;j++){
+                if(strcmp(empleadosArray[j].nombreYapellido, empleadosArray[minIndex].nombreYapellido) <0)
+                {
+                    minIndex = j;
+                }
+            }
+            if(minIndex != i)
+            {
+            stEmpleado temp= empleadosArray[i];
+            empleadosArray[i]=empleadosArray[minIndex];
+            empleadosArray[minIndex] = temp;
+            }
+        }
+        for( int i=0; i<numEmpleados;i++)
+        {
+            mostrarUnEmpleado(empleadosArray[i]);
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
 
+///SUB FUNCION////
+void ordenarEmpleadosPorLegajo(stEmpleado empleadosArray[], int numEmpleados)
+{
+    for (int i = 1; i < numEmpleados; i++) {
+        stEmpleado actual = empleadosArray[i];
+        int j = i - 1;
+        while (j >= 0 && empleadosArray[j].legajo > actual.legajo) {
+            empleadosArray[j + 1] = empleadosArray[j];
+            j--;
+        }
+        empleadosArray[j + 1] = actual;
+    }
+}
 
+void ordenarPorLegajo(char emple[])
+{
+    FILE *archivo= fopen(emple, "r+b");
+    if(archivo)
+    {
+        fseek(archivo, 0, SEEK_END);
+        long cant= ftell(archivo);
+        int numEmpleados= cant / sizeof(stEmpleado);
+        fseek(archivo, 0, SEEK_SET);
 
+        stEmpleado *empleadosArray = malloc(cant);
+        fread(empleadosArray, sizeof(stEmpleado), numEmpleados, archivo);
 
+        ordenarEmpleadosPorLegajo(empleadosArray, numEmpleados);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        for(int i=0; i < numEmpleados; i++)
+        {
+            mostrarUnEmpleado(empleadosArray[i]);
+        }
+        fclose(archivo);
+    }else
+    {
+        printf("\nERROR: No se pudo abrir el archivo.\n");
+    }
+}
 
