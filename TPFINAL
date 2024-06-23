@@ -19,7 +19,6 @@ typedef struct
     int* cantidadDeVentas;
     int sueldo;
     int estado;
-    Pila* sueldosPasados;
 } stEmpleado;
 
 #define ADMIN_USER "admin"
@@ -341,36 +340,6 @@ void mostrarEmpleados(char emple[])
     }
 }
 
-///MOSTRAR SUELDOS PASADOS DEL EMPLEADO/////////
-void mostrarSueldosPasados(char emple[], char dni[])
-{
-    FILE *archivo = fopen(emple, "rb");
-    stEmpleado aux;
-    bool encontrado = false;
-
-    if (archivo)
-    {
-        while (fread(&aux, sizeof(stEmpleado), 1, archivo) > 0)
-        {
-            if (strcmp(aux.dni, dni) == 0)
-            {
-                encontrado = true;
-                printf("Sueldos pasados del empleado %s:\n", aux.nombreYapellido);
-                mostrar(&aux.sueldosPasados);
-                break;
-            }
-        }
-        if (!encontrado)
-        {
-            printf("\nERROR: No se encontró ningún empleado con este DNI.\n");
-        }
-        fclose(archivo);
-    }
-    else
-    {
-        printf("\nERROR: El archivo no pudo abrirse.\n");
-    }
-}
 ///-----------------------------------------------------------/////////////////
 ///----------APARTADO EXCLUSIVAMENTE DE BAJA------------------/////////////////
 ///-----------------------------------------------------------/////////////////
@@ -609,9 +578,6 @@ void modificarSueldo(char emple[], int nuevoSueldo)
     {
         while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
         {
-            inicpila(&aux.sueldosPasados);
-            apilar(aux.sueldosPasados, aux.sueldo);
-
             aux.sueldo = nuevoSueldo;
 
             fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
