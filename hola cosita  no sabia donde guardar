@@ -1,124 +1,329 @@
 #include <stdio.h>
 #include <stdlib.h>
-///**/////////////////////////////////////////////////////////////
-///PROTOTIPADO////////////////////////////////////////////////////
-///**/////////////////////////////////////////////////////////////
-///1///////////////////////////////////////////////////
-int AgregarFinal(int archivoInt[], int dimension);
-void mostrarInt(int archivoInt[], int validos);
-int cantRegistros (int archivoInt[], int validos);
-///2///////////////////////////////////////////////////
+#include <string.h>
+#include <stdbool.h>
+
+typedef struct
+{
+    char nombreYapellido[30];
+    char dni[10];
+    int edad;
+    char sexo;
+    char domicilio[50];
+    int cantPrestamos;
+    char nombrePrestamista[30];
+    int activo;  // Hecho para la baja lógica: 1 para activo y 0 para inactivo
+} stCliente;
+
+bool verificarDNI(char dni[], char clientes[]);
 
 
-///**/////////////////////////////////////////////////////////////
-///MAIN///////////////////////////////////////////////////////////
-///**/////////////////////////////////////////////////////////////
+void cargarClientes(stCliente A[], int *dimension, int dimensionMax);
+int leerClientesDesdeArchivo(char archivoClientes[], stCliente A[], int dimensionMax);
+void guardarClientesEnArchivo(char archivoClientes[]);
+void darDeBajaCliente(stCliente A[], int dimension);
+void ordenarClientesPorNombre(stCliente A[], int dimension);
+void ordenarClientesPorEdad(stCliente A[], int dimension);
+void mostrarClientes(stCliente A[], int dimension);
+void modificarCliente(stCliente A[], int dimension);
+
 int main()
 {
-    int archivoInt[50]= {};
-    int validos=0, resul=0, opcion=0;
+    int dimensionMax = 50;
+    // Cliente clientes[dimensionMax];
+    char clientes[]="ArchivoClientes";
+    int dimensionActual = 0;
 
-    char continuar=0;
+    dimensionActual = leerClientesDesdeArchivo("clientes.bin", clientes, dimensionMax);
 
-    do{
+    int opcion;
+    do
+    {
+        printf("\n--- MENU ---\n");
+        printf("1. Cargar clientes\n");
+        printf("2. Dar de baja un cliente\n");
+        printf("3. Guardar clientes en archivo\n");
+        printf("4. Ordenar clientes por nombre\n");
+        printf("5. Ordenar clientes por edad\n");
+        printf("6. Mostrar clientes\n");
+        printf("7. Modificar cliente\n");
+        printf("8. Salir\n");
+        printf("Elija una opcion: ");
+        scanf("%d", &opcion);
+        fflush(stdin);
 
-       printf("---MENU---\n");
-       printf("\n1.Cargar elementos en un archivo, mostrar y contar cuantos elementos hay.\n");
-       printf("Ingrese la opcion que desea realizar: \n");
-       scanf("%d", &opcion);
-
-       switch(opcion)
-       {
-       case 1:///1//////////////////////////////////////////////////////////////////////////
-            validos=AgregarFinal(archivoInt, 10);
-            printf("\nSe guardaron %d elementos en el arreglo.\n", validos);
-            mostrarInt(archivoInt, validos);
-            resul = cantRegistros (archivoInt, validos);
-            printf("\nEn el archivo se encuentran: %d elementos guardados.\n", resul);
-        break;
-       case 2:///2//////////////////////////////////////////////////////////////////////////
-        break;
-       case 3:///3//////////////////////////////////////////////////////////////////////////
-       default:
-           printf("\nERROR: Porfavor ingrese una opcion valida.\n");
-        break;
-       }
-    }while(continuar=='s');
+        switch (opcion)
+        {
+        case 1:
+            cargarClientes(clientes, &dimensionActual, dimensionMax);
+            break;
+        case 2:
+            darDeBajaCliente(clientes, dimensionActual);
+            break;
+        case 3:
+            guardarClientesEnArchivo(clientes);
+            break;
+        case 4:
+            ordenarClientesPorNombre(clientes, dimensionActual);
+            printf("Clientes ordenados por nombre.\n");
+            break;
+        case 5:
+            ordenarClientesPorEdad(clientes, dimensionActual);
+            printf("Clientes ordenados por edad.\n");
+            break;
+        case 6:
+            mostrarClientes(clientes, dimensionActual);
+            break;
+        case 7:
+            modificarCliente(clientes, dimensionActual);
+            break;
+        case 8:
+            printf("Saliendo del sistema...\n");
+            break;
+        default:
+            printf("Opcion no valida. Intente de nuevo.\n");
+            break;
+        }
+    }
+    while (opcion != 8);
 
     return 0;
 }
-///**//////////////////////////////////////////////////////////////////
-///FUNCIONES///////////////////////////////////////////////////////////
-///**//////////////////////////////////////////////////////////////////
 
-///1///////////////////////////////////////////////////////////////////
-int AgregarFinal(int archivoInt[], int dimension)
+
+//FUNCIONES
+
+bool verificarDNI(char dni[], char clientes[])
 {
-    FILE *fp = fopen ("archivoInt", "ab");
+    FILE *archivo =fopen(clientes, "rb");
+    stCliente aux;
 
-    int validos=0;
-    char control='s';
-
-    if (fp)
+    if(archivo)
     {
-        while(control=='s' && validos<dimension)
+        while(fread(&aux, sizeof(stCliente), 1, archivo) >0)
         {
-            printf("Por favor ingrese un elemento: \n");
-            scanf("%d", &archivoInt[validos]);
-            fwrite(&archivoInt[validos], sizeof(int), 1, fp);
-
-            validos++;
-
-            printf("\nDesea seguir agregando elementos? (s/n)\n");
-            fflush(stdin);
-            scanf("%c", &control);
+            if(strcmp(aux.dni, dni) ==0)
+            {
+                fclose(archivo);
+                return true;///EL ARCHIVO YA EXISTE
+            }
         }
-        fclose (fp);
-    }
-    else
-    {
-        printf("\nNo pudo abrirse el archivo.\n");
-    }
-    return validos;
-}
-
-void mostrarInt(int archivoInt[], int validos)
-{
-    int i=0;
-
-    FILE *fp =fopen("archivoInt", "rb");
-    if(fp)
-    {
-        printf("\nEl contenido del archivo es:\n");
-        while(fread(&archivoInt, sizeof(int), 1, fp) !=0)
-        {
-            printf("\nIndice %d: Valor %d", i, archivoInt);
-            i++;
-        }
-        printf("\n");
-        fclose(fp);
-    }
-    else
-    {
-        printf("\nNo se pudo abrir.\n");
-    }
-}
-
-int cantRegistros (int archivoInt[], int validos)
-{
-    int contador=0,i=0;
-
-    FILE *fp = fopen ("archivoInt", "rb");
-    if (fp)
-    {
-        while(fread(&archivoInt, sizeof(int), 1, fp) !=0)
-        {
-            contador++;
-        }
-        fclose(fp);
+        fclose(archivo);
     }else
     {
-        printf("\nNo se pudo abrir.\n");
+        printf("\nERROR: No pudo abrirse el archivo.\n");
     }
-    return contador;
+    return false;
+}
+
+
+stCliente cargarUnCliente(char clientes[])
+{
+    stCliente a;
+
+    printf("\nIngrese el DNI del cliente a cargar: \n");
+    fflush(stdin);
+    gets(a.dni);
+
+    if(verificarDNI(a.dni, clientes))
+    {
+        printf("\nERROR: El empleado ya existe en el archivo.\n");
+            a.activo= -1;
+            return a;
+    }
+
+    printf("\nIngrese Nombre y Apellido del cliente\n");
+    fflush(stdin);
+    gets(a.nombreYapellido);
+
+    printf("\nIngrese la edad del cliente\n");
+    scanf("%d", &a.edad);
+
+    printf("\nIngrese el genero del cliente: (m o f)\n");
+    fflush(stdin);
+    scanf("%c", &a.sexo);
+
+    printf("\nIngrese el domicilio del cliente\n");
+    fflush(stdin);
+    gets(a.domicilio);
+
+    printf("\nIngrese cuántos prestamos tiene el cliente\n");
+    fflush(stdin);
+    scanf("%d", &a.cantPrestamos);
+
+    // a.prestamoActual = cargarUnPrestamo();
+
+    printf("\nIngrese quien le dio el prestamo al cliente\n");
+    fflush(stdin);
+    gets(a.nombrePrestamista);
+
+    a.activo = 1;
+
+    return a;
+}
+
+
+void cargarClientes(stCliente A[], int *dimension, int dimensionMax)
+{
+
+    char control = 's';
+
+    while (*dimension < dimensionMax && control == 's')
+    {
+        A[*dimension] = cargarUnCliente(A);
+        (*dimension)++;
+
+        printf("¿Quiere cargar otro cliente? (s/n)\n");
+        scanf(" %c", &control);
+        fflush(stdin);
+    }
+}
+
+int leerClientesDesdeArchivo(char archivoClientes[], stCliente A[], int dimensionMax)
+{
+    FILE *buffer2 = fopen(archivoClientes, "rb");
+    int leidos = 0;
+    if (buffer2 != NULL)
+    {
+        leidos = fread(A, sizeof(stCliente), dimensionMax, buffer2);
+        fclose(buffer2);
+        printf("Clientes leidos satifactoriamente desde el archivo.\n");
+    }
+    else
+    {
+        printf("Error al abrir el archivo\n");
+    }
+    return leidos;
+}
+
+void guardarClientesEnArchivo(char cliente[])
+{
+    FILE *buffer1 = fopen(cliente, "ab");
+    stCliente aux;
+
+    if (buffer1)
+    {
+        aux = cargarUnCliente(cliente);
+        fwrite(&aux, sizeof(stCliente), 1, buffer1);
+        fclose(buffer1);
+        printf("Clientes guardados en el archivo.\n");
+    }
+    else
+    {
+        printf("Error al abrir el archivo");
+    }
+}
+
+void darDeBajaCliente(stCliente A[], int dimension)
+{
+    char dni[10];
+    printf("Ingrese el DNI del cliente a dar de baja: ");
+    scanf(" %s", dni);
+    fflush(stdin);
+
+    int encontrado = 0;
+    for (int i = 0; i < dimension; i++)
+    {
+        if (strcmp(A[i].dni, dni) == 0 && A[i].activo == 1)
+        {
+            A[i].activo = 0;
+            encontrado = 1;
+            printf("El cliente con DNI: %s ha sido dado de baja.\n", dni);
+            break;
+        }
+    }
+
+    if (!encontrado)
+    {
+        printf("El cliente con DNI: %s no se encuentra o ya esta dado de baja.\n", dni);
+    }
+}
+
+///ORDENAMIENTOS
+
+//Nombre y Apellido (Metodo de Seleccion)
+
+
+void intercambiarClientes(stCliente *a, stCliente *b)
+{
+    stCliente temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void ordenarClientesPorNombre(stCliente A[], int dimension)
+{
+    for (int i = 0; i < dimension - 1; i++)
+    {
+        int minIndex = i;
+        for (int j = i + 1; j < dimension; j++)
+        {
+            if (strcmp(A[j].nombreYapellido, A[minIndex].nombreYapellido) < 0)
+            {
+                minIndex = j;
+            }
+        }
+        intercambiarClientes(&A[i], &A[minIndex]);
+    }
+}
+
+//Por edad  (Metodo de Insercion)
+
+void ordenarClientesPorEdad(stCliente A[], int dimension)
+{
+    for (int i = 1; i < dimension; i++)
+    {
+        stCliente temp = A[i];
+        int j = i - 1;
+        while (j >= 0 && A[j].edad > temp.edad)
+        {
+            A[j + 1] = A[j];
+            j--;
+        }
+        A[j + 1] = temp;
+    }
+}
+
+void mostrarClientes(stCliente A[], int dimension)
+{
+    for (int i = 0; i < dimension; i++)
+    {
+        if (A[i].activo == 1)
+        {
+            printf("Nombre y Apellido: %s\n", A[i].nombreYapellido);
+            printf("DNI: %s\n", A[i].dni);
+            printf("Edad: %d\n", A[i].edad);
+            printf("Sexo: %c\n", A[i].sexo);
+            printf("Domicilio: %s\n", A[i].domicilio);
+            printf("Cantidad de Prestamos: %d\n", A[i].cantPrestamos);
+            printf("Nombre del Prestamista: %s\n", A[i].nombrePrestamista);
+            printf("----------------------------------\n");
+        }
+    }
+}
+
+void modificarCliente(stCliente A[], int dimension)
+{
+    char dni[10];
+    printf("Ingrese el DNI del cliente a modificar: ");
+    scanf(" %s", dni);
+    fflush(stdin);
+
+    for (int i = 0; i < dimension; i++)
+    {
+        if (strcmp(A[i].dni, dni) == 0 && A[i].activo == 1)
+        {
+            printf("\nModificar domicilio del cliente\n");
+            scanf(" %[^\n]s", A[i].domicilio);
+            getchar(); // Limpiar el buffer de entrada
+
+            printf("\nModificar cantidad de prestamos del cliente\n");
+            scanf("%d", &A[i].cantPrestamos);
+            getchar(); // Limpiar el buffer de entrada
+
+            printf("Cliente modificado exitosamente.\n");
+            return;
+        }
+    }
+    printf("El cliente con DNI: %s no se encuentra o está inactivo.\n", dni);
 }
