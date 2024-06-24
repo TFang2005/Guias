@@ -1,316 +1,2084 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#include <time.h>
+#include "pila.h"
 
-typedef struct {
-     int legajo;
-     char nombreYapellido [30];
-     int edad;
-     int anio;
-}stAlumno;
-////////////////////////////////PROTOTIPADOS////////////////////////////////
-int cargarArreglo(int array[],int dim);
-void mostrarArreglo(int array[], int val);
-int cantPares(int array[], int val);
-int pasaarParesAarregloDinamico(int array[],int validos, int arrayDina[]);
-int pasarParesYretornarArreglo(int array[], int validos);
-int pasarParesAarregloDinamicoConPunterosDobles(int array[],int validos, int **arregloDinamico);
-int* redemensionarArreglo(stAlumno *dinamico[],int valDina,int nuevaDim,char archivo[]);
-////////////////////////////////PRTOTIPADOS////////////////////////////////
+///**////////////////-----------------------------------------------------------/////////////////
+///**////////////////-----------------------ESTRUCTURAS-------------------------/////////////////
+///**////////////////-----------------------------------------------------------/////////////////
+
+typedef struct
+{
+    char nombreYapellido[50];
+    int legajo;
+    char dni[16];
+    char antiguedad[30];
+    char sexo;
+    int cantidadDeVentas;
+    int sueldo;
+    int estado;
+} stEmpleado;
+
+
+typedef struct
+{
+    int id;
+    float monto;
+    int diaInicio;
+    int mesInicio;
+    int anioInicio;
+    int diaVencimiento;
+    int mesVencimiento;
+    int anioVencimiento;
+    int duracion;
+    int estado; //1: activo, 0: finalizado
+    char formaDePago[10]; // debito o credito
+    int cantDeCuotas;
+} stPrestamo;
+
+typedef struct
+{
+    char nombreYapellido[30];
+    char dni[16];
+    int edad;
+    char sexo;
+    char domicilio[50];
+    int cantPrestamos;
+    stPrestamo *prestamoActual;
+    char nombrePrestamista[30];
+    int activo;  // Hecho para la baja lógica: 1 para activo y 0 para inactivo
+} Cliente;
+
+
+#define ADMIN_USER "admin"///Usuario para el sistema de ADMINISTRADOR
+#define ADMIN_PASS "admin123"///Contraseña para el sistema de ADMINISTRADOR
+#define MAX_INTENTOS 3///Intentos maximos para el sistema de ADMINISTRADOR
+
+///**////////////////-----------------------------------------------------------/////////////////
+///**////////////////-----------------------PROTOTIPADO-------------------------/////////////////
+///**////////////////-----------------------------------------------------------/////////////////
+
+
+///**////////////////-----------------------------------------------------------/////////////////
+///**////////////////--------------ADMINISTRADO/EMPLEADOS-----------------------/////////////////
+///**////////////////-----------------------------------------------------------/////////////////
+
+
+///**VALIDAR ENTRADA AL SISTEMA DE ADMINISTRADOR///////////////////
+int validarCredenciales(int intento);
+///**CARGAR EL ARCHIVO DE EMPLEADOS////////////////////////////////
+void cargarArchivoEmpleados(char emple[]);
+///**MOSTRAR EL ARCHIVO DE EMPLEADOS///////////////////////////////
+void mostrarEmpleados(char emple[]);
+///**BUSCAR Y ELIMINAR UN EMPLEADO DEL ARCHIVO////////////////////
+void buscarYeliminar(char emple[], char eliminados[], char dni[]);
+///**MOSTRAR EMPLEADOS DADO DE BAJA///////////////////////////////
+void mostrarEmpleBajados(char elimanods[]);
+///**MODIFICAR EMPLEADOS//////////////////////////////////////////
+void buscarYmodificarUnEmpleado(char emple[], char dni[]);
+///**BUSCAR EMPLEADOS/////////////////////////////////////////////
+void menuParaBuscar(char emple[]);
+///**ORDENAR NOMBRES//////////////////////////////////////////////
+void ordenarEmpleadoPorNombre(char emple[]);
+///**ORDENAR POR LEGAJO///////////////////////////////////////////
+void ordenarPorLegajo(char emple[]);
+
+///**////////////////-----------------------------------------------------------/////////////////
+///**////////////////--------------------------CARGAR CLINTES-------------------/////////////////
+///**////////////////-----------------------------------------------------------/////////////////
+
+
+///**CARGAR CLIENTES///////////////////////////////////////////////////////////////////
+void cargarClientes(Cliente A[], int *dimension, int dimensionMax,char archivo[]);
+///**MOSTRAR CLIENTES//////////////////////////////////////////////////////////////////
+int leerClientesDesdeArchivo(char archivoClientes[], Cliente A[], int dimensionMax);
+///**GUARDAR CLIENTES EN EL ARCHIVO////////////////////////////////////////////////////
+void guardarClientesEnArchivo(char archivoClientes[], Cliente A[], int dimension);
+///**DAR DE BAJAS CLIENTES DEL ARCHIVO/////////////////////////////////////////////////
+void darDeBajaCliente(Cliente A[], int dimension);
+///**ORDENAR CLIENTES POR NOMBRE///////////////////////////////////////////////////////
+void ordenarClientesPorNombre(Cliente A[], int dimension);
+///**ORDENAR CLIENTES POR EDAD/////////////////////////////////////////////////////////
+void ordenarClientesPorEdad(Cliente A[], int dimension);
+///**MOSTRAR CLIENTES DEL ARCHIVO//////////////////////////////////////////////////////
+void mostrarClientes(Cliente A[], int dimension);
+///**MODIFICAR CLIENTES////////////////////////////////////////////////////////////////
+void modificarCliente(Cliente A[], int dimension);
+///**CARGAR UN CLIENTE/////////////////////////////////////////////////////////////////
+Cliente cargarUnCliente(Cliente A[], int dimension, char archivo[]);
+
+///**////////////////-----------------------------------------------------------/////////////////
+///**////////////////--------------------------PRESTAMOS------------------------/////////////////
+///**////////////////-----------------------------------------------------------/////////////////
+
+
+///**VALIDAR FECHAS//////////////////////////////////////////////////////////////////////////////
+int fechaEsValida(stPrestamo A);
+bool fechaEsAnterior(stPrestamo A);
+///**VALIDAR ID/////////////////////////////////////////////////////////////////////////////////
+bool validarIdExiste(char archivo[], int id);
+///**CARGAR UN PRESTAMO////////////////////////////////////////////////////////////////////////
+stPrestamo cargoUnPrestamo ();
+///**CALCULAR FECHA DE VENCIMIENTO/////////////////////////////////////////////////////////////
+stPrestamo calculoFechaDeVencimiento (stPrestamo A);
+///**MOSTRAR UN PRESTAMO///////////////////////////////////////////////////////////////////////
+void mostrarUnPrestamo (stPrestamo A);
+///**CARGAR UN PRESTAMO AL ARCHIVO/////////////////////////////////////////////////////////////
+void cargoPrestamosEnArchivo (char archivo[]);
+///**MOSTRAR ARCHIVO DE PRESTAMOS//////////////////////////////////////////////////////////////
+void mostrarArchivoDePrestamos (char archivo[]);
+///**BUSCAR Y ELIMINAR PRESTAMOS DEL ARCHIVO///////////////////////////////////////////////////
+void buscarYeliminarPrestamoDelArchivo(char archivo[], char eliminados[], int idAbuscar);
+///**MOSTRAR ARCHIVOS DE PRESTAMOS ELIMINADOS//////////////////////////////////////////////////
+void mostrarArchivoDePrestamosEliminados (char eliminados[]);
+///**MODIFICAR DATOS DEL ARCHIVO///////////////////////////////////////////////////////////////
+void modificarDatosArchivo(char archivoPrestamo[], int id);
+stPrestamo modificarDato(stPrestamo dato);
+///**BUSCAR DATOS//////////////////////////////////////////////////////////////////////////////
+stPrestamo* buscarDato (char archivo[], int datoBuscado);
+///**PASAR DATOS A UN ARRAY///////////////////////////////////////////////////////////////////
+int PasoDatosArchivoToArray(char archivo[], stPrestamo arregloPrestamos[], int dimension);
+///**MOSTRAR ARRAY DE PRESTAMOS///////////////////////////////////////////////////////////////
+void mostrarArrayPrestamos(stPrestamo A[], int validos);
+///**ORDENAR POR INSERCCION///////////////////////////////////////////////////////////////////
+void ordenarInsercionPrestamosMonto(stPrestamo array[], int validos);
+void ordenarInsercionPrestamosId(stPrestamo array[], int validos);
+void intercambioDatos(stPrestamo *a, stPrestamo *b);
+///**ORDENAR POR SELECCION////////////////////////////////////////////////////////////////////
+void ordenamientoSeleccionFormaDePagoDuracion(stPrestamo Aprestamos[], int validos);
+
+stPrestamo *buscarPrestamoPorIDEnArchivo(char nombreArchivo[], int idBuscado);
+
+///**////////////////-----------------------------------------------------------/////////////////
+///**////////////////--------------------------MAIN-----------------------------/////////////////
+///**////////////////-----------------------------------------------------------/////////////////
 
 int main()
 {
-  stAlumno *arregloDinamico;
-  char archivo[] = {"Alumnos.dat"};
-  int array[10];
-  int *arrayDina;
-  int valArray;
-    char control = 's';
-    while(control == 's')
+    system("color 3F");
+    int opcion =0, intento =1;
+    char control='s', buscarDni[16];
+
+    char empleados[]="ArchivoEmpleados";///Archivo de empleados original
+    char eliminados[]="EmpleadosEliminados";///Archivo de empleados dado de baja
+
+    int dimensionMax = 50;
+    Cliente clientes[dimensionMax];
+    int dimensionActual = 0;
+
+
+    char archivoPrestamos[] = "archivo.bin";
+    char archivoEliminados[] = "eliminados.bin";
+
+    stPrestamo arregloPrestamos[100];
+
+    int idAbuscar, idSeleccionado, datoBuscado, campo=0, validos=0;
+
+    do
     {
-        int punto;
+        printf("\n----------BIENVENIDO----------\n");
+        printf("\n--¿Como desea entrar al programa?--\n");
+        printf("1.Como ADMINISTRADOR.\n2.Como empleado.\n");
+        scanf("%d", &opcion);
+        system("pause");
         system("cls");
-        printf("1. cambiar valores con punteros dobles.\n");
-        printf("2. cargar arreglo y pasar pares con array en main\n");
-        printf("3. cargar arreglo y pasar pares con array en funcion\n");
-        printf("4. cargar arreglo y pasar pares pero con array en funcion y puntero dobles\n");
-        printf("--------------------------AHORA CON ARCHIVOS  STRUCT--------------------------\n");
-        printf("5. Pasar alumnos a arreglo con array en main\n");
-        printf("6. Pasar alumnos a arreglo con array en funcion.\n");
-        printf("7. Pasar alumnos a arreglo con array en funcion y punteros dobles.\n");
-        printf("8. Ridemensionar el arreglo.\n");
+
+        switch(opcion)
+        {
+        case 1:
+            if(validarCredenciales(intento))
+            {
+
+                do
+                {
+                    printf("\n-----MENU-----\n");
+                    printf("1.Agregar empleados al archivo.\n2.Mostrar el archivo de empleados.\n3.Buscar y Eliminar un empleado del archivo.\n4.Mostrar empleados dado de baja.\n5.Modificar empleados.\n6.Buscar un empleado y mostrarlo.\n");
+                    printf("7.Ordenar empleados por nombre\n8.Ordenar empleados por legajo.\n9.Volver al menu principal.\n");
+                    printf("Ingrese la opcion que desea realizar.\n");
+                    scanf("%d", &opcion);
+                    system("pause");
+                    system("cls");
+
+                    switch(opcion)
+                    {
+                    case 1:
+                        cargarArchivoEmpleados(empleados);
+                        break;
+                    case 2:
+                        mostrarEmpleados(empleados);
+                        break;
+                    case 3:
+                        printf("\nIngrese el DNI que desea buscar y dar de baja: \n");
+                        fflush(stdin);
+                        gets(buscarDni);
+
+                        buscarYeliminar(empleados, eliminados, buscarDni);
+                        break;
+                    case 4:
+                        mostrarEmpleBajados(eliminados);
+                        break;
+                    case 5:
+                        printf("\nIngrese el DNI del empleado que desea modificar: \n");
+                        fflush(stdin);
+                        gets(buscarDni);
+
+                        buscarYmodificarUnEmpleado(empleados, buscarDni);
+                        break;
+                    case 6:
+                        menuParaBuscar(empleados);
+                        break;
+                    case 7:
+                        ordenarEmpleadoPorNombre(empleados);
+                        break;
+                    case 8:
+                        ordenarPorLegajo(empleados);
+                        break;
+                    case 9:
+                        printf("\nVolviendo al menu principal...\n");
+                        break;
+                    default:
+                        printf("\nERROR: Opcion no valida.\n");
+                        break;
+                    }
+                }
+                while(opcion!=9);
+            }
+            else
+            {
+                printf("\nACCESO DENEGADO.\n");
+                return 1;
+            }
+            break;
+        case 2:
+            do
+            {
+                printf("\n----------Haz entrado como empleado----------\n");
+                printf("\nQue operacion desea realizar?\n");
+                printf("1. Operaciones con clientes.\n2. Operaciones con prestamos.\n3.Volver al menu principal.\n");
+                scanf("%d", &opcion);
+
+                switch(opcion)
+                {
+                case 1:
+                    do
+                    {
+                        printf("\n--- MENU ---\n");
+                        printf("1. Cargar clientes\n");
+                        printf("2. Dar de baja un cliente\n");
+                        printf("3. Guardar clientes en archivo\n");
+                        printf("4. Ordenar clientes por nombre\n");
+                        printf("5. Ordenar clientes por edad\n");
+                        printf("6. Mostrar clientes\n");
+                        printf("7. Modificar cliente\n");
+                        printf("8. Salir\n");
+                        printf("Elija una opcion: ");
+                        scanf("%d", &opcion);
+                        fflush(stdin);
+                        system("pause");
+                        system("cls");
+
+                        switch (opcion)
+                        {
+                        case 1:
+                            cargarClientes(clientes, &dimensionActual, dimensionMax, archivoPrestamos);
+                            break;
+                        case 2:
+                            darDeBajaCliente(clientes, dimensionActual);
+                            break;
+                        case 3:
+                            guardarClientesEnArchivo("clientes.bin", clientes, dimensionActual);
+                            break;
+                        case 4:
+                            ordenarClientesPorNombre(clientes, dimensionActual);
+                            printf("Clientes ordenados por nombre.\n");
+                            break;
+                        case 5:
+                            ordenarClientesPorEdad(clientes, dimensionActual);
+                            printf("Clientes ordenados por edad.\n");
+                            break;
+                        case 6:
+                            mostrarClientes(clientes, dimensionActual);
+                            break;
+                        case 7:
+                            modificarCliente(clientes, dimensionActual);
+                            break;
+                        case 8:
+                            printf("Saliendo del sistema...\n");
+                            break;
+                        default:
+                            printf("Opcion no valida. Intente de nuevo.\n");
+                            break;
+                        }
+                    }
+                    while (opcion != 8);
+                    break;
+                case 2:
+                    do
+                    {
+                        printf("\n-----MENU-----\n");
+                        printf("1) Agregar prestamos al archivo\n");
+                        printf("2) Mostrar el arhivo de Prestamos\n");
+                        printf("3) Buscar y Eliminar un prestamo del Archivo\n");
+                        printf("4) Mostrar Prestamos dados de baja\n");
+                        printf("5) Modificar datos\n");
+                        printf("6) Buscar un dato y mostrar\n");
+                        printf("7) Listar prestamos segun su Monto\n");
+                        printf("8) Listar prestamos segun su ID\n");
+                        printf("9) Listar prestamos segun su Forma de Pago\n");
+                        printf("10) Salir\n");
+                        printf("Ingrese la opcion que desea realizar: \n");
+                        scanf("%d", &opcion);
+
+                        system("pause");
+                        system("cls");
+                        switch(opcion)
+                        {
+                        case 1:
+                            cargoPrestamosEnArchivo(archivoPrestamos);
+                            break;
+                        case 2:
+                            mostrarArchivoDePrestamos(archivoPrestamos);
+                            break;
+                        case 3:
+                            printf("Ingrese el ID que desea buscar y eliminar: ");
+                            scanf("%d", &idAbuscar);
+
+                            buscarYeliminarPrestamoDelArchivo(archivoPrestamos,archivoEliminados,idAbuscar);
+                            break;
+                        case 4:
+                            mostrarArchivoDePrestamosEliminados(archivoEliminados);
+                            break;
+                        case 5:
+                            printf("\nIngrese el id del prestamo que desea modificar: ");
+                            scanf("%d", &idSeleccionado);
+
+                            modificarDatosArchivo(archivoPrestamos,idSeleccionado);
+                            break;
+                        case 6:
+                            printf("\nIngrese el id del prestamo a buscar: ");
+                            scanf("%d", &datoBuscado);
+                            stPrestamo* aux = buscarDato(archivoPrestamos,datoBuscado);
+
+                            if(aux != NULL && aux->estado == 1)
+                            {
+                                mostrarUnPrestamo(*aux);
+                            }
+                            else
+                            {
+                                printf("No existe el id proporcionado\n");
+                            }
+                            break;
+                        case 7:
+                            validos = PasoDatosArchivoToArray(archivoPrestamos,arregloPrestamos,100);
+                            ordenarInsercionPrestamosMonto(arregloPrestamos,validos);
+
+                            printf("Prestamos Ordenados Segun sus Montos\n");
+                            mostrarArrayPrestamos(arregloPrestamos,validos);
+                            break;
+                        case 8:
+                            validos = PasoDatosArchivoToArray(archivoPrestamos,arregloPrestamos,100);
+                            ordenarInsercionPrestamosId(arregloPrestamos,validos);
+
+                            printf("Prestamos Ordenados Segun sus ID\n");
+                            mostrarArrayPrestamos(arregloPrestamos,validos);
+                            break;
+                        case 9:
+                            validos = PasoDatosArchivoToArray(archivoPrestamos,arregloPrestamos,100);
+                            ordenamientoSeleccionFormaDePagoDuracion(arregloPrestamos,validos);
+
+                            printf("Prestamos Ordenados Segun su Forma de Pago\n");
+                            mostrarArrayPrestamos(arregloPrestamos,validos);
+                            break;
+                        case 10:
+                            printf("Saliendo...\n");
+                            break;
+                        default:
+                            printf("ERROR. Ingreso mal la opcion\n");
+                            break;
+                        }
+                    }
+                    while (opcion!=10);
+                    break;
+                case 3:
+                    printf("\nVolviendo al menu principal...\n");
+                    break;
+                default:
+                    printf("\nERROR: Opcion no valida.\n");
+                    break;
+                }
+            }
+            while(opcion!=3);
+            break;
+        default:
+            printf("\nERROR: Opcion no valida.\n");
+            break;
+        }
+    }
+    while(control=='s');
+
+    return 0;
+}
+
+///**////////////////-----------------------------------------------------------/////////////////
+///**////////////////---FUNCIONES DEL SISTEMA DE ADMINISTRADOR------------------/////////////////
+///**////////////////-----------------------------------------------------------/////////////////
+
+
+
+///FUNCIONES PARA VALIDAR LA ENTRADA AL SISTEMA DEL ADMINISTRADOR//////////////
+int validarCredenciales(int intento)
+{
+    char usuario[50], contra[50];
+    int fallido;
+    Pila intentoFallido;
+    inicpila(&intentoFallido);
+
+    Pila aux;
+    inicpila(&aux);
+
+    time_t tiempoAcutal = time(NULL); //obtengo fecha y hr actual del sistema
+    struct tm*tiempo = localtime(&tiempoAcutal);
+
+    int hora = tiempo->tm_hour;
+    int minutos = tiempo->tm_min;
+    int segundos = tiempo->tm_sec;
+
+    if(intento == MAX_INTENTOS)
+    {
+        printf("\nHa alcanzado el maximo de intentos permitidos.\n");
+        return 0;
+    }
+
+    printf("\nIngrese el usuario: \n");
+    fflush(stdin);
+    gets(usuario);
+
+    printf("\nIngrese la contrasenia: \n");
+    fflush(stdin);
+    gets(contra);
+
+    if(strcmp(usuario, ADMIN_USER) == 0 && strcmp(contra,ADMIN_PASS) == 0)
+    {
+        return 1;
+    }
+    else
+    {
+        printf("\nUsuario o contraseña incorrectos. Intentos restantes: %d\n", MAX_INTENTOS-intento);
+        printf("\nHorarios del error: (H|S|M)\n");
+        apilar(&intentoFallido, hora);
+        apilar(&intentoFallido, minutos);
+        apilar(&intentoFallido, segundos);
+
+        mostrar(&intentoFallido);
+
+        return validarCredenciales(intento+1);
+    }
+}
+
+///-----------------------------------------------------------/////////////////
+///----------APARTADO EXCLUSIVAMENTE DE ALTA------------------/////////////////
+///-----------------------------------------------------------/////////////////
+
+///VERIFICAR SI EL EMPLEADO YA FUE CARGADO POR DNI/////////////////////////////
+bool verificarDNI(char dni[], char emple[])
+{
+    FILE *archivo=fopen(emple, "rb");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcmp(aux.dni, dni) == 0)
+            {
+                fclose(archivo);
+                return true;//El archivo ya existe
+            }
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+    return false;
+}
+
+///SEGUNDO VERIFICADOR POR NOMBRE//////////////////////////////////////////////
+bool verificarNombre(char nombreyApellido[], char emple[])
+{
+    FILE *archivo=fopen(emple, "rb");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcmp(aux.nombreYapellido, nombreyApellido) == 0)
+            {
+                fclose(archivo);
+                return true;//El archivo ya existe
+            }
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+    return false;
+}
+
+///CARGAR UN SOLO EMPLEADO/////////////////////////////////////////////////////
+stEmpleado cargarUnEmpleado(char emple[])
+{
+    stEmpleado nuevoEmpleado;
+
+    printf("Ingrese el nombre y el apellido del empleado.\n");
+    fflush(stdin);
+    gets(nuevoEmpleado.nombreYapellido);
+
+    if(verificarNombre(nuevoEmpleado.nombreYapellido, emple))
+    {
+        printf("\nERROR: El empleado ya existe en el archivo.\n");
+        nuevoEmpleado.estado=-1;
+        return nuevoEmpleado;
+    }
+
+    printf("Ingrese el legajo el empleado.\n");
+    scanf("%d", &nuevoEmpleado.legajo);
+
+    printf("Ingrese el dni del empleado.\n");
+    fflush(stdin);
+    gets(nuevoEmpleado.dni);
+
+    if(verificarDNI(nuevoEmpleado.dni, emple))
+    {
+        printf("\nERROR: El empleado ya existe en el archivo.\n");
+        nuevoEmpleado.estado= -1;
+        return nuevoEmpleado;
+    }
+
+    printf("Ingrese la antiguedad del empleado.(D/M/A)\n");
+    fflush(stdin);
+    gets(nuevoEmpleado.antiguedad);
+
+    printf("Ingrese el sexo del empleado.(M,F,O)\n");
+    fflush(stdin);
+    scanf("%c", &nuevoEmpleado.sexo);
+
+    printf("Ingrese la cantidad de ventas del empleado.\n");
+    scanf("%d", &nuevoEmpleado.cantidadDeVentas);
+
+    printf("Ingrese el sueldo del empleado.\n");
+    scanf("%d", &nuevoEmpleado.sueldo);
+
+    nuevoEmpleado.estado = 1;
+
+    return nuevoEmpleado;
+}
+
+///CARGAR ARCHIVO DE EMPLEADOS/////////////////////////////////////////////////
+void cargarArchivoEmpleados(char emple[])
+{
+    FILE *archivo=fopen(emple, "ab");
+    stEmpleado aux;
+
+    char control='s';
+
+    if(archivo)
+    {
+        while(control=='s')
+        {
+            aux = cargarUnEmpleado(emple);
+            if(aux.estado !=-1)
+            {
+                fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+            }
+            printf("\nDesea seguir cargando nuevos empleados al archivo? (s|n)");
+            fflush(stdin);
+            scanf("%c", &control);
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse para cargar nuevos empleados.\n");
+    }
+}
+
+
+///-----------------------------------------------------------/////////////////
+///----------APARTADO EXCLUSIVAMENTE DE MUESTRA------------------//////////////
+///-----------------------------------------------------------/////////////////
+
+///MOSTRAR UN SOLO EMPLEADO////////////////////////////////////////////////////
+void mostrarUnEmpleado(stEmpleado nuevoEmpleado)
+{
+    printf("\nEl nombre y Apellido del empleado: %s\n", nuevoEmpleado.nombreYapellido);
+    printf("El legajo del empleado es: %d\n", nuevoEmpleado.legajo);
+    printf("El dni del empleado es: %s\n", nuevoEmpleado.dni);
+    printf("La antiguedad del empleado es: %s\n", nuevoEmpleado.antiguedad);
+    printf("El sexo del empleado: %c\n", nuevoEmpleado.sexo);
+    printf("La cantidad de ventas del empleado es: %d\n", nuevoEmpleado.cantidadDeVentas);
+    printf("El sueldo del empleado es: %d\n", nuevoEmpleado.sueldo);
+    printf("El estado del empleado es: %d\n", nuevoEmpleado.estado);
+    printf("\n-----------------------------------------------------------\n");
+}
+
+///MOSTRAR ARCHIVO DE EMPLEADOS////////////////////////////////////////////////
+void mostrarEmpleados(char emple[])
+{
+    FILE *archivo= fopen(emple, "rb");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            mostrarUnEmpleado(aux);
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+
+///-----------------------------------------------------------/////////////////
+///----------APARTADO EXCLUSIVAMENTE DE BAJA------------------/////////////////
+///-----------------------------------------------------------/////////////////
+
+///BUSCAR Y DAR DE BAJA UN EMPLEADO////////////////////////////////////////////
+void buscarYeliminar(char emple[], char eliminados[], char dni[])
+{
+    FILE *archivo= fopen(emple,"r+b");
+    FILE *archivoDos= fopen(eliminados, "ab");
+
+    bool encontrado=false;
+    stEmpleado aux;
+
+    if(archivo && archivoDos)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcmp(aux.dni, dni) == 0)
+            {
+                encontrado=true;
+
+                aux.estado=0;
+                fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+                fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+                fwrite(&aux, sizeof(stEmpleado), 1, archivoDos);
+                printf("\nEmpleado dado de baja correctamente.\n");
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se encontro ningun Empleado asociado a este DNI.\n");
+        }
+        fclose(archivo);
+        fclose(archivoDos);
+    }
+    else
+    {
+        printf("\nERROR: No se pudo abrir el archivo.\n");
+    }
+}
+
+///MOSTRAR EMPLEADOS DADOS DE BAJA/////////////////////////////////////////////
+void mostrarEmpleBajados(char elimanods[])
+{
+    FILE *archivo=fopen(elimanods,"rb");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            mostrarUnEmpleado(aux);
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+
+
+///-----------------------------------------------------------/////////////////
+///---APARTADO EXCLUSIVAMENTE DE MODIFICACION DE ARCHIVOS-----/////////////////
+///-----------------------------------------------------------/////////////////
+
+
+///BUSCAR Y MODIFICAR UNA EMPLEADO/////////////////////////////////////////////
+void buscarYmodificarUnEmpleado(char emple[], char dni[])
+{
+    FILE *archivo=fopen(emple,"r+b");
+    stEmpleado aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcmp(aux.dni, dni) == 0)
+            {
+                encontrado=true;
+
+                char continuar='s';
+                int opcion=0;
+
+                char nuevoNombre[50];
+                int nuevoLegajo=0, nuevaVenta=0, nuevoSueldo=0;;
+
+                do
+                {
+                    printf("\n\n-----MENU-----\n\n");
+                    printf("\n--MODIFICACION DE EMPLEADOS--\n");
+                    printf("1.Modificar nombre y apellido.\n2.Modificar legajo.\n3.Ingrese la nueva cantidad de ventas del empleado.\n4.Ingrese el nuevo sueldo del empleado.\n");
+                    printf("Ingrese la opcion que desea realizar: \n");
+                    scanf("%d", &opcion);
+
+                    switch(opcion)
+                    {
+                    case 1:
+                        printf("\nIngrese el nuevo nombre del empleado: \n");
+                        fflush(stdin);
+                        gets(nuevoNombre);
+
+                        modificarNombre(emple, nuevoNombre);
+                        break;
+                    case 2:
+                        printf("\nIngrese el nuevo legajo: \n");
+                        scanf("%d", &nuevoLegajo);
+
+                        modificarLegajo(emple, nuevoLegajo);
+                        break;
+                    case 3:
+                        printf("\nIngrese la nueva cantidad de ventas del empleados: \n");
+                        scanf("%d", &nuevaVenta);
+
+                        modificarVentas(emple, nuevaVenta);
+                        break;
+                    case 4:
+                        printf("\nIngrese el nuevo sueldo del empleado: \n");
+                        scanf("%d", &nuevoSueldo);
+
+                        modificarSueldo(emple, nuevoSueldo);
+                        break;
+                    default:
+                        printf("\nERROR: La opcion ingresada no es validad.\n");
+                        break;
+                    }
+                    printf("\nDesea seguir modificando empleados? (s|n)");
+                    fflush(stdin);
+                    scanf("%c", &continuar);
+                }
+                while(continuar=='s');
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se ha encontrado el DNI buscado.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrise.\n");
+    }
+}
+
+///MODIFICAR NOMBRE////////////////////////////////////////////////////////////
+void modificarNombre(char emple[], char nuevoNombre[])
+{
+    FILE *archivo= fopen(emple,"r+b");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            strcpy(aux.nombreYapellido, nuevoNombre);
+            fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+            fwrite(&aux, sizeof(stEmpleado), 1,archivo);
+            printf("\Nombre modificado correctamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///MODIFICAR LEGAJO////////////////////////////////////////////////////////////
+void modificarLegajo(char emple[], int nuevoLegajo)
+{
+    FILE *archivo= fopen(emple, "r+b");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1,archivo) >0)
+        {
+            aux.legajo=nuevoLegajo;
+
+            fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+            fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+            printf("\nEl legajo fue modificado exitosamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse correctamente.\n");
+    }
+}
+
+///MODIFICAR VENTAS////////////////////////////////////////////////////////////
+void modificarVentas(char emple[], int nuevaVenta)
+{
+    FILE *archivo= fopen(emple, "r+b");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            aux.cantidadDeVentas = nuevaVenta;
+
+            fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+            fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+            printf("\nCantidad de ventas modificada con exito.\n");
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo noi pudo abrirse.\n");
+    }
+}
+
+///MODIFICAR SUELDO////////////////////////////////////////////////////////////
+void modificarSueldo(char emple[], int nuevoSueldo)
+{
+    FILE *archivo= fopen(emple, "r+b");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            aux.sueldo = nuevoSueldo;
+
+            fseek(archivo, -sizeof(stEmpleado), SEEK_CUR);
+            fwrite(&aux, sizeof(stEmpleado), 1, archivo);
+            printf("\nEl sueldo a sido modificado exitosamente.\n");
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+
+
+
+///-----------------------------------------------------------/////////////////
+///---APARTADO EXCLUSIVAMENTE PARA BUSCAR UN EMPLEADO---------/////////////////
+///-----------------------------------------------------------/////////////////
+
+///MENU PARA BUSCAR UN EMPLEADOS///////////////////////////////////////////////
+void menuParaBuscar(char emple[])
+{
+    FILE *archivo= fopen(emple, "rb");
+    stEmpleado aux;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1,archivo) >0)
+        {
+            char control='s';
+            int opcion=0;
+
+            char nombreApellido[50];
+            char dni[16];
+            char anti[50];
+            int legajo=0;
+
+            do
+            {
+                printf("\n----------MENU---------");
+                printf("\n--SUB-MENU PARA BUSCAR--\n");
+                printf("1.Buscar por nombre.\n2.Buscar por legajo.\n3.Buscar por DNI.\n4.Buscar por antiguedad.\n");
+                printf("\nIngrese la opcion que desea realizar: \n");
+                scanf("%d", &opcion);
+
+                switch(opcion)
+                {
+                case 1:
+                    printf("\nIngrese el nombre del empleado que desea buscar: \n");
+                    fflush(stdin);
+                    gets(nombreApellido);
+
+                    BuscarPorNombre(emple, nombreApellido);
+                    break;
+                case 2:
+                    printf("\nIngrese el legajo del empleado que desea buscar: \n");
+                    scanf("%d", &legajo);
+
+                    buscarPorLegajp(emple, legajo);
+                    break;
+                case 3:
+                    printf("\nIngrese el DNI del empleado que desea buscar: \n");
+                    fflush(stdin);
+                    gets(dni);
+
+                    buscarPorDni(emple, dni);
+                    break;
+                case 4:
+                    printf("\nIngrese la antiguedad del empleado que desea buscar: \n");
+                    fflush(stdin);
+                    gets(anti);
+
+                    buscarPorAntiguedad(emple, anti);
+                    break;
+                default:
+                    printf("\nERROR: Opcion no valida.\n");
+                    break;
+                }
+
+                printf("\nDesea seguir buscando por otras opciones? (s|n).\n");
+                fflush(stdin);
+                scanf("%c", &control);
+            }
+            while(control=='s');
+            break;
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No se pudo abrir el archivo.\n");
+    }
+}
+
+///BUSCAR POR NOMBRE///////////////////////////////////////////////////////////
+void BuscarPorNombre(char emple[], char buscarNombre[])
+{
+    FILE *archivo=fopen(emple, "rb");
+    stEmpleado aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1,archivo) >0)
+        {
+            if(strcpy(aux.nombreYapellido, buscarNombre))
+            {
+                encontrado=true;
+                mostrarUnEmpleado(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nNo se encontrado ningun empleado con este nombre.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///BUSCAR POR LEGAJO///////////////////////////////////////////////////////////
+void buscarPorLegajp(char emple[], int buscarLegajo)
+{
+    FILE *archivo= fopen(emple, "rb");
+    stEmpleado aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(aux.legajo==buscarLegajo)
+            {
+                encontrado= true;
+                mostrarUnEmpleado(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se encontro ningun empleado con este legajo.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abirse el archivo.\n");
+    }
+}
+
+///BUSCAR POR DNI/////////////////////////////////////////////////////////////
+void buscarPorDni(char emple[], int buscarDni)
+{
+    FILE *archivo= fopen(emple, "rb");
+    stEmpleado aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcpy(aux.dni, buscarDni))
+            {
+                encontrado=true;
+                mostrarUnEmpleado(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se encontro ningun empleado con este DNI.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+
+///BUSCAR POR ANTIGUEDAD//////////////////////////////////////////////////////
+void buscarPorAntiguedad(char emple[], char buscarAnti[])
+{
+    FILE *archivo= fopen(emple, "rb");
+    stEmpleado aux;
+
+    bool encontrado=false;
+
+    if(archivo)
+    {
+        while(fread(&aux, sizeof(stEmpleado), 1, archivo) >0)
+        {
+            if(strcpy(aux.antiguedad, buscarAnti))
+            {
+                encontrado=true;
+                mostrarUnEmpleado(aux);
+                break;
+            }
+        }
+        if(!encontrado)
+        {
+            printf("\nERROR: No se encontro ningun empleado con este antiguedad.\n");
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: El archivo no pudo abrirse.\n");
+    }
+}
+
+
+
+///-----------------------------------------------------------/////////////////
+///---APARTADO EXCLUSIVAMENTE PARA ORDENAR LOS ARCHIVOS-------/////////////////
+///-----------------------------------------------------------/////////////////
+
+///ORDENAR EMPLEADOS POR NOMBRE////////////////////////////////////////////////
+void ordenarEmpleadoPorNombre(char emple[])
+{
+    FILE *archivo = fopen(emple, "r+b");
+
+    if(archivo)
+    {
+        fseek(archivo, 0, SEEK_END);
+        long cant = ftell(archivo);
+        int numEmpleados = cant / sizeof(stEmpleado);
+        fseek(archivo, 0, SEEK_SET);
+
+        stEmpleado *empleadosArray = malloc(cant);
+        fread(empleadosArray, sizeof(stEmpleado), numEmpleados, archivo);
+
+        for(int i=0; i<numEmpleados -1; i++)
+        {
+            int minIndex = i;
+            for(int j=i +1; j<numEmpleados; j++)
+            {
+                if(strcmp(empleadosArray[j].nombreYapellido, empleadosArray[minIndex].nombreYapellido) <0)
+                {
+                    minIndex = j;
+                }
+            }
+            if(minIndex != i)
+            {
+                stEmpleado temp= empleadosArray[i];
+                empleadosArray[i]=empleadosArray[minIndex];
+                empleadosArray[minIndex] = temp;
+            }
+        }
+        for( int i=0; i<numEmpleados; i++)
+        {
+            mostrarUnEmpleado(empleadosArray[i]);
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No pudo abrirse el archivo.\n");
+    }
+}
+
+///SUB FUNCION/////////////////////////////////////////////////////////////////
+void ordenarEmpleadosPorLegajo(stEmpleado empleadosArray[], int numEmpleados)
+{
+    for (int i = 1; i < numEmpleados; i++)
+    {
+        stEmpleado actual = empleadosArray[i];
+        int j = i - 1;
+        while (j >= 0 && empleadosArray[j].legajo > actual.legajo)
+        {
+            empleadosArray[j + 1] = empleadosArray[j];
+            j--;
+        }
+        empleadosArray[j + 1] = actual;
+    }
+}
+
+///ORDENAR POR LEGAJO//////////////////////////////////////////////////////////
+void ordenarPorLegajo(char emple[])
+{
+    FILE *archivo= fopen(emple, "r+b");
+    if(archivo)
+    {
+        fseek(archivo, 0, SEEK_END);
+        long cant= ftell(archivo);
+        int numEmpleados= cant / sizeof(stEmpleado);
+        fseek(archivo, 0, SEEK_SET);
+
+        stEmpleado *empleadosArray = malloc(cant);
+        fread(empleadosArray, sizeof(stEmpleado), numEmpleados, archivo);
+
+        ordenarEmpleadosPorLegajo(empleadosArray, numEmpleados);
+
+        for(int i=0; i < numEmpleados; i++)
+        {
+            mostrarUnEmpleado(empleadosArray[i]);
+        }
+        fclose(archivo);
+    }
+    else
+    {
+        printf("\nERROR: No se pudo abrir el archivo.\n");
+    }
+}
+
+
+///**////////////////-----------------------------------------------------------/////////////////
+///**////////////////---FUNCIONES DEL SISTEMA DE CLIENTES-----------------------/////////////////
+///**////////////////-----------------------------------------------------------/////////////////
+
+
+///VERIFICAR SI EL DNI EXISTE///////////////////////////////////////////////////////////////////
+int dniExiste(Cliente A[], int dimension, char dni[])
+{
+    for (int i = 0; i < dimension; i++)
+    {
+        if (strcmp(A[i].dni, dni) == 0 && A[i].activo == 1)
+        {
+            return 1; //1 si se encuentra
+        }
+    }
+
+    return 0; //0 si no se encuentra
+}
+
+///CARGAR UN SOLO CLIENTES//////////////////////////////////////////////////////////////////////
+Cliente cargarUnCliente(Cliente A[], int dimension, char archivo[])
+{
+    Cliente a;
+
+    do
+    {
+        printf("\nIngrese el DNI del cliente a cargar\n");
+        scanf(" %s", a.dni);
+        if (dniExiste(A, dimension, a.dni))
+        {
+            printf("Error: El cliente ese DNI ya existe en el sistema. Intente de nuevo con otro.\n");
+        }
+    }
+    while (dniExiste(A, dimension, a.dni));
+
+    printf("\nIngrese Nombre y Apellido del cliente\n");
+    fflush(stdin);
+    gets(a.nombreYapellido);
+
+    printf("\nIngrese la edad del cliente\n");
+    scanf("%d", &a.edad);
+    fflush(stdin);
+
+    printf("\nIngrese el genero del cliente: (m o f)\n");
+    scanf(" %c", &a.sexo);
+    fflush(stdin);
+
+    printf("\nIngrese el domicilio del cliente\n");
+    gets(a.domicilio);
+
+    printf("\nIngrese cuántos prestamos tiene el cliente\n");
+    scanf("%d", &a.cantPrestamos);
+    fflush(stdin);
+
+    int idBuscado=0;
+    printf("\nIngrese el ID del prestamo.\n");
+    scanf("%d", &idBuscado);
+
+    stPrestamo *prestamoEncontrado = buscarPrestamoPorIDEnArchivo("archivo.bin", idBuscado);
+
+    if(prestamoEncontrado)
+    {
+        a.prestamoActual = prestamoEncontrado;
+        printf("\nCliente asociado al prestamo.\n");
+    }else
+    {
+        printf("\nPrestamo no encontrado.\n");
+    }
+
+    printf("\nIngrese quien le dio el prestamo al cliente\n");
+    fflush(stdin);
+    gets(a.nombrePrestamista);
+
+    a.activo = 1;
+
+    return a;
+}
+
+///CARGAR CLIENTES/////////////////////////////////////////////////////////////////////////////
+void cargarClientes(Cliente A[], int *dimension, int dimensionMax, char archivo[])
+{
+    char control = 's';
+
+    while (*dimension < dimensionMax && control == 's')
+    {
+        A[*dimension] = cargarUnCliente(A, *dimension, archivo);
+        (*dimension)++;
+
+        printf("¿Quiere cargar otro cliente? (s/n)\n");
+        scanf(" %c", &control);
         fflush(stdin);
-        scanf("%d",&punto);
-        switch(punto)
+    }
+}
+
+///MOSTRAR CLIENTES DESDE EL ARCHIVO//////////////////////////////////////////////////////////
+int leerClientesDesdeArchivo(char archivoClientes[], Cliente A[], int dimensionMax)
+{
+    FILE *buffer2 = fopen(archivoClientes, "rb");
+    int leidos = 0;
+    if (buffer2 != NULL)
+    {
+        leidos = fread(A, sizeof(Cliente), dimensionMax, buffer2);
+        fclose(buffer2);
+        printf("Clientes leidos satifactoriamente desde el archivo.\n");
+    }
+    else
+    {
+        printf("Error al abrir el archivo\n");
+    }
+    return leidos;
+}
+
+///GUARDAR CLIENTES EN EL ARCHIVO////////////////////////////////////////////////////////////
+void guardarClientesEnArchivo(char archivoClientes[], Cliente A[], int dimension)
+{
+    FILE *buffer1 = fopen(archivoClientes, "ab");
+    if (buffer1 != NULL)
+    {
+        fwrite(A, sizeof(Cliente), dimension, buffer1);
+        fclose(buffer1);
+        printf("Clientes guardados en el archivo.\n");
+    }
+    else
+    {
+        printf("Error al abrir el archivo");
+    }
+}
+
+///DAR DE BAJA CLIENTES/////////////////////////////////////////////////////////////////////
+void darDeBajaCliente(Cliente A[], int dimension)
+{
+    char dni[10];
+    printf("Ingrese el DNI del cliente a dar de baja: ");
+    scanf(" %s", dni);
+    fflush(stdin);
+
+    int encontrado = 0;
+    for (int i = 0; i < dimension; i++)
+    {
+        if (strcmp(A[i].dni, dni) == 0 && A[i].activo == 1)
+        {
+            A[i].activo = 0;
+            encontrado = 1;
+            printf("El cliente con DNI: %s ha sido dado de baja.\n", dni);
+            break;
+        }
+    }
+
+    if (!encontrado)
+    {
+        printf("El cliente con DNI: %s no se encuentra o ya esta dado de baja.\n", dni);
+    }
+}
+
+///**////////////////-----------------------------------------------------------/////////////////
+///**////////////////---FUNCIONES DE ORDENAMIENTOS------------------------------/////////////////
+///**////////////////-----------------------------------------------------------/////////////////
+
+///Nombre y Apellido (Metodo de Seleccion)//////////////////////////////////////////////////
+
+void intercambiarClientes(Cliente *a, Cliente *b)
+{
+    Cliente temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void ordenarClientesPorNombre(Cliente A[], int dimension)
+{
+    for (int i = 0; i < dimension - 1; i++)
+    {
+        int minIndex = i;
+        for (int j = i + 1; j < dimension; j++)
+        {
+            if (strcmp(A[j].nombreYapellido, A[minIndex].nombreYapellido) < 0)
+            {
+                minIndex = j;
+            }
+        }
+        intercambiarClientes(&A[i], &A[minIndex]);
+    }
+}
+
+///Por edad  (Metodo de Insercion)///////////////////////////////////////////////////////////
+
+void ordenarClientesPorEdad(Cliente A[], int dimension)
+{
+    for (int i = 1; i < dimension; i++)
+    {
+        Cliente temp = A[i];
+        int j = i - 1;
+        while (j >= 0 && A[j].edad > temp.edad)
+        {
+            A[j + 1] = A[j];
+            j--;
+        }
+        A[j + 1] = temp;
+    }
+}
+
+///MODIFICAR CLIENTES///////////////////////////////////////////////////////////////////////
+void mostrarClientes(Cliente A[], int dimension)
+{
+    for (int i = 0; i < dimension; i++)
+    {
+        if (A[i].activo == 1)
+        {
+            printf("Nombre y Apellido: %s\n", A[i].nombreYapellido);
+            printf("DNI: %s\n", A[i].dni);
+            printf("Edad: %d\n", A[i].edad);
+            printf("Sexo: %c\n", A[i].sexo);
+            printf("Domicilio: %s\n", A[i].domicilio);
+            printf("Cantidad de Prestamos: %d\n", A[i].cantPrestamos);
+            printf("ID del prestamo: %d\n", A[i].prestamoActual->id);
+            printf("Nombre del Prestamista: %s\n", A[i].nombrePrestamista);
+            printf("----------------------------------\n");
+        }
+    }
+}
+
+void modificarCliente(Cliente A[], int dimension)
+{
+    char dni[10];
+    printf("Ingrese el DNI del cliente a modificar: ");
+    scanf(" %s", dni);
+    fflush(stdin);
+
+    for (int i = 0; i < dimension; i++)
+    {
+        if (strcmp(A[i].dni, dni) == 0 && A[i].activo == 1)
+        {
+            printf("\nModificar domicilio del cliente\n");
+            scanf(" %[^\n]s", A[i].domicilio);
+            getchar(); // Limpiar el buffer de entrada
+
+            printf("\nModificar cantidad de prestamos del cliente\n");
+            scanf("%d", &A[i].cantPrestamos);
+            getchar(); // Limpiar el buffer de entrada
+
+            printf("Cliente modificado exitosamente.\n");
+            return;
+        }
+    }
+    printf("El cliente con DNI: %s no se encuentra o está inactivo.\n", dni);
+}
+
+///**////////////////-----------------------------------------------------------/////////////////
+///**////////////////---FUNCIONES DEL SISTEMA DE PRESTAMOS----------------------/////////////////
+///**////////////////-----------------------------------------------------------/////////////////
+
+
+///---INICIO FUNCIONES--///
+///-----FUNCIONES PARA VALIDAR QUE LOS DATOS SEAN CORRECTOS-----///
+
+///VERIFICAR QUE LA FECHA SEA VÁLIDA ///
+
+int fechaEsValida(stPrestamo A)
+{
+    int fechaCorrecta = 0;
+
+    if (A.mesInicio >= 1 && A.mesInicio <= 12)
+    {
+        switch(A.mesInicio)
+        {
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 8:
+        case 10:
+        case 12:
+            if (A.diaInicio >= 1 && A.diaInicio <= 31)
+            {
+                fechaCorrecta = 1;
+                break;
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+                if (A.diaInicio >= 1 && A.diaInicio <= 30)
+                {
+                    fechaCorrecta = 1;
+                    break;
+
+                case 2:
+                    if (A.anioInicio % 4 == 0 && A.anioInicio % 100 != 0)
+                    {
+                        if (A.diaInicio >= 1 && A.diaInicio <=29)
+                        {
+                            fechaCorrecta = 1;
+                        }
+                        else if (A.diaInicio >=1 && A.diaInicio <= 28)
+                        {
+                            fechaCorrecta = 1;
+                            break;
+                        }
+                    default:
+                        printf("ERROR: Vuelva a intentar\n");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    return fechaCorrecta;
+}
+
+///VALIDO FECHA - QUE LA INGRESADA SEA ANTERIOR A LA ACTUAL///
+
+bool fechaEsAnterior(stPrestamo A)
+{
+    time_t tiempoAcutal = time(NULL); //obtengo fecha y hr actual del sistema
+
+    struct tm*tiempo = localtime(&tiempoAcutal);
+
+    if (A.anioInicio < tiempo->tm_year + 1900)
+    {
+        return true;
+
+    }
+    else if (A.anioInicio == tiempo->tm_year + 1900)
+    {
+        if (A.mesInicio < tiempo->tm_mon + 1)
+        {
+            return true;
+
+        }
+        else if (A.mesInicio == tiempo->tm_mon + 1)
+        {
+            if (A.diaInicio < tiempo->tm_mday)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+///---VALIDAR QUE EL ID NO SE REPITA---///
+
+bool validarIdExiste(char archivo[], int id)
+{
+    FILE *archi;
+    archi = fopen (archivo, "rb");
+    stPrestamo aux;
+
+    if (archi != NULL)
+    {
+        while(fread(&aux, sizeof(stPrestamo), 1, archi) > 0)
+        {
+            if (aux.id == id)
+            {
+                fclose(archi);
+                return true; // ya existe en el archivo
+            }
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("Error: El archivo no pudo ser abierto\n");
+    }
+
+    return false; //el id no existe en el archivo
+}
+
+///---FIN DE FUNCIONES DE VALIDACIONES---///
+
+///---INICIO DE FUNCIONES DE CARGA---///
+
+stPrestamo cargoUnPrestamo(char archivo[])
+{
+    stPrestamo nuevoPrestamo;
+    int fechaCorrecta = 0;
+
+    printf ("Ingrese Id: ");
+    scanf("%d", &nuevoPrestamo.id);
+
+    if(validarIdExiste(archivo, nuevoPrestamo.id))
+    {
+        printf("ERROR: el ID ingresado ya existe\n");
+        nuevoPrestamo.estado = -1;
+        return nuevoPrestamo;
+    }
+
+    printf ("\nIngrese el monto del Prestamo: ");
+    scanf("%f", &nuevoPrestamo.monto);
+
+    printf("\nIngrese Fecha de Inicio del Prestamo (DD/MM/AAAA): ");
+    scanf("%d %d %d", &nuevoPrestamo.diaInicio,&nuevoPrestamo.mesInicio,&nuevoPrestamo.anioInicio);
+
+    fechaCorrecta = fechaEsValida(nuevoPrestamo);
+
+    if (fechaCorrecta !=1)
+    {
+
+        printf("ERROR: La fecha ingresada esta mal\nIngrese una nueva fecha: ");
+        scanf("%d %d %d", &nuevoPrestamo.diaInicio,&nuevoPrestamo.mesInicio,&nuevoPrestamo.anioInicio);
+
+    }
+    else if(fechaEsAnterior(nuevoPrestamo))
+    {
+        printf("ERROR: La fecha debe ser posterior a la actual...\n Ingrese nuevamente: ");
+        scanf("%d %d %d", &nuevoPrestamo.diaInicio,&nuevoPrestamo.mesInicio,&nuevoPrestamo.anioInicio);
+    }
+
+
+    printf("\nIngrese Tiempo de Duración del Prestamo (en dias): ");
+    scanf("%d", &nuevoPrestamo.duracion);
+
+    printf("\nIngrese forma de pago (debito - credito): ");
+    fflush(stdin);
+    gets(nuevoPrestamo.formaDePago);
+
+    if (strcmp(nuevoPrestamo.formaDePago, "debito") != 0 )
+    {
+        printf("\nIngrese cantidad de cuotas: ");
+        scanf("%d", &nuevoPrestamo.cantDeCuotas);
+    }
+    nuevoPrestamo.estado = 1;
+
+    return nuevoPrestamo;
+
+}
+
+stPrestamo calculoFechaDeVencimiento (stPrestamo A)
+{
+    int nuevoDia = A.diaInicio + A.duracion;
+    int nuevoMes = A.mesInicio;
+    int nuevoAnio = A.anioInicio;
+
+    while (nuevoDia > 30) //suponiendo que todos los meses son de 30- puede mejorarse
+    {
+        nuevoDia -= 30;
+        nuevoMes++;
+
+        if (nuevoMes>12)
+        {
+            nuevoMes = 1;
+            nuevoAnio++;
+        }
+    }
+
+    A.diaVencimiento= nuevoDia;
+    A.mesVencimiento = nuevoMes;
+    A.anioVencimiento = nuevoAnio;
+
+    return A;
+}
+
+void mostrarUnPrestamo (stPrestamo A)
+{
+    printf("\n------------------------------------------\n");
+    printf("El Id del Prestamo es: %d \n", A.id);
+    printf("El monto del Prestamo es: $%f \n", A.monto);
+    printf("La Fecha de Inicio es: %d /%d /%d \n", A.diaInicio, A.mesInicio, A.anioInicio);
+    printf("La duracion del Prestamo es: %d \n", A.duracion);
+    printf("La forma de Pago es: %s \n", A.formaDePago);
+    printf("Cantidad de Cuotas: %d \n", A.cantDeCuotas);
+    A = calculoFechaDeVencimiento (A);
+    printf("La Fecha de Vencimiento es: %d / %d / %d \n", A.diaVencimiento, A.mesVencimiento, A.anioVencimiento);
+    printf("Estado del Prestamo 1:activo / 0:de baja:  %d \n", A.estado);
+    printf("\n------------------------------------------\n");
+
+}
+
+void cargoPrestamosEnArchivo (char archivo[])
+{
+    FILE * archi;
+    archi = fopen(archivo, "ab");
+
+    char control = 's';
+
+    stPrestamo aux;
+
+    if (archi != NULL)
+    {
+        while (control == 's')
+        {
+            aux = cargoUnPrestamo(archivo);
+
+            fwrite (&aux, sizeof(stPrestamo), 1, archi);
+
+            printf("\nQuiere seguir cargando otro Prestamo? s: si / n: no:  \n");
+            fflush(stdin);
+            scanf("%c", &control);
+            system("cls");
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("Error: no se pudo abrir el archivo\n");
+    }
+}
+
+void mostrarArchivoDePrestamos(char archivo[])
+{
+    FILE *archi;
+    archi = fopen(archivo, "rb");
+
+    stPrestamo aux;
+
+    if (archi != NULL)
+    {
+        while (fread(&aux, sizeof(stPrestamo), 1, archi) > 0)
+        {
+            if (aux.estado == 1)
+            {
+                mostrarUnPrestamo(aux);
+            }
+        }
+
+        fclose(archi);
+    }
+    else
+    {
+        printf ("Error: Primero debe cargar algun dato en el archivo\n");
+    }
+
+}
+///---FUNCION PARA VERIFICAR SI YA ESTA ELIMINADO EL PRESTAMO---///
+
+int VerificarSiYaFueEliminado (char archivoEliminados[], int idAbuscar)
+{
+    FILE *archiDos;
+    archiDos = fopen(archivoEliminados, "rb");
+
+    stPrestamo aux;
+
+    int encontrado = 0;
+
+    if (archiDos != NULL)
+    {
+        rewind(archiDos);
+        while(fread((&aux), sizeof(stPrestamo), 1,archiDos) >0)
+        {
+            if (aux.id == idAbuscar)
+            {
+                encontrado =1;
+                printf("El prestamo con id %d ya se encuentra eliminado\n", idAbuscar);
+            }
+        }
+    }
+    return encontrado;
+}
+
+///---BUSCAR Y ELIMINAR PRESAMOS (BAJA LOGICA)---///
+
+void buscarYeliminarPrestamoDelArchivo(char archivo[], char eliminados[], int idAbuscar)
+{
+    FILE *archi;
+    archi= fopen(archivo,"r+b");
+
+    FILE *archiDos;
+    archiDos = fopen(eliminados, "ab");
+
+    int flag = 0; //para verificar el id en archi
+
+    stPrestamo aux;
+
+    if(archi != NULL && archiDos != NULL)
+    {
+        //llamo ala funcion de verificar si ya el prestamo se encuentra eliminado
+        int encontrado = VerificarSiYaFueEliminado (eliminados, idAbuscar);
+        flag = 1; // flag cambia a 1 pq ya el id se encuentra eliminado
+
+        if (!encontrado)
+        {
+            //busco el ID en el archivo principal
+
+            while(fread(&aux, sizeof(stPrestamo), 1, archi) > 0)
+            {
+                if(aux.id ==idAbuscar)
+                {
+                    flag = 1;
+
+                    aux.estado = 0;
+                    fseek(archi, -sizeof(stPrestamo), SEEK_CUR); //RETROCEDO PARA SOBREESCRIBIR EL ARCHIVO
+                    fwrite(&aux, sizeof(stPrestamo), 1, archi); //ESCRIBO LA ESTRUCTURA ACTUALIZADA
+
+                    fwrite(&aux, sizeof(stPrestamo), 1, archiDos); //ESCRIBO EL REGISTRO EN EL ARCHIVO DE ELIMINADOS
+
+                    printf("\nPrestamo eliminado correctamente.\n");
+                    break; //SALE DEL BUCLE UNA VEZ QUE ENCONTRO EL PRESTAMO Y LO ELIMINO
+                }
+            }
+            if(!flag)
+            {
+                printf("\nERROR: No se encontro ningun Prestamo asociado a ese ID.\n");
+            }
+            fclose(archi);
+            fclose (archiDos);
+        }
+    }
+}
+
+void mostrarArchivoDePrestamosEliminados (char eliminados[])
+{
+    FILE *archi;
+    stPrestamo aux;
+    archi = fopen(eliminados, "rb");
+
+
+    if (archi != NULL)
+    {
+        while (fread(&aux, sizeof(stPrestamo), 1, archi) > 0)
+        {
+            mostrarUnPrestamo(aux);
+        }
+
+        fclose(archi);
+    }
+    else
+    {
+        printf ("Error: Primero debe cargar algun dato en el archivo\n");
+    }
+
+}
+
+///---FUNCIONES PARA MODIFICAR DATOS---///
+
+//--MUESTRO MENU PARA MODIFICAR DATOS--//
+
+
+void modificarDatosArchivo(char archivoPrestamo[], int id)
+{
+    FILE *archi = fopen(archivoPrestamo, "r+b");
+    if (archi != NULL)
+    {
+        stPrestamo aux;
+        while (fread(&aux, sizeof(stPrestamo), 1, archi) > 0)
+        {
+            if (aux.id == id)
+            {
+                aux = modificarDato(aux);
+                fseek(archi, -sizeof(stPrestamo), SEEK_CUR);
+                fwrite(&aux, sizeof(stPrestamo), 1, archi);
+                break;
+            }
+        }
+        fclose(archi);
+    }
+    else
+    {
+        printf("Error al abrir el archivo: %s\n", archivoPrestamo);
+    }
+}
+
+stPrestamo modificarDato(stPrestamo dato)
+{
+    char control = 's';
+
+    do
+    {
+        printf("1 - Monto = %f\n",dato.monto);
+        printf("2 - Fecha inicio = %i/%i/%i\n",dato.diaInicio, dato.mesInicio, dato.anioInicio);
+        printf("3 - Duracion = %i\n",dato.duracion);
+        printf("4 - Forma de pago = %s\n",dato.formaDePago);
+        printf("\nIngrese el dato que desea modificar: \n");
+
+
+        int selector = 0;
+        scanf("%i", &selector);
+
+        switch(selector)
         {
         case 1:
         {
-             system("cls");
-             int valor = 1;
-             int * pint = &valor;
-             int ** ppint = &pint;
-
-             printf("Direccion de memoria de valor: %d\n",&valor);
-             printf("Direccion de memoria de pint: %d\n",&pint);
-             printf("Direccion de memoria de ppint: %d\n\n",&ppint);
-
-             *pint = 10;
-             printf("Ahora valor vale: %d\n",valor);
-
-             valor = 1;
-             pint = &valor;
-             ppint = &pint;
-             **ppint = 100;
-             printf("Ahora valor vale: %d\n",valor);
-             break;
+            printf("\nIngrese nuevo monto: ");
+            scanf("%f", &dato.monto);
+            break;
         }
         case 2:
         {
-             system("cls");
-             valArray = cargarArreglo(array,10);
-             int pares = cantPares(array,valArray);
-             printf("pares %d",pares);
-             arrayDina = (int*)malloc(sizeof(int) * pares);
-             pasaarParesAarregloDinamico(array,valArray,arrayDina);
-             printf("\narreglo original:\n");
-             mostrarArreglo(array,valArray);
-             printf("\narreglo pares:\n");
-             mostrarArreglo(arrayDina,pares);
+            printf("\nIngrese nueva fecha de inicio: ");
+            scanf("%d %d %d", &dato.diaInicio, &dato.mesInicio, &dato.anioInicio);
+            break;
         }
-             break;
         case 3:
-             system("cls");
-             valArray = cargarArreglo(array,10);
-             arrayDina = pasarParesYretornarArreglo(array,valArray);
-             int cant = cantPares(array,valArray);
-
-             printf("\narreglo original:\n");
-             mostrarArreglo(array,valArray);
-             printf("\narreglo pares:\n");
-             mostrarArreglo(arrayDina,cant);
-             break;
+        {
+            printf("\nIngrese nuevo tiempo de duracion: ");
+            scanf("%d", &dato.duracion);
+            break;
+        }
         case 4:
-             system("cls");
-             valArray = cargarArreglo(array,10);
-             int valPares = pasarParesAarregloDinamicoConPunterosDobles(array,valArray,&arrayDina);
-
-             printf("\narreglo original:\n");
-             mostrarArreglo(array,valArray);
-             printf("\narreglo pares:\n");
-             mostrarArreglo(arrayDina,valPares);
-             break;
-        case 5:
         {
-             system("cls");
-             int registros = totalDeRegistros(archivo);
-             arregloDinamico = (stAlumno*)malloc(sizeof(stAlumno) * registros);
-             PasarParesAlumno(archivo,arregloDinamico);
-             mostrarArregloAlumno(arregloDinamico,registros);
-             break;
+            printf("\nIngrese nueva forma de pago: ");
+            fflush(stdin);
+            gets(dato.formaDePago);
+            if (strcmp(dato.formaDePago, "debito") != 0)
+            {
+                printf("\nIngrese cantidad de cuotas: ");
+                scanf("%d", &dato.cantDeCuotas);
+            }
+            else
+            {
+                dato.cantDeCuotas = 0;
+            }
+            break;
         }
-        case 6:
-             system("cls");
-             arregloDinamico = pasarAlumnosConDinamicoEnFuncion(archivo);
-             mostrarArregloAlumno(arregloDinamico,totalDeRegistros(archivo));
-             break;
-        case 7:
-             system("cls");
-             int validosDinamico = pasarAlumnosConDinamicoEnFuncionYpunterosDobles(archivo,&arregloDinamico);
-             mostrarArregloAlumno(arregloDinamico,validosDinamico);
-             break;
-        case 8:
-             system("cls");
-             int registros = totalDeRegistros(archivo);
-             arregloDinamico = (stAlumno*)malloc(sizeof(stAlumno) * registros);
-             arregloDinamico = redemensionarArreglo(arregloDinamico,registros,10,archivo);
-             mostrarArregloAlumno(arregloDinamico,10);
-             break;
         default:
-             printf("Error.\n");
-             break;
+        {
+            printf("ERROR. Ingreso mal la opcion\n");
+            break;
         }
-        printf("\n Desea ver otro ejercicio? s / n.\n");
+
+        }
+        printf("Desea realizar otra modificacion? s:si/n:no \n");
         fflush(stdin);
-        scanf("%c",&control);
+        scanf("%c", &control);
+        system ("cls");
     }
-    return 0;
+    while (control == 's');
+    return dato;
 }
-////////////////////////////////FUNCIONES////////////////////////////////
-///Cargar arreglo
-int cargarArreglo(int array[],int dim)
-{
-    char control = 's';
-    int i = 0;
-    while(control == 's' && i < dim)
-    {
-        printf("Ingrese un numero:\t");
-        scanf("%d",&array[i]);
-        i++;
 
-        printf("\nDesea cargar otro numero? s / n.\n");
-        fflush(stdin);
-        scanf("%c",&control);
-    }
-return i;
-}
-///Mostrar arreglo
-void mostrarArreglo(int array[], int val)
+stPrestamo* buscarDato (char archivo[], int datoBuscado)
 {
-    for(int i = 0; i < val; i++)
+    FILE * archi;
+    archi = fopen (archivo, "r+b");
+
+    stPrestamo* aux;
+
+    if(archi != NULL)
     {
-        printf("| %d |",array[i]);
-    }
-}
-///2a
-int cantPares(int array[], int val)
-{
-    int pares = 0;
-    for(int i = 0; i < val; i++)
-    {
-        if((array[i] % 2) == 0)
+        while(fread(aux, sizeof(stPrestamo), 1, archi)>0)
         {
-          pares++;
+            if(aux->id == datoBuscado)
+            {
+                fclose(archi);
+                return aux;
+            }
         }
-    }
-return pares;
-}
-int pasaarParesAarregloDinamico(int array[],int validos, int arrayDina[])
-{
-    int j = 0;
-    for(int i = 0; i < validos; i++)
-    {
-        if(array[i] % 2 == 0)
-        {
-            arrayDina[j] = array[i];
-            j++;
-        }
-    }
-}
 
-///2B
-int pasarParesYretornarArreglo(int array[], int validos)
-{
-    int i = 0, j = 0;
-    int cant = cantPares(array,validos);
-    int *arrayPares = (int*)malloc(sizeof(int)*cant);
-    for(i = 0; i < validos;i++)
-    {
-        if(array[i] % 2 == 0)
-        {
-            arrayPares[j] = array[i];
-            j++;
-        }
-    }
-return arrayPares;
-}
-
-///2C
-int pasarParesAarregloDinamicoConPunterosDobles(int array[],int validos, int **arregloDinamico)
-{
-    int cant = cantPares(array,validos);
-    *arregloDinamico = (int*)malloc(sizeof(int)*cant);
-     pasaarParesAarregloDinamico(array,validos,*arregloDinamico);
-
-return cant;
-}
-
-/////////////////////////////ARCHIVOS/////////////////////////////
-///Cantidad de registros
-int totalDeRegistros(char archivo[])
-{
-    int cant = 0, totalAlumnos = 0;
-    FILE*buffer = fopen(archivo,"rb");
-    if(buffer)
-    {
-        fseek(buffer,0,SEEK_END);
-        cant = ftell(buffer);
-        totalAlumnos = cant/ sizeof(stAlumno);
-        fclose(buffer);
+        fclose(archi);
     }
     else
     {
-        perror("error.\n");
+        printf("ERROR: no se pudo abrir el archivo\n");
     }
-return totalAlumnos;
+
+    return NULL;
 }
 
-///3A
-void PasarParesAlumno(char archivo[],stAlumno dinamico[])
+///----FUNCION PASAR DATOS DEL ARCHIVO TO ARRAY-----///
+int PasoDatosArchivoToArray(char archivo[], stPrestamo arregloPrestamos[], int dimension)
 {
-    stAlumno A;
-    int i = 0;
-    FILE*buffer= fopen(archivo,"rb");
-    if(buffer)
+    FILE *archi;
+    archi = fopen(archivo, "rb");
+    int i = 0; //contador de prestamos
+
+    stPrestamo aux;
+
+    if(archi != NULL)
     {
-        while(fread(&A,sizeof(stAlumno),1,buffer) > 0)
+        while(i<dimension && fread(&aux, sizeof(stPrestamo),1,archi)>0)
         {
-            dinamico[i] = A;
+            arregloPrestamos[i] = aux;
             i++;
         }
-        fclose(buffer);
+        fclose(archi);
     }
     else
     {
-        perror("error.\n");
+        printf("ERROR: no se pudo abrir el archivo");
     }
+
+    return i;
 }
-void mostrarArregloAlumno(stAlumno array[], int validos)
+///-----FUNCION PARA MOSTRAR ARRAY DE PRESTAMOS-----///
+
+void mostrarArrayPrestamos(stPrestamo A[], int validos)
 {
-    for(int i = 0; i < validos;i++)
+    int i;
+    for (i = 0; i<validos; i++)
     {
-        printf("| Nombre: %s, Edad: %d, legajo: %d, anio de cursada: %d |\n",
-                array[i].nombreYapellido,array[i].edad,array[i].legajo,array[i].anio);
+        mostrarUnPrestamo(A[i]);
     }
 }
 
-///3B
-int pasarAlumnosConDinamicoEnFuncion(char archivo[])
+void ordenarInsercionPrestamosMonto(stPrestamo array[], int validos)
 {
-    int registros = totalDeRegistros(archivo);
-    stAlumno *arregloDinamico = (stAlumno*)malloc(sizeof(stAlumno) * registros);
-    stAlumno A;
-    int i = 0;
-    FILE*buffer= fopen(archivo,"rb");
-    if(buffer)
+    for (int i = 1; i < validos; i++)
     {
-        while(fread(&A,sizeof(stAlumno),1,buffer) > 0)
+        stPrestamo aux = array[i];
+        int j = i - 1;
+
+        while (j >= 0 && array[j].monto > aux.monto)
         {
-            arregloDinamico[i] = A;
-            i++;
+            array[j + 1] = array[j];
+            j--;
         }
-        fclose(buffer);
+
+        array[j + 1] = aux;
     }
-    else
-    {
-        perror("error.\n");
-    }
-return arregloDinamico;
 }
 
-///3C
-int pasarAlumnosConDinamicoEnFuncionYpunterosDobles(char archivo[], stAlumno **arregloDinamico)
+void ordenarInsercionPrestamosId(stPrestamo array[], int validos)
 {
-    int registros = totalDeRegistros(archivo);
-    *arregloDinamico = (stAlumno*)malloc(sizeof(stAlumno) * registros);
-
-    stAlumno A;
-    int i = 0;
-
-    FILE*buffer= fopen(archivo,"rb");
-    if(buffer)
+    for (int i = 1; i < validos; i++)
     {
-        PasarParesAlumno(archivo,*arregloDinamico);
+        stPrestamo aux = array[i];
+        int j = i - 1;
+
+        while (j >= 0 && array[j].id > aux.id)
+        {
+            array[j + 1] = array[j];
+            j--;
+        }
+
+        array[j + 1] = aux;
     }
-    else
-    {
-        perror("error.\n");
-    }
-return registros;
 }
 
-///4
-int* redemensionarArreglo(stAlumno *dinamico[],int valDina,int nuevaDim,char archivo[])
+void intercambioDatos(stPrestamo *a, stPrestamo *b)
 {
-    *dinamico = (stAlumno*)realloc(dinamico,sizeof(stAlumno) * nuevaDim);
-    PasarParesAlumno(archivo,*dinamico);
-return dinamico;
+    stPrestamo aux = *a;
+
+    *a = *b;
+    *b = aux;
 }
+
+void ordenamientoSeleccionFormaDePagoDuracion(stPrestamo Aprestamos[], int validos)
+{
+    int i, j, menorId;
+    stPrestamo temp;
+
+    for (i = 0; i < validos - 1; i++)
+    {
+        menorId = i; //la posicion menor arranca en el contador i
+        for (j = i + 1; j < validos; j++)
+        {
+            if (strcmp(Aprestamos[j].formaDePago, Aprestamos[menorId].formaDePago) < 0) //comparo si es debito o credito
+            {
+                menorId = j;
+            }
+            // Si tienen la misma forma de pago, entonces por duración (menor duración primero)
+            else if (strcmp(Aprestamos[j].formaDePago, Aprestamos[menorId].formaDePago) == 0)
+            {
+                if (Aprestamos[j].duracion < Aprestamos[menorId].duracion)
+                {
+                    menorId = j;
+                }
+            }
+        }
+        // Intercambiar el elemento mínimo encontrado con el primer elemento no ordenado
+        intercambioDatos(&Aprestamos[i], &Aprestamos[menorId]);
+    }
+}
+
+stPrestamo *buscarPrestamoPorIDEnArchivo(char nombreArchivo[], int idBuscado)
+{
+    FILE *archivo = fopen(nombreArchivo, "rb"); // Abre el archivo en modo binario
+    if (!archivo)
+    {
+        printf("Error al abrir el archivo.\n");
+        return NULL;
+    }
+
+    stPrestamo prestamo;
+    while (fread(&prestamo, sizeof(stPrestamo), 1, archivo) == 1)
+    {
+        if (prestamo.id == idBuscado)
+        {
+            fclose(archivo);
+            stPrestamo *prestamoEncontrado = malloc(sizeof(stPrestamo));
+            if (!prestamoEncontrado)
+            {
+                printf("Error al asignar memoria.\n");
+                return NULL;
+            }
+            *prestamoEncontrado = prestamo;
+            return prestamoEncontrado;
+        }
+    }
+
+    fclose(archivo);
+    return NULL; // No se encontró el préstamo
+}
+
+
+
+
