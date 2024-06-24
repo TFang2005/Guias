@@ -16,7 +16,7 @@ typedef struct
     char dni[16];
     char antiguedad[30];
     char sexo;
-    int* cantidadDeVentas;
+    int cantidadDeVentas;
     int sueldo;
     int estado;
 } stEmpleado;
@@ -195,7 +195,7 @@ int main()
                 {
                     printf("\n-----MENU-----\n");
                     printf("1.Agregar empleados al archivo.\n2.Mostrar el archivo de empleados.\n3.Buscar y Eliminar un empleado del archivo.\n4.Mostrar empleados dado de baja.\n5.Modificar empleados.\n6.Buscar un empleado y mostrarlo.\n");
-                    printf("7.Ordenar empleados por nombre\n8.Ordenar empleados por legajo.\n9.Mostrar sueldos pasados del empleado.\n");
+                    printf("7.Ordenar empleados por nombre\n8.Ordenar empleados por legajo.\n");
                     printf("Ingrese la opcion que desea realizar.\n");
                     scanf("%d", &opcion);
                     system("pause");
@@ -234,13 +234,6 @@ int main()
                         break;
                     case 8:
                         ordenarPorLegajo(empleados);
-                        break;
-                    case 9:
-                        printf("\nIngrese el DNI del empleado cuyos sueldos pasados desea ver: \n");
-                        fflush(stdin);
-                        gets(buscarDni);
-
-                        mostrarSueldosPasados(empleados, buscarDni);
                         break;
                     default:
                         printf("\nERROR: Opcion no valida.\n");
@@ -438,10 +431,24 @@ int main()
 ///**////////////////-----------------------------------------------------------/////////////////
 
 
+
 ///FUNCIONES PARA VALIDAR LA ENTRADA AL SISTEMA DEL ADMINISTRADOR//////////////
 int validarCredenciales(int intento)
 {
     char usuario[50], contra[50];
+    int fallido;
+    Pila intentoFallido;
+    inicpila(&intentoFallido);
+
+    Pila aux;
+    inicpila(&aux);
+
+    time_t tiempoAcutal = time(NULL); //obtengo fecha y hr actual del sistema
+    struct tm*tiempo = localtime(&tiempoAcutal);
+
+    int hora = tiempo->tm_hour;
+    int minutos = tiempo->tm_min;
+    int segundos = tiempo->tm_sec;
 
     if(intento == MAX_INTENTOS)
     {
@@ -464,6 +471,13 @@ int validarCredenciales(int intento)
     else
     {
         printf("\nUsuario o contraseña incorrectos. Intentos restantes: %d\n", MAX_INTENTOS-intento);
+        printf("\nHorarios del error: (H|S|M)\n");
+        apilar(&intentoFallido, hora);
+        apilar(&intentoFallido, minutos);
+        apilar(&intentoFallido, segundos);
+
+        mostrar(&intentoFallido);
+
         return validarCredenciales(intento+1);
     }
 }
@@ -2026,4 +2040,3 @@ void ordenamientoSeleccionFormaDePagoDuracion(stPrestamo Aprestamos[], int valid
         intercambioDatos(&Aprestamos[i], &Aprestamos[menorId]);
     }
 }
-
